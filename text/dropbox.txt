@@ -1,0 +1,20 @@
+Sur Linux
+
+getfattr -d libre_service.txt -e hex
+# file: libre_service.txt
+user.com.dropbox.attributes=0x789cab564a29ca2f48caaf884fcbcc49cd4c89cfc94f4ecc51b252a856ca4d4ccec8cc038925969414818552124b12810c258314ff74cffcbcdc7cbfa0c24083fcf0e042a78af4725b5ba5dada5a00cecd1d0b
+user.com.dropbox.attrs=0x0a140a1067ec2e4abf005ef8000000000008f004100110e1f4f9ff09
+
+
+Sur macOS
+
+~ $ xattr -l file.txt
+com.dropbox.attributes:
+00000000  78 9C AB 56 4A 29 CA 2F 48 CA AF 88 4F CB CC 49  |x..VJ)./H...O..I|
+00000010  CD 4C 89 CF C9 4F 4E CC 51 B2 52 A8 56 CA 4D 4C  |.L...ON.Q.R.V.ML|
+00000020  CE C8 CC 03 89 25 96 94 14 81 85 52 12 4B 12 81  |.....%.....R.K..|
+00000030  0C A5 CC 80 E4 D4 80 D2 52 33 63 73 F3 7C AF F4  |........R3cs.|..|
+00000040  4C ED 40 83 22 E3 10 47 5B 5B A5 DA DA 5A 00 C4  |L.@."..G[[...Z..|
+00000050  56 1C 0C                                         |V..|
+00000053
+

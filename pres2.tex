@@ -1,0 +1,56 @@
+\documentclass[10pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[export]{adjustbox}
+\newcommand\Fontvi{\fontsize{8}{7.2}\selectfont}
+
+\usepackage{minted}
+\usemintedstyle{colorful}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks,
+	citecolor=black,
+	filecolor=black,
+	linkcolor=black,
+	urlcolor=blue
+}
+
+\usetheme{Frankfurt}
+\usecolortheme{beaver}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+\begin{document}
+\logo{%
+	\makebox[0.95\paperwidth]{%
+		\includegraphics[width=2.5cm,keepaspectratio]{images/hepia.jpg}%
+		\hfill%
+		\includegraphics[width=2.5cm,keepaspectratio]{images/hesso.jpg}%
+	}%
+}
+
+\title{Conception d’un système de "tagging" des fichiers avec Rust}
+\author{Steven Liatti}
+\institute{Projet de bachelor - Prof. Florent Glück - Hepia ITI 3\up{ème} année}
+% \date{21 décembre 2017}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+    \frametitle{Plan}
+	\setcounter{tocdepth}{3}
+	\tableofcontents
+\end{frame}
+
+
+
+
+\end{document}

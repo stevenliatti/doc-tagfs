@@ -1,0 +1,79 @@
+Formatage via le file explorer Linux Mint.
+
+~ $ df -T
+
+
+SSD, disque système, en ext4
+----------
+Sys. de fichiers   Type    Taille Utilisé Dispo Uti% Monté sur
+/dev/sda2          ext4      451G    334G   96G  78% /
+
+
+Clé USB de 8 Go en FAT32
+----------
+Sys. de fichiers   Type    Taille Utilisé Dispo Uti% Monté sur
+/dev/sdg1          vfat      7.7G    4.0K  7.7G   1% /media/stevenliatti/STEVEN
+
+
+Clé USB de 8 Go en NTFS
+----------
+Sys. de fichiers   Type    Taille Utilisé Dispo Uti% Monté sur
+/dev/sdg1          fuseblk   7.7G     41M  7.7G   1% /media/stevenliatti/STEVEN
+
+
+Clé USB de 8 Go en ext4 : formatage impossible
+
+
+Emplacement réseau distant, via NFS
+----------
+Sys. de fichiers              Type     Taille Utilisé Dispo Uti% Monté sur
+192.168.1.21:/home/kodi/media nfs4       916G    198G  673G  23% /mnt/kodi
+
+
+Clé USB de 64 Go en ext4
+----------
+Sys. de fichiers   Type     Taille Utilisé Dispo Uti% Monté sur
+/dev/sdg1          ext4        59G     33G   23G  59% /media/stevenliatti/Survivor
+
+--------------------------------------------------------------------
+
+Résultats
+
+
+Clé USB de 8 Go en FAT32
+----------
+~ $ attr -s author -V steven file.txt
+L'attribut « author » positionné à une valeur de 6 octets pour file.txt :
+steven
+~ $ cp --preserve=xattr file.txt /media/stevenliatti/STEVEN
+cp: setting attributes for '/media/stevenliatti/STEVEN/file.txt': Opération non supportée
+
+
+Clé USB de 8 Go en NTFS
+----------
+~ $ attr -s author -V steven file.txt
+L'attribut « author » positionné à une valeur de 6 octets pour file.txt :
+steven
+~ $ cp --preserve=xattr file.txt /media/stevenliatti/STEVEN
+~ $ cd /media/stevenliatti/STEVEN
+/media/stevenliatti/STEVEN $ attr -g author file.txt
+L'attribut « author » avait une valeur de 6 octets pour file.txt :
+steven
+
+
+Emplacement réseau distant, via NFS
+----------
+~ $ cp --preserve=xattr file.txt /mnt/kodi
+cp: setting attributes for '/mnt/kodi/file.txt': Opération non supportée
+
+
+Clé USB de 64 Go en ext4
+----------
+~ $ attr -s author -V steven file.txt
+L'attribut « author » positionné à une valeur de 6 octets pour file.txt :
+steven
+~ $ cp --preserve=xattr file.txt /media/stevenliatti/Survivor
+~ $ cd /media/stevenliatti/Survivor
+/media/stevenliatti/Survivor $ attr -g author file.txt
+L'attribut « author » avait une valeur de 6 octets pour file.txt :
+steven
