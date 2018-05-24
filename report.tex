@@ -278,7 +278,58 @@ pour manipuler les fichiers comme \mintinline{text}{cp}, \mintinline{text}{tar},
 pas en compte les attributs avec leur syntaxe par défaut \cite{ref4}.
 
 \subsubsection{Petites manipulations}
-% inclure fichiers text
+Pour vérifier la portabilité des extended attributes, quelques tests ont été réalisés entre un 
+SSD faisant office de disque système à Linux Mint avec 2 clés USB (de 8 et 64 Go) et un emplacement 
+réseau monté en NFS. Le listing suivant montre la sortie de la commande \mintinline{bash}{df}, qui 
+renvoie l'utilisation des différents emplacements de stockage, dans l'ordre : le disque système, en 
+ext4, la clé de 8 Go formatée une fois en FAT32, puis une autre fois en NTFS, la clé de 64 Go formatée 
+en ext4 et finalement une machine virtuelle sous Debian 9 montée en NFS.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{text}
+Sys. de fichiers        Type   Taille Utilisé Dispo Uti% Monté sur
+/dev/sda2               ext4     451G    334G   96G  78% /
+/dev/sdg1               vfat     7.7G    4.0K  7.7G   1% /media/pc/cle1
+/dev/sdg1               fuseblk  7.7G     41M  7.7G   1% /media/pc/cle1
+/dev/sdg1               ext4      59G     33G   23G  59% /media/pc/cle2
+192.168.1.21:/home/user nfs4     916G    198G  673G  23% /mnt/debian
+    \end{minted}
+    \caption{Output de \mintinline{bash}{df -Th} : le disque système, les clés USB et le NFS}
+\end{code}
+\bigbreak
+La démarche est la suivante : un extended attribute dans l'espace \mintinline{text}{user} avec 
+comme nom \mintinline{text}{author} et comme valeur \mintinline{text}{steven} est ajouté au fichier 
+\mintinline{text}{file.txt} avec \mintinline{bash}{attr}. Ce fichier est copié avec 
+\mintinline{bash}{cp} en prenant garde à préserver l'attribut (option 
+\mintinline{bash}{--preserve=xattr}). Une fois copié, on tente de lire le même attribut, toujours 
+avec \mintinline{bash}{attr}. Les résultats sont les suivants :
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=45,lastline=49]{text}{text/test_attr.txt}
+    \caption{Copie sur clé USB 8 Go, FAT32}
+\end{code}
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=54,lastline=61]{text}{text/test_attr.txt}
+    \caption{Copie sur clé USB 8 Go, NTFS}
+\end{code}
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=66,lastline=73]{text}{text/test_attr.txt}
+    \caption{Copie sur clé USB 64 Go, ext4}
+\end{code}
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=78,lastline=79]{text}{text/test_attr.txt}
+    \caption{Copie sur l'emplacement réseau distant, NFS}
+\end{code}
+\bigbreak
+On constate que l'opération est infructueuse sur la clé en FAT32 et sur l'emplacement réseau monté 
+en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4.
 
 \subsection{Notifications}
 

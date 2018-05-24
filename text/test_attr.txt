@@ -12,13 +12,13 @@ Sys. de fichiers   Type    Taille Utilisé Dispo Uti% Monté sur
 Clé USB de 8 Go en FAT32
 ----------
 Sys. de fichiers   Type    Taille Utilisé Dispo Uti% Monté sur
-/dev/sdg1          vfat      7.7G    4.0K  7.7G   1% /media/stevenliatti/STEVEN
+/dev/sdg1          vfat      7.7G    4.0K  7.7G   1% /media/pc/cle1
 
 
 Clé USB de 8 Go en NTFS
 ----------
 Sys. de fichiers   Type    Taille Utilisé Dispo Uti% Monté sur
-/dev/sdg1          fuseblk   7.7G     41M  7.7G   1% /media/stevenliatti/STEVEN
+/dev/sdg1          fuseblk   7.7G     41M  7.7G   1% /media/pc/cle1
 
 
 Clé USB de 8 Go en ext4 : formatage impossible
@@ -27,13 +27,13 @@ Clé USB de 8 Go en ext4 : formatage impossible
 Emplacement réseau distant, via NFS
 ----------
 Sys. de fichiers              Type     Taille Utilisé Dispo Uti% Monté sur
-192.168.1.21:/home/kodi/media nfs4       916G    198G  673G  23% /mnt/kodi
+192.168.1.21:/home/kodi/media nfs4       916G    198G  673G  23% /mnt/debian
 
 
 Clé USB de 64 Go en ext4
 ----------
 Sys. de fichiers   Type     Taille Utilisé Dispo Uti% Monté sur
-/dev/sdg1          ext4        59G     33G   23G  59% /media/stevenliatti/Survivor
+/dev/sdg1          ext4        59G     33G   23G  59% /media/pc/cle2
 
 --------------------------------------------------------------------
 
@@ -43,37 +43,37 @@ Résultats
 Clé USB de 8 Go en FAT32
 ----------
 ~ $ attr -s author -V steven file.txt
-L'attribut « author » positionné à une valeur de 6 octets pour file.txt :
+L'attribut "author" positionné à une valeur de 6 octets pour file.txt :
 steven
-~ $ cp --preserve=xattr file.txt /media/stevenliatti/STEVEN
-cp: setting attributes for '/media/stevenliatti/STEVEN/file.txt': Opération non supportée
+~ $ cp --preserve=xattr file.txt /media/pc/cle1
+cp: setting attributes for '/media/pc/cle1/file.txt': Opération non supportée
 
 
 Clé USB de 8 Go en NTFS
 ----------
 ~ $ attr -s author -V steven file.txt
-L'attribut « author » positionné à une valeur de 6 octets pour file.txt :
+L'attribut "author" positionné à une valeur de 6 octets pour file.txt :
 steven
-~ $ cp --preserve=xattr file.txt /media/stevenliatti/STEVEN
-~ $ cd /media/stevenliatti/STEVEN
-/media/stevenliatti/STEVEN $ attr -g author file.txt
-L'attribut « author » avait une valeur de 6 octets pour file.txt :
+~ $ cp --preserve=xattr file.txt /media/pc/cle1
+~ $ cd /media/pc/cle1
+/media/pc/cle1 $ attr -g author file.txt
+L'attribut "author" avait une valeur de 6 octets pour file.txt :
 steven
-
-
-Emplacement réseau distant, via NFS
-----------
-~ $ cp --preserve=xattr file.txt /mnt/kodi
-cp: setting attributes for '/mnt/kodi/file.txt': Opération non supportée
 
 
 Clé USB de 64 Go en ext4
 ----------
 ~ $ attr -s author -V steven file.txt
-L'attribut « author » positionné à une valeur de 6 octets pour file.txt :
+L'attribut "author" positionné à une valeur de 6 octets pour file.txt :
 steven
-~ $ cp --preserve=xattr file.txt /media/stevenliatti/Survivor
-~ $ cd /media/stevenliatti/Survivor
-/media/stevenliatti/Survivor $ attr -g author file.txt
-L'attribut « author » avait une valeur de 6 octets pour file.txt :
+~ $ cp --preserve=xattr file.txt /media/pc/cle2
+~ $ cd /media/pc/cle2
+/media/pc/cle2 $ attr -g author file.txt
+L'attribut "author" avait une valeur de 6 octets pour file.txt :
 steven
+
+
+Emplacement réseau distant, via NFS
+----------
+~ $ cp --preserve=xattr file.txt /mnt/debian
+cp: setting attributes for '/mnt/debian/file.txt': Opération non supportée

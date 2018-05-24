@@ -5,7 +5,7 @@ PRES2=pres2
 
 all: $(REPORT).pdf $(PRES1).pdf $(PRES2).pdf mostlyclean
 
-$(REPORT).pdf: $(REPORT).tex bib.bib images/*
+$(REPORT).pdf: $(REPORT).tex bib.bib images/* text/*
 	$(CC) $(REPORT).tex
 	$(CC) $(REPORT).tex
 	bibtex $(REPORT)
