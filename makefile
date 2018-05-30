@@ -7,7 +7,7 @@ all: $(REPORT).pdf $(PRES1).pdf $(PRES2).pdf mostlyclean
 
 $(REPORT).pdf: $(REPORT).tex bib.bib images/* text/*
 	$(CC) $(REPORT).tex
-	$(CC) $(REPORT).tex
+	makeglossaries $(REPORT)
 	bibtex $(REPORT)
 	$(CC) $(REPORT).tex
 	$(CC) $(REPORT).tex
@@ -24,9 +24,12 @@ $(PRES2).pdf: $(PRES2).tex images/*
 	make mostlyclean
 
 mostlyclean:
-	rm -rf _minted-* *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg *.nav *.snm
+	rm -rf _minted-* *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg
+	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist
 
 clean:
-	rm -rf _minted-* *.pdf *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg *.nav *.snm
+	rm -f *.pdf
+	rm -rf _minted-* *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg
+	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist
 
 rebuild: clean all

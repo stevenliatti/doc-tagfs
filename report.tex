@@ -31,6 +31,17 @@
 
 \usepackage{dirtree}
 
+\usepackage{glossaries}
+	\let\oldnewacronym\newacronym
+	\newcommand*{\provideacronym}[3]{%
+	  \ifglsentryexists{#1}{%
+	  }{%
+	    \oldnewacronym{#1}{#2}{#3}%
+	  }%
+	}
+\makeglossaries
+
+
 \begin{document}
 
 \title{Conception d'un système de "tagging" des fichiers avec Rust}
@@ -74,8 +85,33 @@ permet, le système développé sera intégré à un environnement desktop chois
 \listoflistings
 \newpage
 
+\section*{Conventions typographiques}
+Lors de la rédaction de ce document, les conventions typographique ci-dessous ont
+été adoptées.
+\begin{itemize}[label=\textbullet]
+	\item Tous les mots empruntés à la langue anglaise ont été écrits en \textit{italique}
+	\item Toute référence à un nom de fichier (ou dossier), un chemin d'accès, une 
+    utilisation de paramètre, variable, ou commande utilisable par l'utilisateur, 
+    est écrite avec la police d'écriture \mintinline{text}{Courier New}.
+	\item Tout extrait de fichier ou de code est écrit selon le format suivant:
+    \bigbreak
+    \begin{code}
+        \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn main() {
+    println!("Hello, world!");
+}
+        \end{minted}
+    \end{code}
+\end{itemize}
+\newpage
+
+\newacronym{xattr}{XATTR}{\textit{Extended Attributes}}
+\printglossary[type=\acronymtype,title={Acronymes}]
+\newpage
+
 
 \section{Introduction} %--------------------------------------------------
+\acrshort{xattr}
 \subsection{Motivations}
 \subsection{Buts}
 \cite{ref3}
