@@ -14,6 +14,7 @@
 \floatplacement{figure}{H}
 \usepackage{authblk}
 \usepackage{enumitem}
+\setlist[enumerate]{label*=\arabic*.}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks,
@@ -80,7 +81,9 @@ permet, le système développé sera intégré à un environnement desktop chois
 
 % \setcounter{tocdepth}{2}
 \tableofcontents
+\newpage
 \listoffigures
+\newpage
 \renewcommand\listoflistingscaption{Table des listings de code source}
 \listoflistings
 \newpage
@@ -314,6 +317,11 @@ pour manipuler les fichiers comme \mintinline{text}{cp}, \mintinline{text}{tar},
 pas en compte les attributs avec leur syntaxe par défaut \cite{ref4}.
 
 \subsubsection{Petites manipulations}
+
+% TODO:
+% mv préserve les xattr !
+% la copie dans l'explorateur de fichiers aussi (nemo)
+
 Pour vérifier la portabilité des extended attributes, quelques tests ont été réalisés entre un 
 SSD faisant office de disque système à Linux Mint avec 2 clés USB (de 8 et 64 Go) et un emplacement 
 réseau monté en NFS. Le listing suivant montre la sortie de la commande \mintinline{bash}{df}, qui 
@@ -368,11 +376,92 @@ On constate que l'opération est infructueuse sur la clé en FAT32 et sur l'empl
 en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4.
 
 \subsection{Notifications}
+% TODO:
+% Utilisation de inotify. Surveillance du répertoire \mintinline{text}{home} et des événements suivants :
+% \begin{itemize}
+%     \item IN\_ATTRIB : changement sur les tags (ajout, suppression, renommage)
+%     \item IN\_CREATE : création de fichier/dossier dans le dossier surveillé. Ajouter une nouvelle surveillance si dossier.
+%     \item IN\_DELETE : suppression d'un fichier/dossier dans le dossier surveillé
+%     \item IN\_DELETE\_SELF : suppression du dossier surveillé
+%     \item IN\_MOVE\_SELF : suppression d'un fichier/dossier dans le dossier surveillé
+%     \item IN\_MOVE\_FROM : déplacement du dossier
+%     \item IN\_MOVE\_TO : déplacement du dossier
+% \end{itemize}
+
 
 \section{Indexation}
+% TODO:
+\cite{ref25}
+2 index (clé -> valeur) :
+\begin{enumerate}
+    \item tag -> fichiers : Index dense (Index inversé) -> hashmap : clé = tag, valeur = ensemble des path des fichiers 
+        -> intersection des ensembles
+    \item fichier -> tags -> 2 possibilités :
+    \begin{enumerate}
+        \item Index dense (Index inversé) -> hashmap : clé = path du fichier, valeur = ensemble des tags du fichier
+        \item B-arbre -> noeud = dossier/fichier, feuille = fichier 
+            -> chaque élément contient en ensemble de tags (ensemble vide si pas de tags)
+    \end{enumerate}
+\end{enumerate}
+
+Cas de figure/utilisation des fichiers par l'utilisateur :
+\begin{itemize}
+    \item Un tag est ajouté à un fichier :
+        \begin{itemize}
+            \item Index 1 : obtenir l'ensemble des fichiers associés au tag et ajouter le fichier. 
+                Si tag non présent, ajouter la nouvelle clé => O(1)
+            \item Index 2.1 : obtenir l'ensemble des tags d'un fichier et ajouter le tag => O(1)
+            \item Index 2.2 : parcourir l'arbre à la recherche du fichier et ajouter le nouveau tag => ~ O(log(n))
+        \end{itemize}
+    \item Un tag est supprimé d'un fichier :
+        \begin{itemize}
+            \item Index 1 : obtenir l'ensemble des fichiers associés au tag et supprimer le fichier => O(1)
+            \item Index 2.1 : obtenir l'ensemble des tags associés au fichier et supprimer le tag => O(1)
+            \item Index 2.2 : parcourir l'arbre à la recherche du fichier et supprimer le tag => ~ O(log(n))
+        \end{itemize}
+    \item Un tag change de nom (opération lourde) :
+        2 possibilités :
+        \begin{enumerate}
+            \item Dans les 2 index, les tags pointent vers une "entité" tag
+                \begin{itemize}
+                    \item Index 1 : "rien de spécial"
+                    \item Index 2.1 et 2.2 : "rien de spécial"
+                \end{itemize} 
+            \item Dans les 2 index, les tags sont des valeurs (strings) inscrits en dur
+                \begin{itemize}
+                    \item Index 1 : renommer la clé / retirer l'ensemble et le rajouter selon le nouveau nom
+                    \item Index 2.1 et 2.2 : récupérer les fichiers grâce à index 1 et boucler pour changer le nom
+                \end{itemize} 
+        \end{enumerate}
+        Dans les deux cas, parcourir les fichiers sur le disque pour changer la valeur des tags dans les \acrshort{xattr}
+    \item Un fichier est supprimé :
+        \begin{itemize}
+            \item Index 1 : supprimer toutes les clés correspondant aux tags
+            \item Index 2.1 : supprimer la clé fichier
+            \item Index 2.2 : parcourir et supprimer la clé fichier
+        \end{itemize}
+    \item Un fichier est copié :
+        \begin{itemize}
+            \item Index 1 : parcourir tous les tags du fichier et ajouter le nouveau fichier créé aux ensembles
+            \item Index 2.1 et 2.2 : créer une nouvelle clé et copier l'ensemble de tags vers cette clé
+        \end{itemize}
+    \item Un fichier est déplacé ou change de nom :
+        \begin{itemize}
+            \item Index 1 : parcourir tous les tags du fichier et changer le nom du fichier
+            \item Index 2.1 et 2.2 : renommer la clé / retirer l'ensemble et le rajouter selon le nouveau nom
+        \end{itemize}
+\end{itemize}
+
+
+
 
 
 \section{Architecture} %--------------------------------------------------
+
+
+\section{Graphes}
+% TODO:
+% Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
 
 
 \section{Réalisation} %--------------------------------------------------
@@ -384,6 +473,7 @@ xattr \cite{ref23}. Clap (Command Line Argument Parser for Rust) est une librair
 les arguments d'un programme en ligne de commande. Xattr est une API en Rust pour récupérer, lister, 
 ajouter/modifier et supprimer des extended attributes avec Rust. Elle fait appel aux appels systèmes 
 en C.
+% TODO:
 % Insérer quelques bouts de code intéressants. -> examples/01a_quick_example.rs pour clap
 % Insérer capture/exemple d'utilisation
 
