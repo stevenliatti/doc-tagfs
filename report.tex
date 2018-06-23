@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[francais]{babel}
 \usepackage[left=2.5cm,top=2.5cm,right=2.5cm,bottom=2.5cm]{geometry}
+\usepackage[onehalfspacing]{setspace}
 \usepackage{graphicx}
 \usepackage[usenames, dvipsnames]{xcolor}
 \definecolor{mygray}{gray}{0.95}
@@ -31,6 +32,7 @@
 \patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
 
 \usepackage{dirtree}
+\usepackage{tabularx}
 
 \usepackage{glossaries}
 	\let\oldnewacronym\newacronym
@@ -94,8 +96,8 @@ Lors de la rédaction de ce document, les conventions typographique ci-dessous o
 \begin{itemize}[label=\textbullet]
 	\item Tous les mots empruntés à la langue anglaise ont été écrits en \textit{italique}
 	\item Toute référence à un nom de fichier (ou dossier), un chemin d'accès, une 
-    utilisation de paramètre, variable, ou commande utilisable par l'utilisateur, 
-    est écrite avec la police d'écriture \mintinline{text}{Courier New}.
+    utilisation de paramètre, variable, commande utilisable par l'utilisateur, ou extrait de code 
+    source est écrite avec une police d'écriture à \mintinline{text}{chasse fixe}.
 	\item Tout extrait de fichier ou de code est écrit selon le format suivant:
     \bigbreak
     \begin{code}
@@ -106,6 +108,9 @@ fn main() {
         \end{minted}
     \end{code}
 \end{itemize}
+
+\section*{Remerciements}
+
 \newpage
 
 \newacronym{xattr}{XATTR}{\textit{Extended Attributes}}
@@ -113,13 +118,21 @@ fn main() {
 \newpage
 
 
-\section{Introduction} %--------------------------------------------------
+\section{Introduction} %-----------------------------------------------------------------------------------------------
 \acrshort{xattr}
 \subsection{Motivations}
 \subsection{Buts}
 \cite{ref3}
+% surveillance des fichiers
+% indexation
+% peu de latence
+% temps réel
+% périph amovible garde index
+% rust
+% efficace et peu de mémoire
+% bcp de fichiers (million)
 
-\section{Analyse de l'existant} %--------------------------------------------------
+\section{Analyse de l'existant} %-----------------------------------------------------------------------------------------------
 Dans cette section, nous allons analyser les principales solutions existantes, qu'elles soient 
 sous la forme d'applications utilisateur ou intégrées directement dans un système d'exploitation.
 Jean-Francois Dockes en dresse également une liste avec avantages et inconvénients sur son site 
@@ -268,20 +281,8 @@ des fichiers, les applications peuvent ainsi retrouver l'historique des changeme
 le veulent \cite{ref10}.
 
 
-\section{Analyse des besoins} %--------------------------------------------------
-\cite{ref3}
-% surveillance des fichiers
-% indexation
-% peu de latence
-% temps réel
-% périph amovible garde index
-% rust
-% efficace et peu de mémoire
-% bcp de fichiers (million)
 
-
-
-\section{Technologies} %--------------------------------------------------
+\section{Technologies} %-----------------------------------------------------------------------------------------------
 \subsection{Rust}
 \cite{ref0} \cite{ref1} \cite{ref2}
 
@@ -375,23 +376,8 @@ avec \mintinline{bash}{attr}. Les résultats sont les suivants :
 On constate que l'opération est infructueuse sur la clé en FAT32 et sur l'emplacement réseau monté 
 en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4.
 
-\subsection{Notifications}
+\section{Architecture} %-----------------------------------------------------------------------------------------------
 % TODO:
-% Utilisation de inotify. Surveillance du répertoire \mintinline{text}{home} et des événements suivants :
-% \begin{itemize}
-%     \item IN\_ATTRIB : changement sur les tags (ajout, suppression, renommage)
-%     \item IN\_CREATE : création de fichier/dossier dans le dossier surveillé. Ajouter une nouvelle surveillance si dossier.
-%     \item IN\_DELETE : suppression d'un fichier/dossier dans le dossier surveillé
-%     \item IN\_DELETE\_SELF : suppression du dossier surveillé
-%     \item IN\_MOVE\_SELF : suppression d'un fichier/dossier dans le dossier surveillé
-%     \item IN\_MOVE\_FROM : déplacement du dossier
-%     \item IN\_MOVE\_TO : déplacement du dossier
-% \end{itemize}
-
-
-\section{Indexation}
-% TODO:
-\cite{ref25}
 2 index (clé -> valeur) :
 \begin{enumerate}
     \item tag -> fichiers : Index dense (Index inversé) -> hashmap : clé = tag, valeur = ensemble des path des fichiers 
@@ -404,80 +390,180 @@ en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4.
     \end{enumerate}
 \end{enumerate}
 
-Cas de figure/utilisation des fichiers par l'utilisateur :
+
+Le système global est composé de trois entités distinctes :
+
+\subsection{Gestion des tags}
+La gestion physiques des tags stockés dans les \acrshort{xattr} est une fonctionnalité indépendante du 
+reste du système. Comme vu dans la section \ref{extended_attributes}, des outils système existent pour 
+manipuler les \acrshort{xattr} des fichiers. Cependant, pour offrir un plus haut niveau d'abstraction, 
+une cohérence sur le nommage des tags pour l'indexation et plus de confort pour l'utilisateur final, 
+un outil devient nécessaire pour la gestion des tags. Cet outil se présente, sous sa forme de base, 
+comme un programme en ligne de commande. Il doit, au minimum, offrir la possibilité de lire les tags 
+contenus dans les fichiers et ajouter et supprimer les tags donnés en entrée par l'utilisateur. 
+Il devra pouvoir manipuler plusieurs tags et fichiers simultanément. D'un point de vue algorithmique 
+et structures de données, cette partie n'est pas particulièrement ardue.
+
+\subsection{Indexation et surveillance des fichiers et des tags}
+L'indexation et la surveillance des fichiers et des tags associés est la partie centrale du système. 
+Il faut d'une part surveiller en permanence l'arborescence des fichiers et d'autre part créer un 
+index des relations entre les tags et les fichiers. Deux structures différentes ont été imaginées.
+
+\subsubsection{Indexation avec table de hachage et arbre}
+La première version de l'architecture de l'indexation a été la suivante, comportant deux structures 
+de données :
+\begin{enumerate}
+    \item Une table de hachage (ou \textit{hashmap}) associant un tag (son nom, sous forme de 
+        chaine de caractères) à un ensemble (au sens mathématique) de chemins de fichiers sur 
+        le disque.
+    \item Un arbre, correspondant à l'arborescence des fichiers, avec comme noeuds les dossiers, 
+        sous-dossiers et fichiers. Le dossier à surveiller représente la racine de l'arbre.
+        Les liens entre les noeuds représentent le contenu d'un répertoire. L'étiquette du noeud 
+        contient le nom du fichier ou du répertoire et l'ensemble des tags associés au fichier.
+\end{enumerate}
+\begin{figure}
+    \begin{center}
+        \fbox{\includegraphics[width=1\textwidth]{images/hashmap_wiki.png}}
+    \end{center}
+    \caption{Un annuaire représenté comme une table de hachage - \cite{ref27}}
+    % \label{label}
+\end{figure}
+Une table de hachage est un tableau associatif. Les composantes de l'association sont la "clé", 
+reliée à une ou plusieurs valeurs. Pour insérer, accéder ou supprimer une entrée de la table, 
+il faut calculer le "hash" de la clé, c'est-à-dire son empreinte unique. Sur l'image précédente, 
+nous apercevons les clés en bleu, le résultat du hash en rouge et les valeurs associées en vert. 
+Le risque que deux clés ou plus produisent une même empreinte s'appelle une "collision", c'est 
+pour cela qu'une bonne implémentation d'une table de hachage doit non seulement utiliser une bonne 
+fonction de hachage mais aussi une manière de résoudre les collisions. C'est ainsi que les trois 
+opérations ci-dessus peuvent être réalisées, en moyenne, en temps constant (O(1)) et dans le pire 
+des cas (si les collisions s'enchainent) en temps linéaire (O(n)). Dans notre cas, l'utilisation 
+d'une table de hachage pour stocker la relation entre un tag et ses fichiers est efficace lorsque 
+une recherche par tags est demandée. De plus, en associant un ensemble de chemins de fichiers, 
+des opérations ensemblistes (union, intersection) peuvent être réalisées lorsque une recherche 
+impliquant plusieurs tags est effectuée.
+\bigbreak
+L'arbre, au sens informatique, est une représentation de la hiérarchie du système de fichier dans 
+notre cas. Prenons comme exemple la hiérarchie suivante :
+\dirtree{%
+.1 home.
+.2 root.
+.2 user.
+.3 docs.
+.4 graph.pdf.
+.4 report.tex.
+.3 images.
+.4 img1.png.
+.4 img2.png.
+.3 music.
+.4 kiss.mp3.
+}
+Elle peut être obtenue grâce à la commande \mintinline{bash}{tree} sous Linux par exemple.
+La même représentation sous forme d'un arbre est dessinée sur l'image suivante :
+\begin{figure}
+    \begin{center}
+        \fbox{\includegraphics[width=1\textwidth]{images/tree.png}}
+    \end{center}
+    \caption{Représentation sous forme d'arbre d'une hiérarchie de fichiers et dossiers}
+    % \label{label}
+\end{figure}
+Le noeud "home" représente la racine de l'arbre. Chaque noeud représente soit un fichier, soit 
+un répertoire sur le disque. Chaque dossier peut être vu comme un sous-arbre de l'arbre principal.
+Du point de vue programmatoire, un noeud serait définit, au minimum, comme une structure de données 
+contenant un champ "données" (dans notre cas, le nom du fichier/répertoire et l'ensemble de ses tags) 
+et un champ "enfants", une liste ou un ensemble de pointeurs vers les noeuds enfants. Dans le cas 
+présent, seuls les noeuds répertoires pointent vers des noeuds répertoires ou fichiers enfants, 
+les fichiers n'auraient qu'une liste vide de pointeurs.
+\\
+Le tableau suivant donne un aperçu des différents cas de figure de l'utilisation du système 
+de fichiers. Pour chaque cas d'utilisation, l'opération correspondante pour les deux structures de 
+données (la table de hachage et l'arbre) est donnée, avec une approximation de la complexité de 
+l'opération en utilisant la notation \textit{Big O}. Les variables suivantes sont définies :
 \begin{itemize}
-    \item Un tag est ajouté à un fichier :
-        \begin{itemize}
-            \item Index 1 : obtenir l'ensemble des fichiers associés au tag et ajouter le fichier. 
-                Si tag non présent, ajouter la nouvelle clé => O(1)
-            \item Index 2.1 : obtenir l'ensemble des tags d'un fichier et ajouter le tag => O(1)
-            \item Index 2.2 : parcourir l'arbre à la recherche du fichier et ajouter le nouveau tag => ~ O(log(n))
-        \end{itemize}
-    \item Un tag est supprimé d'un fichier :
-        \begin{itemize}
-            \item Index 1 : obtenir l'ensemble des fichiers associés au tag et supprimer le fichier => O(1)
-            \item Index 2.1 : obtenir l'ensemble des tags associés au fichier et supprimer le tag => O(1)
-            \item Index 2.2 : parcourir l'arbre à la recherche du fichier et supprimer le tag => ~ O(log(n))
-        \end{itemize}
-    \item Un tag change de nom (opération lourde) :
-        2 possibilités :
-        \begin{enumerate}
-            \item Dans les 2 index, les tags pointent vers une "entité" tag
-                \begin{itemize}
-                    \item Index 1 : "rien de spécial"
-                    \item Index 2.1 et 2.2 : "rien de spécial"
-                \end{itemize} 
-            \item Dans les 2 index, les tags sont des valeurs (strings) inscrits en dur
-                \begin{itemize}
-                    \item Index 1 : renommer la clé / retirer l'ensemble et le rajouter selon le nouveau nom
-                    \item Index 2.1 et 2.2 : récupérer les fichiers grâce à index 1 et boucler pour changer le nom
-                \end{itemize} 
-        \end{enumerate}
-        Dans les deux cas, parcourir les fichiers sur le disque pour changer la valeur des tags dans les \acrshort{xattr}
-    \item Un fichier est supprimé :
-        \begin{itemize}
-            \item Index 1 : supprimer toutes les clés correspondant aux tags
-            \item Index 2.1 : supprimer la clé fichier
-            \item Index 2.2 : parcourir et supprimer la clé fichier
-        \end{itemize}
-    \item Un fichier est copié :
-        \begin{itemize}
-            \item Index 1 : parcourir tous les tags du fichier et ajouter le nouveau fichier créé aux ensembles
-            \item Index 2.1 et 2.2 : créer une nouvelle clé et copier l'ensemble de tags vers cette clé
-        \end{itemize}
-    \item Un fichier est déplacé ou change de nom :
-        \begin{itemize}
-            \item Index 1 : parcourir tous les tags du fichier et changer le nom du fichier
-            \item Index 2.1 et 2.2 : renommer la clé / retirer l'ensemble et le rajouter selon le nouveau nom
-        \end{itemize}
+    \item $c = Operation \ constante$
+    \item $p = Profondeur \ de \ l'arbre$
+    \item $t = Nombre \ de \ tags$
 \end{itemize}
+\begin{center}
+    \begin{tabularx}{16cm}{|p{3cm}|X|X|} \hline
+        \textbf{Cas d'utilisation} & \textbf{Opération \textit{hashmap}} & \textbf{Opération arbre} \\ \hline
+        Ajout d'un tag à un fichier/répertoire & Si tag non présent, ajouter le tag comme clé et 
+            ajouter le chemin du fichier à l'ensemble -> $O(c)$ & Parcourir l'arbre à la recherche 
+            du fichier et ajouter le tag à l'ensemble des tags existants -> $O(p * c)$ \\ \hline
+        Suppression d'un tag d'un fichier/répertoire & Supprimer le fichier de l'ensemble des 
+            chemins de fichiers associés au tag -> $O(c)$ & Parcourir l'arbre à la recherche 
+            du fichier et supprimer le tag de l'ensemble des tags existants -> $O(p * c)$ \\ \hline
+        % Renommage d'un tag &  &  \\ \hline
+        Ajout d'un fichier & Pour tous les tags du fichier, ajouter au besoin le tag et lui 
+            associer le chemin de fichier -> $O(t * c)$ & Parcourir l'arbre à 
+            la recherche du répertoire parent du fichier, ajouter le nouveau noeud et l'ensemble 
+            de ses tags -> $O(p * c)$ \\ \hline
+        Ajout d'un répertoire & Opération identique à l'ajout d'un fichier & Parcourir l'arbre à 
+            la recherche du répertoire parent, ajouter le nouveau noeud et l'ensemble 
+            de ses tags, puis, récursivement, ajouter ses enfants (sous-répertoires et fichiers) 
+            -> $\approx O(p^2 * c)$ \\ \hline
+        Déplacement /renommage d'un fichier & Pour tous les tags du fichier, associer le nouveau 
+            chemin de fichier -> $O(t * c)$ & Parcourir l'arbre à la recherche du parent et 
+            changement du lien du noeud avec son parent / simple renommage du nom dans 
+            l'étiquette -> $O(p * c)$ \\ \hline
+        Déplacement /renommage d'un répertoire & Pour tous les tags de tous les 
+            sous-répertoires et fichiers, associer le nouveau chemin de fichier -> $O(t * p * c)$ 
+            & Parcourir l'arbre à la recherche du parent et changement du lien du noeud avec son 
+            parent / simple renommage du nom dans l'étiquette -> $O(p * c)$ \\ \hline
+        Suppression d'un fichier & Pour tous les tags du fichier, supprimer le chemin de fichier 
+            -> $O(t * c)$ & Parcourir l'arbre à la recherche du parent et suppression du lien et 
+            du noeud -> $O(p * c)$ \\ \hline
+        Suppression d'un répertoire & Pour tous les tags de tous les sous-répertoires et fichiers, 
+            supprimer le chemin de fichier -> $O(t * p * c)$ & Parcourir l'arbre à la recherche du 
+            répertoire parent, supprimer le noeud, l'ensemble de ses tags, et récursivement, ses 
+            enfants (sous-répertoires et fichiers) -> $\approx O(p^2 * c)$ \\ \hline
+    \end{tabularx}
+\end{center}
+
+Cette version a été en partie abandonnée et adaptée pour deux raisons majeures :
+\begin{enumerate}
+    \item Avoir deux structures de données interdépendantes augmente la complexité des 
+        opérations de mise à jour (ajout, déplacement, suppression de fichiers et tags).
+    \item L'implémentation s'est avérée plus difficile que prévue, du fait de certaines 
+        contraintes de Rust (voir section \ref{tag_engine_realisation}).
+\end{enumerate}
+
+\subsubsection{Indexation avec un graphe}\label{graphe_architecture}
 
 
-
-
-
-\section{Architecture} %--------------------------------------------------
-
-
-\section{Graphes}
+\subsubsection{Surveillance du système de fichiers}
 % TODO:
-% Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
+% Utilisation de inotify. Surveillance du répertoire \mintinline{text}{home} et des événements suivants :
+% \begin{itemize}
+%     \item IN\_ATTRIB : changement sur les tags (ajout, suppression, renommage)
+%     \item IN\_CREATE : création de fichier/dossier dans le dossier surveillé. Ajouter une nouvelle surveillance si dossier.
+%     \item IN\_DELETE : suppression d'un fichier/dossier dans le dossier surveillé
+%     \item IN\_DELETE\_SELF : suppression du dossier surveillé
+%     \item IN\_MOVE\_SELF : suppression d'un fichier/dossier dans le dossier surveillé
+%     \item IN\_MOVE\_FROM : déplacement du dossier
+%     \item IN\_MOVE\_TO : déplacement du dossier
+% \end{itemize}
+
+\subsection{Recherche par tags}
 
 
-\section{Réalisation} %--------------------------------------------------
+\section{Réalisation} %-----------------------------------------------------------------------------------------------
 \subsection{Tag Manager}
 La première réalisation de ce projet est un outil en ligne de commande, écrit en Rust, permettant 
 de facilement lister, ajouter et supprimer des tags à des fichiers et dossiers. Il fait usage de 
 deux \textit{crates} disponibles sur \href{https://crates.io}{crates.io} : clap \cite{ref22} et 
 xattr \cite{ref23}. Clap (Command Line Argument Parser for Rust) est une librairie pour parser 
 les arguments d'un programme en ligne de commande. Xattr est une API en Rust pour récupérer, lister, 
-ajouter/modifier et supprimer des extended attributes avec Rust. Elle fait appel aux appels systèmes 
-en C.
+ajouter/modifier et supprimer des \acrshort{xattr} avec Rust. Elle utilise les appels systèmes 
+en C fournis par Linux.
 % TODO:
 % Insérer quelques bouts de code intéressants. -> examples/01a_quick_example.rs pour clap
 % Insérer capture/exemple d'utilisation
+% Option récursive
 
-\section{Discussion/résultats} %--------------------------------------------------
+\subsection{Tag Engine}\label{tag_engine_realisation}
+% Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
+
+\section{Discussion/résultats} %-----------------------------------------------------------------------------------------------
 % cahier des charges rempli ?
 % réalisation OK ?
 % performances
@@ -487,12 +573,11 @@ en C.
 
 
 
-\section{Conclusion} %--------------------------------------------------
-\subsection{Remerciements}
+\section{Conclusion} %-----------------------------------------------------------------------------------------------
 
 
 \newpage
-\section{Références} %--------------------------------------------------
+\section{Références} %-----------------------------------------------------------------------------------------------
 \bibliographystyle{unsrt}
 \bibliography{bib}
 
