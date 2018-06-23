@@ -3,7 +3,7 @@ REPORT=report
 PRES1=pres1
 PRES2=pres2
 
-all: $(REPORT).pdf $(PRES1).pdf $(PRES2).pdf mostlyclean
+# all: $(REPORT).pdf $(PRES1).pdf $(PRES2).pdf mostlyclean
 
 $(REPORT).pdf: $(REPORT).tex bib.bib images/* text/*
 	$(CC) $(REPORT).tex
@@ -25,11 +25,11 @@ $(PRES2).pdf: $(PRES2).tex images/*
 
 mostlyclean:
 	rm -rf _minted-* *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg
-	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist
+	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist *.lot
 
 clean:
 	rm -f *.pdf
 	rm -rf _minted-* *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg
-	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist
+	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist *.lot
 
 rebuild: clean all

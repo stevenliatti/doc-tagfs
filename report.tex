@@ -86,6 +86,8 @@ permet, le système développé sera intégré à un environnement desktop chois
 \newpage
 \listoffigures
 \newpage
+\listoftables
+\newpage
 \renewcommand\listoflistingscaption{Table des listings de code source}
 \listoflistings
 \newpage
@@ -390,6 +392,7 @@ en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4.
     \end{enumerate}
 \end{enumerate}
 
+% TODO: différence entre indexation stricte et celle réalisée ici
 
 Le système global est composé de trois entités distinctes :
 
@@ -407,7 +410,8 @@ et structures de données, cette partie n'est pas particulièrement ardue.
 \subsection{Indexation et surveillance des fichiers et des tags}
 L'indexation et la surveillance des fichiers et des tags associés est la partie centrale du système. 
 Il faut d'une part surveiller en permanence l'arborescence des fichiers et d'autre part créer un 
-index des relations entre les tags et les fichiers. Deux structures différentes ont été imaginées.
+index des relations entre les tags et les fichiers. Deux structures différentes ont été imaginées 
+pour l'indexation des tags et des fichiers.
 
 \subsubsection{Indexation avec table de hachage et arbre}
 La première version de l'architecture de l'indexation a été la suivante, comportant deux structures 
@@ -474,7 +478,7 @@ et un champ "enfants", une liste ou un ensemble de pointeurs vers les noeuds enf
 présent, seuls les noeuds répertoires pointent vers des noeuds répertoires ou fichiers enfants, 
 les fichiers n'auraient qu'une liste vide de pointeurs.
 \\
-Le tableau suivant donne un aperçu des différents cas de figure de l'utilisation du système 
+Le tableau \ref{tableau_architecture_1} donne un aperçu des différents cas de figure de l'utilisation du système 
 de fichiers. Pour chaque cas d'utilisation, l'opération correspondante pour les deux structures de 
 données (la table de hachage et l'arbre) est donnée, avec une approximation de la complexité de 
 l'opération en utilisant la notation \textit{Big O}. Les variables suivantes sont définies :
@@ -484,7 +488,7 @@ l'opération en utilisant la notation \textit{Big O}. Les variables suivantes so
     \item $t = Nombre \ de \ tags$
 \end{itemize}
 \begin{center}
-    \begin{tabularx}{16cm}{|p{3cm}|X|X|} \hline
+    \begin{tabularx}{16.5cm}{|p{3cm}|X|X|} \hline
         \textbf{Cas d'utilisation} & \textbf{Opération \textit{hashmap}} & \textbf{Opération arbre} \\ \hline
         Ajout d'un tag à un fichier/répertoire & Si tag non présent, ajouter le tag comme clé et 
             ajouter le chemin du fichier à l'ensemble -> $O(c)$ & Parcourir l'arbre à la recherche 
@@ -517,6 +521,8 @@ l'opération en utilisant la notation \textit{Big O}. Les variables suivantes so
             répertoire parent, supprimer le noeud, l'ensemble de ses tags, et récursivement, ses 
             enfants (sous-répertoires et fichiers) -> $\approx O(p^2 * c)$ \\ \hline
     \end{tabularx}
+    \captionof{table}{Cas d'utilisation et opérations, première architecture}
+    \label{tableau_architecture_1}
 \end{center}
 
 Cette version a été en partie abandonnée et adaptée pour deux raisons majeures :
@@ -527,8 +533,37 @@ Cette version a été en partie abandonnée et adaptée pour deux raisons majeur
         contraintes de Rust (voir section \ref{tag_engine_realisation}).
 \end{enumerate}
 
-\subsubsection{Indexation avec un graphe}\label{graphe_architecture}
-
+\subsubsection{Indexation avec un graphe et une table de hachage}\label{graphe_architecture}
+Pendant l'implémentation de cette partie du programme (voir section \ref{tag_engine_realisation}), 
+une nouvelle architecture a été imaginée. Elle reprend les bases de la précédente, mais simplifie 
+la structure de données. Plutôt que de maintenir deux structures différentes, cette solution 
+propose une structure de données principale, secondée par une structure secondaire, optionnelle, 
+mais néanmoins efficace :
+\begin{enumerate}
+    \item Un graphe, avec un noeud représentant soit un répertoire, soit un fichier 
+        soit un tag. Chaque noeud est une structure de données comportant un nom et type et est 
+        identifié de manière unique. Grâce à cet identifiant, les noeuds sont facilement accessibles.
+    \item Une table de hachage, associant le nom d'un tag à son identifiant unique en tant que 
+        noeud du graphe.
+\end{enumerate}
+Les explications suivantes sont appuyées par le cours de Jean-François Hêche, professeur à la 
+heig-vd, sur les "Graphes et Réseaux". La définition d'un graphe non orienté : "Un graphe non 
+orienté est une structure formée d'un ensemble V, dont les éléments sont appelés les sommets 
+ou les noeuds du graphe, et d'un ensemble E, dont les éléments sont appelés les arêtes du graphe, 
+et telle qu'à chaque arête est associée une paire de sommets de V appelés les extrémités de 
+l'arête." (Hêche, page 1, \cite{ref28}).
+\\
+La définition d'un graphe orienté : "Un graphe orienté est une structure formée d'un ensemble V, dont 
+les éléments sont appelés les sommets ou les noeuds du graphe, et d'un ensemble E, dont les éléments 
+sont appelés les arcs du graphe, et telle qu'à chaque arc est associé un couple de sommets de 
+V (c.-à-d. un élément de $V \times V$) appelés les extrémités de l'arc." (Hêche, page 3, \cite{ref28}). 
+\bigbreak
+Un graphe est donc un ensemble de noeuds reliés par des arêtes ou des arcs, selon si le graphe est 
+orienté ou non. Dans notre cas, l'utilisation d'un graphe n'est pas si éloignée de celle d'un arbre. 
+Par ailleurs, selon la théorie des graphes, "un arbre est un graphe sans cycle et connexe" (Hêche, 
+page 33, \cite{ref28}). "Sans cycle" signifie qu'un parcours du graphe est possible de telle sorte 
+à ce que le noeud de départ et d'arrivée soient différents. "Connexe" définit un graphe tel que 
+pour chaque paire de noeuds du graphe il existe un chemin les reliant.
 
 \subsubsection{Surveillance du système de fichiers}
 % TODO:
@@ -562,6 +597,9 @@ en C fournis par Linux.
 
 \subsection{Tag Engine}\label{tag_engine_realisation}
 % Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
+
+% TODO: inotify limitations, inotify-wait, dossier /media -> clé USB
+
 
 \section{Discussion/résultats} %-----------------------------------------------------------------------------------------------
 % cahier des charges rempli ?
