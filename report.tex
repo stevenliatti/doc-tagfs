@@ -109,6 +109,7 @@ fn main() {
 }
         \end{minted}
     \end{code}
+    \item Dans les listings, les lignes précédées d'un "\$" sont exécutées dans un shell.
 \end{itemize}
 
 \section*{Remerciements} %-----------------------------------------------------------------------------------------------
@@ -276,6 +277,7 @@ un menu de réglages permet la gestion des tags (affichage, suppression, etc.) \
 \mintinline{shell}{kMDItemUserTags}, listés les uns à la suite des autres. Via le Terminal, à 
 l'aide de la commande \mintinline{shell}{mdls}, nous pouvons afficher la liste des tags associés à 
 un fichier, nommé "Hello" pour l'exemple :
+\bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{shell}
 % mdls -name kMDItemUserTags Hello 
@@ -571,11 +573,205 @@ dans ce même buffer (simple pattern producteur-consommateur).
 \section{Technologies} %-----------------------------------------------------------------------------------------------
 \subsection{Rust}
 % TODO:
-\cite{ref0} \cite{ref1} \cite{ref2}
+Cette section va présenter le langage de programmation Rust et certains de ses mécanismes, à 
+travers quelques exemples. Rust est un langage multi paradigmes, fortement typé, compilé et performant. 
+Il peut être utilisé en autres pour de la programmation orientée système, pour créer des programmes CLI 
+ou pour créer des applications web. Fort d'une communauté active, de nombreux packages et modules sont 
+disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33} et de nombreuses discussions sont présentes sur 
+le \href{https://www.reddit.com/r/rust/}{reddit} \cite{ref34} dédié. Pour plus de détails, l'excellent livre \cite{ref0} 
+réalisé par les mainteneurs de Rust saura donner de plus amples et précises informations au lecteur avide de 
+connaissances sur Rust. Un autre livre \cite{ref2}, plus spécialisé, guide le débutant à Rust dans la conception 
+de listes chaînées, car non triviales en Rust de par le fait de ses contraintes
 
-\subsection{Les extended attributes}\label{extended_attributes}
+\subsubsection{Installation}
+L'installation de Rust sur Linux et macOS est très simple. Les prérequis sont d'avoir installé un 
+compilateur C (certaines librairies Rust en nécessitent un) et l'outil de transfert de données 
+\mintinline{bash}{curl}. Il suffit ensuite d'ouvrir un terminal et d'entrer la commande suivante :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{bash}
+$ curl https://sh.rustup.rs -sSf | sh
+    \end{minted}
+    \caption{Installation de Rust sur Linux ou macOS}
+\end{code}
+\bigbreak
+Sur Windows, la procédure est un peu plus longue mais tout aussi simple, il faut s'assurer d'avoir 
+les C++ build tools pour Visual Studio 2013 ou supérieur. Rust installe son compilateur, 
+\mintinline{bash}{rustc}, qui permet de compiler un fichier source (\mintinline{text}{.rs}) en 
+fichier exécutable. Nous n'allons cependant pas en parler davantage, la compilation se fera avec 
+le gestionnaire de paquets et de compilation Cargo (voir sous-section \ref{cargo_crates}).
+Pour plus de détails, se référer au chapitre 1.1 du \textit{book} \cite{ref0}.
+Le site \href{https://areweideyet.com/}{Are we (I)DE yet?} \cite{ref1} donne un aperçu des éditeurs 
+de texte compatibles avec la chaîne de développement Rust. En ce qui concerne le projet de bachelor 
+présenté ici, tout le code a été écrit avec Visual Studio Code.
+
+\subsubsection{Généralités}
+% TODO: unsafe rust
+
+\paragraph{Commentaires}
+Tout texte écrit après deux slashs consécutifs ("//") est considéré comme un commentaire en Rust.
+La syntaxe multiligne qui existe en C par exemple n'est pas prise en compte. En mettant trois slashs 
+consécutifs ("///"), le commentateur indique au compilateur que ce commentaire fait partie de la 
+documentation (qui peut être générée avec Cargo, voir sous-section \ref{cargo_crates}).
+
+\paragraph{Variables}
+Tout d'abord, pour déclarer une variable en Rust, il faut utiliser le mot-clé \mintinline{rust}{let}. Une variable 
+est par défaut déclarée immutable, c'est-à-dire qu'elle ne peut pas être modifiée dans la suite du 
+code. Bien que Rust soit un langage fortement typé, son compilateur sait dans la plupart des cas 
+inférer le bon type de la variable, soit en analysant la valeur attribuée, soit en analysant la 
+première utilisation de la variable (arguments d'une fonction, insertion de données dans le cas 
+des collections). Il existe toutefois la possibilité de déclarer explicitement le type de la variable 
+en l'indiquant avant le "=". Pour déclarer une variable mutable, il faut lui ajouter le mot-clé 
+\mintinline{rust}{mut} avant son nom. Ensuite, les constantes sont déclarées avec le mot-clé \mintinline{rust}{const} 
+et leur type doit obligatoirement être indiqué. La différence principale entre les constantes et 
+les variables immutables est qu'une constante ne peut être le résultat d'une valeur calculée à 
+l'exécution du programme. Enfin, une variable peut être "masquée" ou "obscurcie" (\textit{shadowed}) : 
+une nouvelle déclaration avec \mintinline{rust}{let} et le même nom écrase la précédente valeur et 
+peut être de type différent. Le listing \ref{rust_variables} montre quelques cas de déclarations de variables :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Déclaration d'une variable "x", immutable et de type inféré i32
+let x = 3;
+
+// Déclaration d'une variable "y", mutable et de type inféré bool
+let mut y = true;
+
+// Déclaration d'une variable "z", mutable et de type déclaré char
+let mut z : char = 'A';
+
+// La constante PI de type flottant 64 bits
+const PI : f64 = 3.1415;
+
+// Shadowing. La première déclaration crée une variable nommée "answer"
+// de type i32 et de valeur 42, alors que la deuxième écrase la 
+// précédente variable en lui prenant son nom et est de type String.
+let answer = 42;
+let answer = answer.to_string();
+    \end{minted}
+    \caption{Exemples de déclarations de variables en Rust}
+    \label{rust_variables}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 3.1 du \textit{book} \cite{ref0}.
+
+\paragraph{Types}
+Il existe deux familles de types en Rust : 
+\begin{itemize}
+    \item Les scalaires : nombres entiers, nombres à virgule, booleans et caractères
+    \item Les composés (deux types primitifs) : les tuples et les tableaux
+\end{itemize}
+Les entiers peuvent être signés ou non signés et sur 8, 16, 32, 64 ou dépendant de l'architecture
+du processeur (\mintinline{rust}{i8, u8, i16, u16, i32, u32, i64, u64, isize, usize}). Les nombres 
+à virgule ont deux possibilités, soit sur 32 bits, soit sur 64 bits (\mintinline{rust}{f32} ou 
+\mintinline{rust}{f64}). Le type bool, classique, peut prendre deux valeurs, \mintinline{rust}{true} 
+ou \mintinline{rust}{false}. Enfin, dernier type primitif scalaire, \mintinline{rust}{chat} stocke 
+un caractère Unicode entre simples guillemets. Le premier type primitif composé est le tuple. C'est 
+un regroupement de plusieurs valeurs qui peuvent être de différents types. Lors des déclarations, 
+les noms de variables, les types et les valeurs d'un tuple sont contenues entre parenthèses et 
+séparées par des virgules. Enfin, le type tableau, ou \textit{array} : classique type regroupant 
+plusieurs valeurs du même type cette fois. Un \textit{array} a une taille fixe, déterminée à la 
+compilation. La déclaration des valeurs d'un tableau se fait entre crochets "[]". Pour accéder à une 
+valeur du tableau, il faut utiliser la syntaxe \mintinline{rust}{array[i]} où \mintinline{rust}{i} 
+est un indice valide du tableau (entre zéro compris et la taille du tableau non compris).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+let myint : i32 = 1234;
+let mychar : char = 'a';
+let myfloat : f64 = 2.0;
+
+// Déclaration d'un tuple
+let tuple : (char, u32, f64) = ('c', 42, 2.8);
+// Destructuration du tuple en trois variables distinctes
+let (letter, age, score) = tuple;
+
+// Déclaration d'un tableau
+let myarray = ['a', 'b', 'c', 'd', 'e', 'f'];
+let x = myarray[4]; // x vaut 'e'
+    \end{minted}
+    \caption{Quelques types primitifs de Rust}
+    \label{rust_types}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 3.2 du \textit{book} \cite{ref0}.
+
+\paragraph{Fonctions}
+Comme en C, tout programme a comme point d'entrée la fonction \mintinline{rust}{main()}. Une 
+déclaration de fonction commence par le mot-clé \mintinline{rust}{fn}, est suivi du nom de la 
+fonction, de la liste des éventuels paramètres et des éventuels types de retour. Lorsqu'une 
+fonction a une valeur de retour, la dernière ligne de la fonction qui n'a pas de point-virgule 
+à sa fin est évaluée comme une expression et est retournée. Le mot-clé \mintinline{rust}{return} 
+existe néanmoins si la fonction doit retourner dans des cas bien précis (dans une condition par 
+exemple). Les variables déclarées dans la fonction ne sont pas accessibles depuis l'extérieur de la 
+fonction. Les arguments de la fonction sont passés par copie par défaut (voir la sous-section 
+\ref{ownership_borrowing} pour plus de détails). Le listing suivant donne l'exemple d'une même 
+fonction, en deux versions plus ou moins courtes. Ces fonctions attendent deux entiers et retournent 
+également un entier.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn x_plus_y_plus_one(x : i32, y : i32) -> i32 {
+    let x_plus_y = x + y;
+    x_plus_y + 1
+}
+
+fn x_plus_y_plus_one_short(x : i32, y : i32) -> i32 {
+    x + y + 1
+}
+    \end{minted}
+    \caption{Exemples de fonctions en Rust}
+    \label{rust_functions}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 3.3 du \textit{book} \cite{ref0}.
+
+\paragraph{Structures de contrôle}
+
+Pour plus de détails, se référer au chapitre 3.5 du \textit{book} \cite{ref0}.
+
+\subsubsection{Cargo et Crates.io}\label{cargo_crates}
+Cargo est le système de compilation et exécution et le gestionnaire de paquets intégré à Rust.
+Depuis le terminal, ses commandes principales permettent de créer un nouveau projet 
+(\mintinline{bash}{cargo new myproject}), de le compiler (\mintinline{bash}{cargo build}), de 
+l'exécuter (\mintinline{bash}{cargo run}) ou de générer la documentation associée 
+(\mintinline{bash}{cargo doc}). Lorsqu'un nouveau projet est créé avec Cargo, un fichier 
+\mintinline{text}{Cargo.toml} est généré (à la manière du fichier \mintinline{text}{package.json} 
+avec Node.js et npm) avec le contenu minimal suivant :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{bash}
+[package]
+name = "myproject"
+version = "0.1.0"
+authors = ["Firstname Lastname <me@mail.com>"]
+
+[dependencies]
+    \end{minted}
+    \caption{Contenu du fichier \mintinline{text}{Cargo.toml}}
+\end{code}
+\bigbreak
+La section "package" contient les informations sur le projet en lui-même. La section "dependencies" 
+liste les paquets dont dépend notre application, appelés "\textit{crates}" par la communauté Rust. 
+Des milliers de \textit{crates} sont disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33}. 
+D'autres sections peuvent être ajoutées au fichier \mintinline{text}{Cargo.toml} pour personnaliser 
+les commandes de compilation, créer des workspaces à partir de plusieurs \textit{crates} ou ajouter 
+des commandes spécifiques par exemple.
+Un sous-chapitre (1.3) et un chapitre entier (14) sont dédiés à Cargo dans le livre de Rust \cite{ref0} 
+et il dispose également d'une \href{https://doc.rust-lang.org/cargo/}{documentation complète} 
+\cite{ref35} (comme le \textit{book} dédié à Rust).
+
+\subsubsection{\textit{Ownership}, \textit{Borrowing} et références}\label{ownership_borrowing}
+\subsubsection{Structures}
+\subsubsection{Énumérations et \textit{pattern matching}}
+\subsubsection{Gestion des erreurs}
+\subsubsection{Tests}
+\subsubsection{Collections}
+\subsubsection{Concurrence et threads}
+
+\subsection{Extended attributes}\label{extended_attributes}
 \subsubsection{Théorie}
-Les extended attributes, ou "attributs étendus" en français, sont un moyen d'attacher des 
+Les extended attributes (\acrshort{xattr}), ou "attributs étendus" en français, sont un moyen d'attacher des 
 méta-données aux fichiers et dossiers sous forme de paires \mintinline{text}{espace:nom:valeur}. 
 L'espace de nom, ou \textit{namespace} en anglais, définit les différentes classes d'attributs. 
 Dans le cadre de ce projet, l'accent est mis sur ext4 sous Linux, il actuellement 4 espaces de noms 
@@ -747,6 +943,9 @@ Il existe plusieurs outils système qui utilisent \mintinline{c}{inotify} \cite{
 Pour plus d'informations, la page de \mintinline{text}{man} sur \mintinline{c}{inotify} existe \cite{ref29} et 
 un très bon article en deux parties sur les ajouts de \mintinline{c}{inotify} par rapport à \mintinline{c}{dnotify} 
 (son prédécesseur) et sur ses limitations par Michael Kerrisk \cite{ref31} \cite{ref32}.
+
+\subsection{Sockets}
+
 \newpage
 
 
