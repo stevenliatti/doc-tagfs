@@ -574,14 +574,16 @@ dans ce même buffer (simple pattern producteur-consommateur).
 \subsection{Rust}
 % TODO:
 Cette section va présenter le langage de programmation Rust et certains de ses mécanismes, à 
-travers quelques exemples. Rust est un langage multi paradigmes, fortement typé, compilé et performant. 
-Il peut être utilisé en autres pour de la programmation orientée système, pour créer des programmes CLI 
-ou pour créer des applications web. Fort d'une communauté active, de nombreux packages et modules sont 
-disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33} et de nombreuses discussions sont présentes sur 
-le \href{https://www.reddit.com/r/rust/}{reddit} \cite{ref34} dédié. Pour plus de détails, l'excellent livre \cite{ref0} 
-réalisé par les mainteneurs de Rust saura donner de plus amples et précises informations au lecteur avide de 
-connaissances sur Rust. Un autre livre \cite{ref2}, plus spécialisé, guide le débutant à Rust dans la conception 
-de listes chaînées, car non triviales en Rust de par le fait de ses contraintes
+travers quelques exemples, qui sont soit absolument nécessaires pour commencer à programmer avec 
+Rust, soit utilisés dans le code de ce projet. Rust est un langage multi paradigmes, fortement typé, 
+compilé et performant. Il peut être utilisé en autres pour de la programmation orientée système, 
+pour créer des programmes CLI ou pour créer des applications web. Fort d'une communauté active, de 
+nombreux packages et modules sont disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33} 
+et de nombreuses discussions sont présentes sur le \href{https://www.reddit.com/r/rust/}{reddit} 
+\cite{ref34} dédié. Pour plus de détails, l'excellent livre \cite{ref0} réalisé par les mainteneurs 
+de Rust saura donner de plus amples et précises informations au lecteur avide de connaissances sur 
+Rust. Un autre livre \cite{ref2}, plus spécialisé, guide le débutant à Rust dans la conception de 
+listes chaînées, car non triviales en Rust de par le fait de ses contraintes
 
 \subsubsection{Installation}
 L'installation de Rust sur Linux et macOS est très simple. Les prérequis sont d'avoir installé un 
@@ -606,7 +608,7 @@ de texte compatibles avec la chaîne de développement Rust. En ce qui concerne 
 présenté ici, tout le code a été écrit avec Visual Studio Code.
 
 \subsubsection{Généralités}
-% TODO: unsafe rust
+% TODO: unsafe rust + compilateur verbeux + macros + généricité
 
 \paragraph{Commentaires}
 Tout texte écrit après deux slashs consécutifs ("//") est considéré comme un commentaire en Rust.
@@ -705,7 +707,7 @@ fonction a une valeur de retour, la dernière ligne de la fonction qui n'a pas d
 existe néanmoins si la fonction doit retourner dans des cas bien précis (dans une condition par 
 exemple). Les variables déclarées dans la fonction ne sont pas accessibles depuis l'extérieur de la 
 fonction. Les arguments de la fonction sont passés par copie par défaut (voir la sous-section 
-\ref{ownership_borrowing} pour plus de détails). Le listing suivant donne l'exemple d'une même 
+\ref{rust_ownership_borrowing} pour plus de détails). Le listing suivant donne l'exemple d'une même 
 fonction, en deux versions plus ou moins courtes. Ces fonctions attendent deux entiers et retournent 
 également un entier.
 \bigbreak
@@ -727,7 +729,61 @@ fn x_plus_y_plus_one_short(x : i32, y : i32) -> i32 {
 Pour plus de détails, se référer au chapitre 3.3 du \textit{book} \cite{ref0}.
 
 \paragraph{Structures de contrôle}
+Comme tout langage de programmation, Rust possède des structures de contrôle pour gérer les 
+consditions et les répétitions (boucles). Il y a le classique \mintinline{rust}{if condition 
+{ ... } else if autre_condition { ... } else { ... }} avec une différence notable par rapport à C : 
+il est possible d'affecter une variable avec un \mintinline{rust}{if}, comme dans le listing 
+\ref{rust_if}. Il n'y a pas de \mintinline{c}{switch ... case} à proprement parler en Rust, 
+nous verrons le \mintinline{rust}{match ... case} à la sous-section \ref{rust_enum_pattern_matching}.
+En ce qui concerne les boucles, elles sont au nombre de trois : \mintinline{rust}{loop} (boucle 
+infinie), \mintinline{rust}{while} (boucle avec condition initiale) et \mintinline{rust}{for} 
+boucle pour traverser les collections par leurs itérateurs principalement (voir sous-section 
+\ref{rust_collections}).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Exemple d'un simple if ... else
+let name = "fred";
+if name == "fred" {
+    println!("Hello buddy !");
+}
+else {
+    println!("Hello World !");
+}
 
+// Exemple d'affectation d'une variable avec un if. Ici, n vaudra 42
+let condition = true;
+let n = if condition { 42 }
+else { 66 };
+    \end{minted}
+    \caption{Exemples de conditions en Rust}
+    \label{rust_if}
+\end{code}
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Boucle infinie
+loop {
+    println!("Forever");
+}
+
+// Boucle avec condition
+let mut x = 0;
+while x < 10 {
+    println!("{}", x);
+    x = x + 1;
+}
+
+// Parcours d'un tableau
+let myarray = [1, 2, 3, 4, 5];
+for elem in myarray.iter() {
+    println!("value : {}", elem);
+}
+    \end{minted}
+    \caption{Exemples de boucles en Rust}
+    \label{rust_loop}
+\end{code}
+\bigbreak
 Pour plus de détails, se référer au chapitre 3.5 du \textit{book} \cite{ref0}.
 
 \subsubsection{Cargo et Crates.io}\label{cargo_crates}
@@ -761,13 +817,220 @@ Un sous-chapitre (1.3) et un chapitre entier (14) sont dédiés à Cargo dans le
 et il dispose également d'une \href{https://doc.rust-lang.org/cargo/}{documentation complète} 
 \cite{ref35} (comme le \textit{book} dédié à Rust).
 
-\subsubsection{\textit{Ownership}, \textit{Borrowing} et références}\label{ownership_borrowing}
-\subsubsection{Structures}
-\subsubsection{Énumérations et \textit{pattern matching}}
+\subsubsection{\textit{Ownership}, \textit{Borrowing} et références}\label{rust_ownership_borrowing}
+% TODO:
+
+\subsubsection{Structures de données}
+Comme en C, Rust octroie la possibilité au programmeur de définir ses propres types composés, les 
+\mintinline{rust}{struct}. La déclaration et l'instanciation d'une structure se font comme en C 
+avec quelques raccourcis disponibles. Une structure sans noms de champs est également disponible, 
+appelée "tuple struct". Pour accéder aux champs d'une structure, il suffit d'utiliser la notation 
+pointée (\mintinline{rust}{player.name}).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Structure définissant un personnage dans un jeu vidéo
+struct Player {
+    name: String,
+    class: String,
+    life: i32,
+    active: bool
+}
+// Création d'une variable Player
+let player_one = Player {
+    name: String::from("Groumf"),
+    class: String::from("Wizard"),
+    life: 100,
+    active: true
+};
+
+// Structure sans noms aux champs
+struct Coordinates(f64, f64);
+let geneva = Coordinates(46.2016, 6.146);
+
+// Structure vide ()
+struct Nil;
+    \end{minted}
+    \caption{Exemples de structures en Rust}
+    \label{rust_struct}
+\end{code}
+\bigbreak
+La particularité des structures, par rapport à C, est qu'il est possible de définir des méthodes 
+rattachées aux structures, à la manière des méthodes en Java, sans pour autant obtenir une classe 
+\textit{stricto sensu} des langages orientés objets, même si le résultat final est très semblable.
+Pour définir des méthodes à une structure, il est nécessaire de déclarer un bloc de code commençant 
+par le mot-clé \mintinline{rust}{impl} suivi du nom de la structure et d'accolades. À l'intérieur 
+de ce bloc sont définies des fonctions en relation avec la structure. Dans le listing 
+\ref{rust_struct_impl}, nous voyons la déclaration de la structure \mintinline{rust}{Player} et de 
+son implémentation, comportant trois méthodes (avec la syntaxe des fonctions) pour créer un nouveau 
+personnage, qu'il puisse en attaquer un autre et qu'il puisse saluer. La seule différence entre une 
+méthode et une fonction est qu'une méthode qui est appelée sur une variable du type de la structure 
+avec la notation pointée attend le paramètre \mintinline{rust}{self} comme premier paramètre, 
+obligatoirement. \mintinline{rust}{self} réfère à la variable elle-même, comme \mintinline{java}{this} 
+en Java.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+struct Player {
+    name: String, class: String, life: i32, force: i32
+}
+
+impl Player {
+    fn new(name : String, class : String) -> Player {
+        Player { name, class, life : 100, force : 10 }
+    }
+
+    fn attack(&self, other : &mut Player) {
+        other.life = other.life - self.force;
+    }
+
+    fn say_hi(&self) {
+        println!("Hi, I'm {}, powerfull {} !", self.name, self.class);
+    }
+}
+
+fn main() {
+    let player_one = Player::new(String::from("Groumf"),
+        String::from("Wizard"));
+    let mut player_two = Player::new(String::from("Trabi"),
+        String::from("Thief"));
+    player_one.attack(&mut player_two);
+    player_one.say_hi();
+}
+    \end{minted}
+    \caption{Bloc \mintinline{rust}{impl} d'une structure en Rust}
+    \label{rust_struct_impl}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 5 du \textit{book} \cite{ref0}.
+
+\subsubsection{Énumérations et \textit{pattern matching}}\label{rust_enum_pattern_matching}
+Les énumérations sont une autre manière de concevoir ses propres types. Comme en C, une énumération
+liste toutes les variantes possibles d'une valeur d'un même type. L'exemple classique d'une énumération 
+sont les jours de la semaine. Sept cas différents, sans évolutions possibles. Les énumérations en 
+Rust prennent tout leur sens en combinaison avec les \textit{pattern matching} : une structure 
+de contrôle ressemblant à un \mintinline{c}{switch ... case} en C mais avec un côté davantage 
+emprunté à la programmation fonctionnelle (on les retrouve d'ailleurs en Scala). Tous les cas 
+possibles d'une énumération doivent être traité avec un \mintinline{rust}{match} (d'où la clause 
+par défaut \mintinline{rust}{_}). Le bloc de code à droite de chaque \mintinline{rust}{=>} peut être 
+retourné, comme pour une fonction (voir listing \ref{rust_enum}).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum Direction {
+    North, South, East, West
+}
+
+fn print_direction(direction : Direction) {
+    match direction {
+        Direction::North => println!("Go North"),
+        Direction::South => println!("Go South"),
+        _ => println!("Go East or West") // clause par défaut
+    }
+}
+    \end{minted}
+    \caption{Définition d'une \mintinline{rust}{enum} et son utilisation avec un \textit{pattern matching} en Rust}
+    \label{rust_enum}
+\end{code}
+\bigbreak
+Rust possède dans la librairie standard une énumération très puissante : \mintinline{rust}{Option} 
+(recopiée dans le listing \ref{rust_option}). Elle remplace le tristement fameux \mintinline{c}{NULL} 
+en C ou d'autres langages. Elle supprime simplement d'innombrables bugs souvent rencontrés à cause 
+de \mintinline{c}{NULL}. Si une variable existe, elle se retrouve dans le cas \mintinline{rust}{Some} 
+de l'option, si elle n'existe pas, dans le cas \mintinline{rust}{None}. Cette énumération est de 
+plus générique, elle accepte tout type de données.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+fn process(value : Option<u32>) {
+    match value {
+        Some(data) => println!("{}", data),
+        None => println!("Error, no data")
+    }
+}
+    \end{minted}
+    \caption{L'énumération \mintinline{rust}{Option} et son utilisation avec un \textit{pattern matching} en Rust}
+    \label{rust_option}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 6 du \textit{book} \cite{ref0}.
+
 \subsubsection{Gestion des erreurs}
+Nonobstant son compilateur très restrictif, détectant à la compilation de nombreuses erreurs, Rust 
+a une gestion avancée des erreurs survenant à l'exécution. Il distingue deux types : les erreurs 
+récupérables et les erreurs irrécupérables. Pour ces dernières, Rust offre une macro, 
+\mintinline{rust}{panic!}, stopant abruptement le programme et affichant un message d'erreur sur 
+la sortie standard en indiquant à quelle ligne le programme a planté. Pour les erreurs récupérables, 
+une manière plus élégante existe : à la manière de l'énumération \mintinline{rust}{Option} vue à 
+la section \ref{rust_enum_pattern_matching}, l'énumération \mintinline{rust}{Result} a été conçue 
+pour gérer les erreurs au \textit{runtime}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+fn process(value : Result<u32, std::io::Error>) {
+    match value {
+        Ok(data) => println!("u32 value : {}", data),
+        Err(error) => println!("Error : {}", error)
+    }
+}
+    \end{minted}
+    \caption{L'énumération \mintinline{rust}{Result} et son utilisation avec un \textit{pattern matching} en Rust}
+    \label{rust_result}
+\end{code}
+\bigbreak
+De nombreuses fonctions de la librairie standard et de la communauté retournent des 
+\mintinline{rust}{Result}, notamment lors de l'ouverture d'un fichier. Comme ce genre d'opérations 
+sont courantes, Rust met à disposition deux fonctions équivalentes à réaliser un \mintinline{rust}{match} 
+sur un \mintinline{rust}{Result}, \mintinline{rust}{unwrap()} et \mintinline{rust}{expect()}. La 
+seule différence entre les deux est qu'avec la deuxième fonctions, un message personnalisé est 
+attendu en argument. Le listing \ref{rust_result_file} montre les différentes façons de traiter un 
+\mintinline{rust}{Result} lors de l'ouverture d'un fichier :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn main() {
+    // Version 1
+    let f = File::open("test.txt");
+    let f = match f {
+        Ok(file) => file,
+        Err(error) => {
+            panic!("Error on opening file : {:?}", error)
+        },
+    };
+    // Version 2
+    let f = File::open("test.txt").unwrap();
+    // Version 3
+    let f = File::open("test.txt").expect("Error on opening test.txt");
+}
+    \end{minted}
+    \caption{Ouverture d'un fichier et son traitement en Rust}
+    \label{rust_result_file}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 9 du \textit{book} \cite{ref0}.
+
 \subsubsection{Tests}
-\subsubsection{Collections}
+
+Pour plus de détails, se référer au chapitre 11 du \textit{book} \cite{ref0}.
+
+\subsubsection{Collections}\label{rust_collections}
+
+Pour plus de détails, se référer au chapitre 8 du \textit{book} \cite{ref0}.
+
 \subsubsection{Concurrence et threads}
+
+Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
+
 
 \subsection{Extended attributes}\label{extended_attributes}
 \subsubsection{Théorie}
@@ -971,9 +1234,11 @@ en C fournis par Linux.
 \newpage
 
 \section{Tests du système} %-----------------------------------------------------------------------------------------------
+% TODO:
 \newpage
 
 \section{Discussion/résultats} %-----------------------------------------------------------------------------------------------
+% TODO:
 % cahier des charges rempli ?
 % réalisation OK ?
 % performances
@@ -984,6 +1249,7 @@ en C fournis par Linux.
 \newpage
 
 \section{Conclusion} %-----------------------------------------------------------------------------------------------
+% TODO:
 
 
 \newpage
