@@ -608,7 +608,9 @@ de texte compatibles avec la chaîne de développement Rust. En ce qui concerne 
 présenté ici, tout le code a été écrit avec Visual Studio Code.
 
 \subsubsection{Généralités}
-% TODO: unsafe rust + compilateur verbeux + macros + généricité
+
+\paragraph{Organisation des fichiers et modules}
+% TODO: modules
 
 \paragraph{Commentaires}
 Tout texte écrit après deux slashs consécutifs ("//") est considéré comme un commentaire en Rust.
@@ -1020,16 +1022,102 @@ fn main() {
 Pour plus de détails, se référer au chapitre 9 du \textit{book} \cite{ref0}.
 
 \subsubsection{Tests}
-
+Lorsqu'un nouveau projet \textit{librairie} est créé avec \mintinline{bash}{cargo new mylib --lib}, 
+un module de tests unitaires est \textit{de facto} ajouté au fichier \mintinline{rust}{lib.rs}, 
+comme dans le listing \ref{rust_test_module} :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}
+    \end{minted}
+    \caption{Module de test ajouté automatiquement}
+    \label{rust_test_module}
+\end{code}
+\bigbreak
+Chaque fonction précédée par l'attribut \mintinline{rust}{#[test]} est considérée par le compilateur 
+comme un test. Pour exécuter les tests, Cargo met à disposition une commande, \mintinline{bash}{cargo test}. 
+Lorsque cette commande est exécutée, tous les tests sont effectués en parallèle, sans garantir un 
+ordre d'exécution prédéfini. Un résumé des tests effectués, réussis et échoués est affichés sur la 
+sortie standard à la fin de l'exécution de la commande. Pour réaliser nos tests, Rust fournit 
+quelques macros :
+\begin{itemize}
+    \item \mintinline{rust}{assert!} : attend un argument de type \mintinline{rust}{bool}
+    \item \mintinline{rust}{assert_eq!} : attend deux arguments de même type, pour vérifier qu'ils sont égaux
+    \item \mintinline{rust}{assert_ne!} : inverse du précédent, vérifie l'inégalité des deux arguments donnés
+\end{itemize}
+Il existe également un autre attribut, \mintinline{rust}{#[should_panic]}, pour réaliser des 
+fonctions qui testent si un morceau de code doit "paniquer", donc échouer. Finalement, la 
+\textit{killer feature} des tests en Rust, c'est que la commande \mintinline{bash}{cargo test} 
+vérifie également le code donné en exemple dans la documentation de notre code, pour garder une 
+documentation à jour avec notre code.
 Pour plus de détails, se référer au chapitre 11 du \textit{book} \cite{ref0}.
 
 \subsubsection{Collections}\label{rust_collections}
-
+Cette sous-section décrit les deux collections les plus utilisées en Rust, à savoir les vecteurs 
+(\mintinline{rust}{Vec})et les tables de 
+hachage associatives (\mintinline{rust}{HashMap}). Un vecteur est un tableau qui n'a pas de taille 
+fixe, des éléments peuvent lui être ajoutés ou enlevés. C'est l'équivalent des \mintinline{java}{ArrayList} 
+en Java. Un vecteur est générique, il peut contenir tout type de données, mais un seul type à la fois. 
+De nombreuses méthodes existent pour manipuler un vecteur, que ce soit pour lui ajouter ou enlever 
+des éléments ou pour le convertir vers d'autre formes. Une macro, \mintinline{rust}{vec!} est 
+disponible pour rapidement créer un vecteur (éléments séparés par des virgules entre "[]").
+Le listing \ref{rust_collections_vec} donne quelques exemples :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Déclaration d'un vecteur avec new, puis avec la macro
+let v: Vec<char> = Vec::new();
+let mut v = vec!['a', 'b', 'c'];
+// Ajout d'un élément au vecteur
+v.push('d');
+// Accès au deuxième élément du vecteur, de deux manière différentes
+let second: &char = &v[1];
+let second: Option<&char> = v.get(1);
+// Parcours (immutable) du vecteur avec la syntaxe for .. in ..
+for i in &v {
+    println!("{}", i);
+}
+    \end{minted}
+    \caption{Exemples de déclarations et utilisations d'un vecteur}
+    \label{rust_collections_vec}
+\end{code}
+\bigbreak
+Une \mintinline{rust}{HashMap} est une table de hachage associative, tel qu'il en existe en Java.
+Elle est, comme le vecteur, générique, elle accepte tout type de données. C'est une structure de 
+données efficace pour accéder rapidement à une information.
+Le listing \ref{rust_collections_hashmap} donne quelques exemples :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Déclaration d'une hashmap avec new
+let h: HashMap<char, u32> = HashMap::new();
+// Ajout d'une paire clé-valeur à la hashmap
+h.insert('a', 97);
+// Accès à la valeur associée à la clé 'a', retourne une Option
+let a: Option<&u32> = h.get('a');
+// Parcours (immutable) de la hashmap avec la syntaxe for .. in ..
+for (key, value) in &h {
+    println!("{}: {}", key, value);
+}
+    \end{minted}
+    \caption{Exemples de déclaration et utilisation d'une \mintinline{rust}{HashMap}}
+    \label{rust_collections_hashmap}
+\end{code}
+\bigbreak
 Pour plus de détails, se référer au chapitre 8 du \textit{book} \cite{ref0}.
 
 \subsubsection{Concurrence et threads}
-
+% TODO:
 Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
+
+\subsubsection{Divers}
+% TODO: unsafe rust + compilateur verbeux + macros + généricité
 
 
 \subsection{Extended attributes}\label{extended_attributes}
@@ -1064,12 +1152,7 @@ pour manipuler les fichiers comme \mintinline{text}{cp}, \mintinline{text}{tar},
 pas en compte les attributs avec leur syntaxe par défaut \cite{ref4}.
 
 \subsubsection{Petites manipulations}
-
-% TODO:
-% mv préserve les xattr !
-% la copie dans l'explorateur de fichiers aussi (nemo)
-
-Pour vérifier la portabilité des extended attributes, quelques tests ont été réalisés entre un 
+Pour vérifier la portabilité des \acrshort{xattr}, quelques tests ont été réalisés entre un 
 SSD faisant office de disque système à Linux Mint avec 2 clés USB (de 8 et 64 Go) et un emplacement 
 réseau monté en NFS. Le listing suivant montre la sortie de la commande \mintinline{bash}{df}, qui 
 renvoie l'utilisation des différents emplacements de stockage, dans l'ordre : le disque système, en 
@@ -1088,7 +1171,7 @@ Sys. de fichiers        Type   Taille Utilisé Dispo Uti% Monté sur
     \caption{Output de \mintinline{bash}{df -Th} : le disque système, les clés USB et le NFS}
 \end{code}
 \bigbreak
-La démarche est la suivante : un extended attribute dans l'espace \mintinline{text}{user} avec 
+La démarche est la suivante : un \acrshort{xattr} dans l'espace \mintinline{text}{user} avec 
 comme nom \mintinline{text}{author} et comme valeur \mintinline{text}{steven} est ajouté au fichier 
 \mintinline{text}{file.txt} avec \mintinline{bash}{attr}. Ce fichier est copié avec 
 \mintinline{bash}{cp} en prenant garde à préserver l'attribut (option 
@@ -1120,7 +1203,11 @@ avec \mintinline{bash}{attr}. Les résultats sont les suivants :
 \end{code}
 \bigbreak
 On constate que l'opération est infructueuse sur la clé en FAT32 et sur l'emplacement réseau monté 
-en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4.
+en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4. 
+\\
+Deux autres petites expériences ont 
+été menées avec la commande \mintinline{bash}{mv} et la copie/déplacement de fichiers avec 
+l'explorateur de fichiers Nemo de Linux Mint. Ces deux opérations conservent par défaut les \acrshort{xattr}.
 
 \subsection{\mintinline{c}{inotify}}\label{inotify_techno}
 Sous Linux, un outil (inclu au noyau) dédié à la surveillance du \acrshort{fs} existe, \mintinline{c}{inotify} 
@@ -1205,10 +1292,10 @@ Il existe plusieurs outils système qui utilisent \mintinline{c}{inotify} \cite{
 \end{itemize}
 Pour plus d'informations, la page de \mintinline{text}{man} sur \mintinline{c}{inotify} existe \cite{ref29} et 
 un très bon article en deux parties sur les ajouts de \mintinline{c}{inotify} par rapport à \mintinline{c}{dnotify} 
-(son prédécesseur) et sur ses limitations par Michael Kerrisk \cite{ref31} \cite{ref32}.
+(son prédécesseur) \cite{ref31} et sur ses limitations par Michael Kerrisk \cite{ref32}.
 
 \subsection{Sockets}
-
+% TODO:
 \newpage
 
 
@@ -1235,6 +1322,8 @@ en C fournis par Linux.
 
 \section{Tests du système} %-----------------------------------------------------------------------------------------------
 % TODO:
+% cargo benchmarks
+% comparaisons d'arborescences après manipulations
 \newpage
 
 \section{Discussion/résultats} %-----------------------------------------------------------------------------------------------
