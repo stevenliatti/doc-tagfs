@@ -86,6 +86,7 @@ permet, le système développé sera intégré à un environnement desktop chois
 \newpage
 \listoffigures
 \newpage
+\renewcommand{\listtablename}{Liste des tables}
 \listoftables
 \newpage
 \renewcommand\listoflistingscaption{Table des listings de code source}
@@ -112,13 +113,19 @@ fn main() {
     \item Dans les listings, les lignes précédées d'un "\$" sont exécutées dans un shell.
 \end{itemize}
 
+\section*{Structure du document} %-----------------------------------------------------------------------------------------------
+% TODO: 
+% comment est écrit le doc
+% paraphrase la table des matières
+% où est dit quoi
+
 \section*{Remerciements} %-----------------------------------------------------------------------------------------------
 % TODO:
 
 \newpage
 
 % TODO: parcourir le texte pour voir si remplacement par acronyme
-\newacronym{xattr}{XATTR}{\textit{Extended Attributes}, attributs étendus : voir section 
+\newacronym{xattr}{XATTR}{\textit{Extended Attributes}, Attributs étendus : voir section 
     \ref{extended_attributes}}
 \newacronym{api}{API}{\textit{Application Programming Interface}, Interface de programmation : 
     services offerts par un programme producteur à d'autres programmes consommateurs}
@@ -130,6 +137,12 @@ fn main() {
 \newacronym{os}{OS}{\textit{Operating System}, Système d'exploitation : couche logicielle entre le 
     matériel d'un ordinateur et les applications utilisateurs. Offre des abstractions pour la gestion 
     des processus, des fichiers et des périphériques entre autres}
+\newacronym{cli}{CLI}{\textit{Command Line Interface}, Interface en ligne de commande : interface 
+    homme-machine en mode texte : l'utilisateur entre des commandes dans un terminal et l'ordinateur 
+    répond en exécutant les ordres de l'utilisateur et en affichant le résultat de l'opération}
+\newacronym{gui}{GUI}{\textit{Graphical User Interface}, Interface graphique : moyen d'intéragir avec 
+    un logiciel où les contrôles et objets sont manipulables. S'oppose à l'interface en ligne de commande 
+    (\acrshort{cli})}
 \printglossary[type=\acronymtype,title={Acronymes}]
 \newpage
 
@@ -137,6 +150,8 @@ fn main() {
 \section{Introduction} %-----------------------------------------------------------------------------------------------
 % TODO:
 \acrshort{xattr}
+\acrshort{cli}
+\acrshort{gui}
 \subsection{Motivations}
 \subsection{Buts}
 \cite{ref3}
@@ -165,42 +180,45 @@ plusieurs fichiers et une autre liste les fichiers qui possèdent le ou les tags
 la possibilité à l'utilisateur de "monter" un \acrshort{fs} virtuel avec FUSE (Filesystem in 
 UserSpacE). L'outil est rapide et efficace, mais il comporte quelques défauts :
 \begin{itemize}
-    \item Pas d'interface graphique
-    \item Dépendance à FUSE pour monter le \acrshort{fs} virtuel
-    \item Stockage des tags dans une base de données SQLite
+    \item Pas d'interface graphique.
+    \item Dépendance à FUSE pour monter le \acrshort{fs} virtuel.
+    \item Stockage des tags dans une base de données SQLite : si la base est perdue, les tags également.
 \end{itemize}
 
 \subsubsection{Tagsistant}
 Tagsistant \cite{ref16} est autre outil CLI de gestion de tags. Il dépend de FUSE et d'une base 
-de données (SQLite ou MySQL) pour fonctionner. Comme pour TMSU, il faut donner un dossier à Tagsistant 
-pour son usage interne. À l'intérieur de ce dernier, se trouvent différents dossiers :
+de données (SQLite ou MySQL) pour fonctionner. Comme pour TMSU, il faut donner un répertoire à Tagsistant 
+pour son usage interne. À l'intérieur de ce dernier, se trouvent différents répertoires :
 \dirtree{%
 .1 /.
-.2 alias --- Dossier contenant les requêtes les plus courantes.
-.2 archive --- Dossier listant les fichiers.
-.2 relations --- Dossier contenant les relations entre les tags et fichiers.
-.2 stats --- Dossier contenant des infos sur l'utilisation de Tagsistant.
-.2 store --- Dossier où sont taggés les fichiers.
-.2 tags --- Dossier de gestion des tags.
+.2 alias --- Répertoire contenant les requêtes les plus courantes.
+.2 archive --- Répertoire listant les fichiers.
+.2 relations --- Répertoire contenant les relations entre les tags et fichiers.
+.2 stats --- Répertoire contenant des infos sur l'utilisation de Tagsistant.
+.2 store --- Répertoire où sont gérés les fichiers et ajoutés les tags.
+.2 tags --- Répertoire de gestion des tags.
 }
 \bigbreak
-Chaque dossier a un rôle bien précis. Tout se fait avec le terminal et des commandes usuelles 
+Chaque répertoire a un rôle bien précis. Tout se fait avec le terminal et des commandes usuelles 
 (\mintinline{text}{cp}, \mintinline{text}{ls}, \mintinline{text}{mkdir}, etc.). Dans Tagsistant, 
-un dossier créé dans le dossier \mintinline{text}{tags} correspond à un tag. On se retrouve 
+un répertoire créé dans le répertoire \mintinline{text}{tags} correspond à un tag. On se retrouve 
 finalement avec une arborescence de tags et de fichiers \cite{ref17}. Bien que cet outil soit 
 performant d'un point de vue de la rapidité d'exécution, il comporte les défauts de TMSU ainsi que 
 des nouveaux :
 \begin{itemize}
-    \item Pas d'interface graphique
-    \item Dépendance à FUSE pour monter le \acrshort{fs} virtuel
-    \item Stockage des tags dans une base de données
-    \item Utilisation des différents dossiers peu intuitive
+    \item Pas d'interface graphique.
+    \item Dépendance à FUSE pour monter le \acrshort{fs} virtuel.
+    \item Stockage des tags dans une base de données : si la base est perdue, les tags également.
+    \item Utilisation des différents répertoires peu intuitive.
+    \item Tous les fichiers sont contenus dans un seul répertoire et leur nom est modifié pour les 
+        besoins internes de l'application. Obligation de passer par l'application pour accéder aux 
+        fichiers.
 \end{itemize} 
 
 \subsubsection{TaggedFrog}
 TaggedFrog \cite{ref18} est un programme disponible sur Windows uniquement et ne partage pas ses sources.
 Son fonctionnement interne n'est pas documenté. L'interface est agréable, on peut ajouter des fichiers 
-par Drag \& Drop. L'interface créé au fur et à mesure un "nuage" de tags, comme on peut le retrouver sur 
+par \textit{Drag \& Drop}. L'interface créé au fur et à mesure un "nuage" de tags, comme on peut le retrouver sur 
 certains sites web. On peut exécuter des recherches sur les tags et les fichiers. On peut supposer que 
 TaggedFrog maintient une base de données des tags associés aux fichiers, ce qui ne correspond à nouveau 
 pas à nos besoins.
@@ -227,18 +245,18 @@ un tag avec la date de création).
     \caption{TagSpaces en utilisation}
     \label{tagspaces}
 \end{figure}
-Globalement, l'application est fonctionnelle et \textit{user friendly}. Cependant, 2 points noirs 
+Globalement, l'application est fonctionnelle et \textit{user friendly}. Cependant, deux points noirs 
 sont à déplorer :
 \begin{enumerate}
     \item L'application copie les fichiers déjà existants sélectionnés par l'utilisateur, ce qui 
         créé une contrainte supplémentaire dans la gestion de ses fichiers personnels.
     \item TagSpaces stocke les tags directement dans le nom du fichier, modifiant ainsi son nom \cite{ref14}.
         Bien que pratique dans le cas d'une synchronisation à l'aide d'un service cloud, 
-        le fichier devient dépendant de TagSpaces, si l'utilisateur décide de changer son nom sans 
+        le fichier devient dépendant de TagSpaces. Si l'utilisateur décide de changer son nom sans 
         respecter la nomenclature interne, il risque de perdre les tags associés au fichier.
 \end{enumerate}
 
-\subsection{Fonctionnalités incluses dans l'\acrshort{os}}
+\subsection{Fonctionnalités disponibles dans l'\acrshort{os}}
 % \subsubsection{BeOS}
 % \subsubsection{Linux}
 
@@ -297,7 +315,7 @@ donne une solution partielle : c'est une \acrshort{api} (utilisée également pa
 applications la possibilité d'être notifiées si un changement a eu lieu sur un dossier (un événement 
 toutes les 30 secondes). \mintinline{text}{FSEvents} maintient des logs de ces changements dans 
 des fichiers, les applications peuvent ainsi retrouver l'historique des changements quand elles 
-le veulent \cite{ref10}.
+le souhaitent \cite{ref10}.
 
 \newpage
 
@@ -309,7 +327,7 @@ le veulent \cite{ref10}.
 % index dense, index inversé
 % TODO: différence entre indexation stricte et celle réalisée ici
 
-Le système global est composé de trois entités distinctes, décrites ci-dessous.
+Le système global est composé de quatre entités distinctes, décrites dans les sous-sections suivantes.
 
 \subsection{Gestion des tags}
 La gestion physiques des tags stockés dans les \acrshort{xattr} est une fonctionnalité indépendante du 
@@ -328,8 +346,8 @@ un index des relations entre les tags et les fichiers. Deux architectures ont é
 l'indexation des tags et des fichiers.
 
 \subsubsection{Indexation avec table de hachage et arbre}\label{indexation_hashmap_arbre}
-La première version de l'architecture de l'indexation a été la suivante, comportant deux structures 
-de données :
+La première version de l'architecture de l'indexation, comportant deux structures 
+de données, est la suivante :
 \begin{enumerate}
     \item Une table de hachage (ou \textit{hashmap}) associant un tag (son nom, sous forme de 
         chaine de caractères) à un ensemble (au sens mathématique) de chemins de fichiers sur 
@@ -341,14 +359,15 @@ de données :
 \end{enumerate}
 \begin{figure}
     \begin{center}
-        \fbox{\includegraphics[width=1\textwidth]{images/hashmap_wiki.png}}
+        \fbox{\includegraphics[width=0.8\textwidth]{images/hashmap_wiki.png}}
     \end{center}
     \caption{Un annuaire représenté comme une table de hachage - \cite{ref27}}
-    % \label{label}
+    \label{hashmap_wiki}
 \end{figure}
+% TODO: complexité -> mémoire ou calcul ?
 Une table de hachage est un tableau associatif. Les composantes de l'association sont la "clé", 
 reliée à une ou plusieurs valeurs. Pour insérer, accéder ou supprimer une entrée de la table, 
-il faut calculer le "hash" de la clé, c'est-à-dire son empreinte unique. Sur l'image précédente, 
+il faut calculer le "hash" de la clé, c'est-à-dire son empreinte unique. Sur la figure \ref{hashmap_wiki}, 
 nous apercevons les clés en bleu, le résultat du hash en rouge et les valeurs associées en vert. 
 Le risque que deux clés ou plus produisent une même empreinte s'appelle une "collision", c'est 
 pour cela qu'une bonne implémentation d'une table de hachage doit non seulement utiliser une bonne 
@@ -375,31 +394,32 @@ notre cas. Prenons comme exemple la hiérarchie suivante :
 .3 music.
 .4 kiss.mp3.
 }
+% TODO: les tableaux pas top, à reprendre
 Elle peut être obtenue grâce à la commande \mintinline{bash}{tree} sous Linux par exemple.
-La même représentation sous forme d'un arbre est dessinée sur l'image suivante :
+La même représentation sous forme d'un arbre est illustrée sur la figure \ref{tree} :
 \begin{figure}
     \begin{center}
-        \fbox{\includegraphics[width=1\textwidth]{images/tree.png}}
+        \fbox{\includegraphics[width=0.8\textwidth]{images/tree.png}}
     \end{center}
-    \caption{Représentation sous forme d'arbre d'une hiérarchie de fichiers et dossiers}
-    % \label{label}
+    \caption{Représentation sous forme d'arbre d'une hiérarchie de fichiers et répertoires}
+    \label{tree}
 \end{figure}
-Le noeud "home" représente la racine de l'arbre. Chaque noeud représente soit un fichier, soit 
-un répertoire sur le disque. Chaque dossier peut être vu comme un sous-arbre de l'arbre principal.
+Le noeud "home" représente la racine de l'arbre. Chaque noeud représente soit un fichier (en orange), soit 
+un répertoire (en bleu) sur le disque. Chaque répertoire peut être vu comme un sous-arbre de l'arbre principal.
 Du point de vue programmatoire, un noeud serait définit, au minimum, comme une structure de données 
 contenant un champ "données" (dans notre cas, le nom du fichier/répertoire et l'ensemble de ses tags) 
 et un champ "enfants", une liste ou un ensemble de pointeurs vers les noeuds enfants. Dans le cas 
 présent, seuls les noeuds répertoires pointent vers des noeuds répertoires ou fichiers enfants, 
 les fichiers n'auraient qu'une liste vide de pointeurs.
 \\
-Le tableau \ref{tableau_architecture_1} donne un aperçu des différents cas de figure de l'utilisation du système 
+La table \ref{tableau_architecture_1} donne un aperçu des différents cas de figure de l'utilisation du système 
 de fichiers. Pour chaque cas d'utilisation, l'opération correspondante pour les deux structures de 
 données (la table de hachage et l'arbre) est donnée, avec une approximation de la complexité de 
 l'opération en utilisant la notation \textit{Big O}. Les variables suivantes sont définies :
 \begin{itemize}
-    \item $c = Operation \ constante$
-    \item $p = Profondeur \ de \ l'arbre$
-    \item $t = Nombre \ de \ tags$
+    \item $c = Operation \ constante$.
+    \item $p = Profondeur \ de \ l'arbre$.
+    \item $t = Nombre \ de \ tags$.
 \end{itemize}
 \begin{center}
     \begin{tabularx}{16cm}{|p{3cm}|p{5cm}|X|} \hline
@@ -461,6 +481,7 @@ mais néanmoins efficace :
     \item Une table de hachage, associant le nom d'un tag à son identifiant unique en tant que 
         noeud du graphe.
 \end{enumerate}
+% TODO: reprendre les explications sur les arbres
 Les explications suivantes sont appuyées par le cours de Jean-François Hêche, professeur à la 
 heig-vd, sur les "Graphes et Réseaux". La définition d'un graphe non orienté : "Un graphe non 
 orienté est une structure formée d'un ensemble V, dont les éléments sont appelés les sommets 
@@ -499,9 +520,9 @@ Comme pour la sous-section \ref{indexation_hashmap_arbre}, le tableau
 lorsque le \acrshort{fs} est manipulé. Les variables suivantes sont définies :
 % TODO: vérifier le terme "profondeur du graphe"
 \begin{itemize}
-    \item $c = Operation \ constante$
-    \item $p = Profondeur \ du \ graphe$
-    \item $t = Nombre \ de \ tags$
+    \item $c = Operation \ constante$.
+    \item $p = Profondeur \ du \ graphe$.
+    \item $t = Nombre \ de \ tags$.
 \end{itemize}
 \begin{center}
     \begin{tabularx}{16cm}{|p{3cm}|p{7cm}|X|} \hline
@@ -543,20 +564,20 @@ facultatives, ce qui se traduit par un gain sur le nombre d'opérations totales.
 
 \subsection{Surveillance du \acrshort{fs}}
 La surveillance du \acrshort{fs} et des tags associés est le deuxième pilier du système. 
-L'indexation initiale est nécessaire, mais il faut également surveiller en permanence 
+L'indexation initiale est nécessaire, mais il est également nécessaire de surveiller en permanence 
 l'arborescence des fichiers pour garder cet index à jour. Pour y parvenir, nous allons utiliser 
 \mintinline{c}{inotify} (voir section \ref{inotify_techno}), en surveillant tout particulièrement les événements 
 suivants :
 \begin{itemize}
-    \item IN\_ATTRIB : changement sur les tags (ajout, suppression, renommage)
+    \item IN\_ATTRIB : changement sur les tags (ajout, suppression, renommage).
     \item IN\_CREATE : création de fichier/répertoire dans le répertoire surveillé. Ajouter une nouvelle surveillance si répertoire.
-    \item IN\_DELETE : suppression d'un fichier/répertoire dans le répertoire surveillé
-    \item IN\_DELETE\_SELF : suppression du répertoire surveillé
-    \item IN\_MOVE\_SELF : suppression d'un fichier/répertoire dans le répertoire surveillé
-    \item IN\_MOVE\_FROM : déplacement/renommage du répertoire (ancien nom)
-    \item IN\_MOVE\_TO : déplacement/renommage du répertoire (nouveau nom)
+    \item IN\_DELETE : suppression d'un fichier/répertoire dans le répertoire surveillé.
+    \item IN\_DELETE\_SELF : suppression du répertoire surveillé.
+    \item IN\_MOVE\_SELF : suppression d'un fichier/répertoire dans le répertoire surveillé.
+    \item IN\_MOVE\_FROM : déplacement/renommage du répertoire (ancien nom).
+    \item IN\_MOVE\_TO : déplacement/renommage du répertoire (nouveau nom).
 \end{itemize}
-Un thread va s'occuper d'écouter les événements du \acrshort{fs} et les inscrire dans un buffer 
+Un thread s'occupe d'écouter les événements du \acrshort{fs} et les inscrire dans un buffer 
 tandis qu'un autre va mettre à jour le graphe pour répercuter les changements survenus en lisant 
 dans ce même buffer (simple pattern producteur-consommateur).
 
@@ -570,10 +591,10 @@ dans ce même buffer (simple pattern producteur-consommateur).
 
 \newpage
 
-\section{Technologies} %-----------------------------------------------------------------------------------------------
+\section{Analyse technologique} %-----------------------------------------------------------------------------------------------
 \subsection{Rust}
 % TODO:
-Cette section va présenter le langage de programmation Rust et certains de ses mécanismes, à 
+Cette section présente le langage de programmation Rust et certains de ses mécanismes, à 
 travers quelques exemples, qui sont soit absolument nécessaires pour commencer à programmer avec 
 Rust, soit utilisés dans le code de ce projet. Rust est un langage multi paradigmes, fortement typé, 
 compilé et performant. Il peut être utilisé en autres pour de la programmation orientée système, 
@@ -586,7 +607,7 @@ Rust. Un autre livre \cite{ref2}, plus spécialisé, guide le débutant à Rust 
 listes chaînées, car non triviales en Rust de par le fait de ses contraintes
 
 \subsubsection{Installation}
-L'installation de Rust sur Linux et macOS est très simple. Les prérequis sont d'avoir installé un 
+L'installation de Rust sur Linux et macOS est très simple. Les prérequis sont un 
 compilateur C (certaines librairies Rust en nécessitent un) et l'outil de transfert de données 
 \mintinline{bash}{curl}. Il suffit ensuite d'ouvrir un terminal et d'entrer la commande suivante :
 \bigbreak
@@ -662,8 +683,8 @@ Pour plus de détails, se référer au chapitre 3.1 du \textit{book} \cite{ref0}
 \paragraph{Types}
 Il existe deux familles de types en Rust : 
 \begin{itemize}
-    \item Les scalaires : nombres entiers, nombres à virgule, booleans et caractères
-    \item Les composés (deux types primitifs) : les tuples et les tableaux
+    \item Les scalaires : nombres entiers, nombres à virgule, booleans et caractères.
+    \item Les composés (deux types primitifs) : les tuples et les tableaux.
 \end{itemize}
 Les entiers peuvent être signés ou non signés et sur 8, 16, 32, 64 ou dépendant de l'architecture
 du processeur (\mintinline{rust}{i8, u8, i16, u16, i32, u32, i64, u64, isize, usize}). Les nombres 
@@ -962,7 +983,8 @@ fn process(value : Option<u32>) {
 \bigbreak
 Pour plus de détails, se référer au chapitre 6 du \textit{book} \cite{ref0}.
 
-\subsubsection{Gestion des erreurs}
+\subsubsection{Gestion des erreurs} 
+% TODO: pas d'exceptions comme Java
 Nonobstant son compilateur très restrictif, détectant à la compilation de nombreuses erreurs, Rust 
 a une gestion avancée des erreurs survenant à l'exécution. Il distingue deux types : les erreurs 
 récupérables et les erreurs irrécupérables. Pour ces dernières, Rust offre une macro, 
@@ -1047,9 +1069,9 @@ ordre d'exécution prédéfini. Un résumé des tests effectués, réussis et é
 sortie standard à la fin de l'exécution de la commande. Pour réaliser nos tests, Rust fournit 
 quelques macros :
 \begin{itemize}
-    \item \mintinline{rust}{assert!} : attend un argument de type \mintinline{rust}{bool}
-    \item \mintinline{rust}{assert_eq!} : attend deux arguments de même type, pour vérifier qu'ils sont égaux
-    \item \mintinline{rust}{assert_ne!} : inverse du précédent, vérifie l'inégalité des deux arguments donnés
+    \item \mintinline{rust}{assert!} : attend un argument de type \mintinline{rust}{bool}.
+    \item \mintinline{rust}{assert_eq!} : attend deux arguments de même type, pour vérifier qu'ils sont égaux.
+    \item \mintinline{rust}{assert_ne!} : inverse du précédent, vérifie l'inégalité des deux arguments donnés.
 \end{itemize}
 Il existe également un autre attribut, \mintinline{rust}{#[should_panic]}, pour réaliser des 
 fonctions qui testent si un morceau de code doit "paniquer", donc échouer. Finalement, la 
@@ -1121,26 +1143,26 @@ Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
 
 
 \subsection{Extended attributes}\label{extended_attributes}
-\subsubsection{Théorie}
 Les extended attributes (\acrshort{xattr}), ou "attributs étendus" en français, sont un moyen d'attacher des 
 méta-données aux fichiers et dossiers sous forme de paires \mintinline{text}{espace:nom:valeur}. 
 L'espace de nom, ou \textit{namespace} en anglais, définit les différentes classes d'attributs. 
-Dans le cadre de ce projet, l'accent est mis sur ext4 sous Linux, il actuellement 4 espaces de noms 
+Dans le cadre de ce projet, l'accent est mis sur le système de fichiers ext4 \cite{ref36}
+sous Linux, il existe actuellement quatre espaces de noms 
 ou classes : \mintinline{text}{user}, \mintinline{text}{trusted}, \mintinline{text}{security} et 
 \mintinline{text}{system}. L'espace qui nous intéresse est \mintinline{text}{user}. C'est là que 
 l'utilisateur ou l'application, pour autant qu'il ait les droits usuels UNIX sur les fichiers, peut 
-manipuler les extended attributes. Les 3 autres espaces de noms sont utilisés entre autres pour 
+manipuler les extended attributes. Les trois autres espaces de noms sont utilisés entre autres pour 
 les listes d'accès ACL (\mintinline{text}{system}), les modules de sécurité du kernel 
 (\mintinline{text}{security}) ou par \mintinline{text}{root} (\mintinline{text}{trusted})
 \cite{ref11} \cite{ref12}.
 Le nom est une chaine de caractères et la valeur peut être une chaine de caractères ou des données binaires. 
 Les extended attributes sont stockés dans les fichiers. De nombreux \acrshort{fs} gèrent leur 
 usage : ext2-3-4, XFS, Btrfs, UFS1-2, NTFS, HFS+, ZFS. Ces \acrshort{fs} sont utilisés par 
-les 4 \acrshort{os} les plus répandus : Windows, macOS, Linux et FreeBSD. Windows utilise 
+les quatre \acrshort{os} les plus répandus : Windows, macOS, Linux et FreeBSD. Windows utilise 
 les extended attributes notamment dans sa gestion des permissions Unix dans le shell Linux intégré 
 à Windows 10 \cite{ref21}. macOS, comme vu à la section \ref{existant_macOS}, les utilise entre 
 autres dans son système de gestion des tags. La commande \mintinline{text}{xattr} permet de les 
-manipuler. Sous Linux, il en existe 3 : \mintinline{text}{attr}, \mintinline{text}{getfattr} et 
+manipuler. Sous Linux, il en existe trois : \mintinline{text}{attr}, \mintinline{text}{getfattr} et 
 \mintinline{text}{setfattr}. Sous Linux avec ext2-3-4, chaque attribut dispose d'un bloc de données 
 (1024, 2048 ou 4096 bytes) \cite{ref12}.
 Apple et freedesktop.org préconisent la notation DNS inversée pour 
@@ -1152,6 +1174,7 @@ pour manipuler les fichiers comme \mintinline{text}{cp}, \mintinline{text}{tar},
 pas en compte les attributs avec leur syntaxe par défaut \cite{ref4}.
 
 \subsubsection{Petites manipulations}
+% TODO: trouver meilleur titre
 Pour vérifier la portabilité des \acrshort{xattr}, quelques tests ont été réalisés entre un 
 SSD faisant office de disque système à Linux Mint avec 2 clés USB (de 8 et 64 Go) et un emplacement 
 réseau monté en NFS. Le listing suivant montre la sortie de la commande \mintinline{bash}{df}, qui 
@@ -1210,6 +1233,7 @@ Deux autres petites expériences ont
 l'explorateur de fichiers Nemo de Linux Mint. Ces deux opérations conservent par défaut les \acrshort{xattr}.
 
 \subsection{\mintinline{c}{inotify}}\label{inotify_techno}
+% TODO: mentionner fanotify, pourquoi pas bien, quoi de neuf
 Sous Linux, un outil (inclu au noyau) dédié à la surveillance du \acrshort{fs} existe, \mintinline{c}{inotify} 
 \cite{ref29}. Comme son nom l'indique, \mintinline{c}{inotify} donne la possibilité à une application d'être 
 notifiée sur des événements au niveau du système de fichiers. Une \acrshort{api} en C existe et 
@@ -1249,19 +1273,19 @@ struct inotify_event {
 Le champ \mintinline{c}{mask} peut prendre les valeurs suivantes (multiples valeurs autorisées, 
 séparées par des "ou" logiques -> "|") :
 \begin{itemize}
-    \item IN\_ACCESS : accès au fichier
-    \item IN\_ATTRIB : changement sur les attributs du fichier
-    \item IN\_CLOSE\_WRITE : fichier ouvert en écriture fermé
-    \item IN\_CLOSE\_NOWRITE : fichier ouvert en écriture fermé
-    \item IN\_CREATE : création de fichier/répertoire
-    \item IN\_DELETE : suppression d'un fichier/répertoire
-    \item IN\_DELETE\_SELF : suppression du répertoire surveillé lui-même
-    \item IN\_MODIFY : modification d'un fichier/répertoire
-    \item IN\_MOVE\_SELF : suppression d'un fichier/répertoire
-    \item IN\_MOVE\_FROM : déplacement/renommage du répertoire (ancien nom)
-    \item IN\_MOVE\_TO : déplacement/renommage du répertoire (nouveau nom)
-    \item IN\_OPEN : ouverture d'un fichier
-    \item IN\_ALL\_EVENTS : macro combinant tous les événements précédents
+    \item IN\_ACCESS : accès au fichier.
+    \item IN\_ATTRIB : changement sur les attributs du fichier.
+    \item IN\_CLOSE\_WRITE : fichier ouvert en écriture fermé.
+    \item IN\_CLOSE\_NOWRITE : fichier ouvert en écriture fermé.
+    \item IN\_CREATE : création de fichier/répertoire.
+    \item IN\_DELETE : suppression d'un fichier/répertoire.
+    \item IN\_DELETE\_SELF : suppression du répertoire surveillé lui-même.
+    \item IN\_MODIFY : modification d'un fichier/répertoire.
+    \item IN\_MOVE\_SELF : suppression d'un fichier/répertoire.
+    \item IN\_MOVE\_FROM : déplacement/renommage du répertoire (ancien nom).
+    \item IN\_MOVE\_TO : déplacement/renommage du répertoire (nouveau nom).
+    \item IN\_OPEN : ouverture d'un fichier.
+    \item IN\_ALL\_EVENTS : macro combinant tous les événements précédents.
 \end{itemize}
 Le champ \mintinline{c}{cookie} de la structure \mintinline{c}{inotify_event} prend tout son sens 
 lors des événements IN\_MOVE : un numéro unique est généré pour faire le lien entre ces deux 
@@ -1270,24 +1294,24 @@ la surveillance du \acrshort{fs}. Il possède cependant quelques limitations :
 \begin{itemize}
     \item Pas de surveillance récursive d'un répertoire : si une arborescence complète doit être 
         surveillée, il faut pour chaque sous-répertoire ajouter une surveillance dédiée.
-    \item Les chemins de fichiers peuvent changer entre l'émission d'un événement et son traitement
-    \item \mintinline{c}{inotify} ne permet que la surveillance de répertoires en espace utilisateur par défaut
-    \item Il n'y pas de moyen de discriminer quel processus ou utilisateur a généré un événement
+    \item Les chemins de fichiers peuvent changer entre l'émission d'un événement et son traitement.
+    \item \mintinline{c}{inotify} ne permet que la surveillance de répertoires en espace utilisateur par défaut.
+    \item Il n'y pas de moyen de discriminer quel processus ou utilisateur a généré un événement.
 \end{itemize}
 Il existe plusieurs outils système qui utilisent \mintinline{c}{inotify} \cite{ref30} :
 \begin{itemize}
     \item \mintinline{bash}{incron} : équivalent de \mintinline{bash}{cron}, mais l'exécution 
-        des tâches se fait non pas selon un horaire donné, mais selon un événement donné sur un fichier
+        des tâches se fait non pas selon un horaire donné, mais selon un événement donné sur un fichier.
     \item \mintinline{bash}{lsyncd} : outil de synchronisation, basé sur \mintinline{bash}{rsync}. 
         La synchronisation est effectuée à chaque changement dans le répertoire surveillé vers une 
         liste d'emplacements distants configurés à l'avance.
-    \item \mintinline{bash}{iwatch} : déclenchement d'une commande selon un événement \mintinline{bash}{inotify}
+    \item \mintinline{bash}{iwatch} : déclenchement d'une commande selon un événement \mintinline{bash}{inotify}.
     \item \mintinline{bash}{inotify-tools} : deux commandes permettant d'utiliser \mintinline{bash}{inotify} 
         directement dans le terminal :
         \begin{itemize}
             \item \mintinline{bash}{inotifywait} : exécute une attente sur un événement, avant de 
-                continuer le fil d'exécution
-            \item \mintinline{bash}{inotifywatch} : retourne une liste d'événements des répertoires surveillés
+                continuer le fil d'exécution.
+            \item \mintinline{bash}{inotifywatch} : retourne une liste d'événements des répertoires surveillés.
         \end{itemize}
 \end{itemize}
 Pour plus d'informations, la page de \mintinline{text}{man} sur \mintinline{c}{inotify} existe \cite{ref29} et 
@@ -1320,10 +1344,12 @@ en C fournis par Linux.
 % \mintinline{c}{inotify} limitations, inotifywait, dossier /media -> clé USB
 \newpage
 
-\section{Tests du système} %-----------------------------------------------------------------------------------------------
+\section{Protocole de test} %-----------------------------------------------------------------------------------------------
 % TODO:
 % cargo benchmarks
 % comparaisons d'arborescences après manipulations
+\subsection{\textit{Benchmarks}}
+\subsection{Mesure de performances}
 \newpage
 
 \section{Discussion/résultats} %-----------------------------------------------------------------------------------------------
@@ -1332,7 +1358,7 @@ en C fournis par Linux.
 % réalisation OK ?
 % performances
 % Rust VS C
-% Bugs
+% Bugs prob rencontrés
 % Améliorations futures
 
 \newpage
