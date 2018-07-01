@@ -1339,9 +1339,91 @@ documentation à jour avec notre code.
 Pour plus de détails, se référer au chapitre 11 du \textit{book} \cite{ref0}.
 
 \subsubsection{Concurrence et threads}
-% TODO:
+Rust fournit une implémentation des threads dans sa librairie standard. Un thread en Rust 
+correspond à un thread système. Le listing \ref{rust_thread_create} donne un exemple de création 
+d'un thread. La méthode \mintinline{rust}{spawn()} retourne un \textit{handler} pour terminer le 
+thread proprement avec la méthode \mintinline{rust}{join()}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use std::thread;
 
-Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
+fn main() {
+    let handle = thread::spawn(|| {
+        println!("Hello from thread !");
+    });
+    
+    println!("Hello from main !");
+    handle.join().unwrap();
+}
+    \end{minted}
+    \caption{Création d'un thread en Rust}
+    \label{rust_thread_create}
+\end{code}
+\bigbreak
+Un thread peut prendre possession d'une variable si le mot-clé \mintinline{rust}{move} est ajouté à 
+l'appel de \mintinline{rust}{spawn()}. La variable n'est plus disponible dans la fonction ayant 
+appelé le thread. Le listing \ref{rust_thread_create_variable} montre un exemple de cette situation.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use std::thread;
+
+fn main() {
+    let my_vec = vec!['a', 'b', 'c'];
+    let handle = thread::spawn(move || {
+        println!("{:?}", my_vec);
+    });
+    handle.join().unwrap();
+}
+    \end{minted}
+    \caption{Création d'un thread en Rust et passage d'une variable}
+    \label{rust_thread_create_variable}
+\end{code}
+\bigbreak
+Pour communiquer entre threads, un mécanisme de messages est disponible. Les threads communiquent à 
+travers un canal selon la topologie \textit{Multiple Producer, Single Consumer} ("multiple producteur, 
+unique consommateur", voir figure \ref{rust_channel}) : il est possible que plusieurs threads 
+envoient (produisent) des messages dans le canal mais un seul thread peut les recevoir (consommer). 
+Le listing \ref{rust_thread_message} donne un exemple.
+\begin{figure}
+    \begin{center}
+        \fbox{\includegraphics[width=0.8\textwidth]{images/mpsc.png}}
+    \end{center}
+    \caption{Canal de communication entre threads - \cite{ref37}}
+    \label{rust_channel}
+\end{figure}
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use std::thread;
+use std::sync::mpsc;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    let new_tx = mpsc::Sender::clone(&tx);
+    thread::spawn(move || {
+        let val = String::from("Hello from first thread");
+        new_tx.send(val).unwrap();
+    });
+
+    thread::spawn(move || {
+        let val = String::from("Hello from second thread");
+        tx.send(val).unwrap();
+    });
+
+    for received in rx {
+        println!("Message from threads: {}", received);
+    }
+}
+    \end{minted}
+    \caption{\textit{Message passing} avec deux producteurs et un consommateur en Rust}
+    \label{rust_thread_message}
+\end{code}
+\bigbreak
+Des primitives plus bas niveau (Mutex) ainsi que des traits sont disponibles pour manipuler 
+plus finement les threads en Rust. Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
 
 \subsubsection{Divers}
 % TODO: unsafe rust + compilateur verbeux + macros
