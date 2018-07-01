@@ -149,9 +149,6 @@ fn main() {
 
 \section{Introduction} %-----------------------------------------------------------------------------------------------
 % TODO:
-\acrshort{xattr}
-\acrshort{cli}
-\acrshort{gui}
 \subsection{Motivations}
 \subsection{Buts}
 \cite{ref3}
@@ -173,7 +170,7 @@ Jean-Francois Dockes en dresse également une liste avec avantages et inconvéni
 
 \subsection{Applications utilisateur}
 \subsubsection{TMSU}
-TMSU \cite{ref15} est un outil en ligne de commande (CLI) qui permet d'attribuer des tags à des 
+TMSU \cite{ref15} est un outil en ligne de commande (\acrshort{cli}) qui permet d'attribuer des tags à des 
 fichiers et d'exécuter des recherches par tags. On commence par initialiser TMSU dans le dossier choisi. 
 Une commande liste les tags associés à un ou 
 plusieurs fichiers et une autre liste les fichiers qui possèdent le ou les tags donnés. TMSU offre 
@@ -186,7 +183,7 @@ UserSpacE). L'outil est rapide et efficace, mais il comporte quelques défauts :
 \end{itemize}
 
 \subsubsection{Tagsistant}
-Tagsistant \cite{ref16} est autre outil CLI de gestion de tags. Il dépend de FUSE et d'une base 
+Tagsistant \cite{ref16} est autre outil \acrshort{cli} de gestion de tags. Il dépend de FUSE et d'une base 
 de données (SQLite ou MySQL) pour fonctionner. Comme pour TMSU, il faut donner un répertoire à Tagsistant 
 pour son usage interne. À l'intérieur de ce dernier, se trouvent différents répertoires :
 \dirtree{%
@@ -231,7 +228,7 @@ pas à nos besoins.
 \end{figure}
 
 \subsubsection{TagSpaces}
-TagSpaces \cite{ref13} est un programme avec une GUI permettant d'étiqueter ses fichiers avec des tags. 
+TagSpaces \cite{ref13} est un programme avec une \acrshort{gui} permettant d'étiqueter ses fichiers avec des tags. 
 L'application est agréable à utiliser, on commence par connecter un emplacement qui fera office de dossier de 
 destination aux fichiers. On peut ajouter ou créer des fichiers depuis l'application. Les fichiers 
 existants ajoutés depuis l'application sont copiés dans le dossier (cela créé donc un doublon). 
@@ -597,7 +594,7 @@ Cette section présente le langage de programmation Rust et certains de ses méc
 travers quelques exemples, qui sont soit absolument nécessaires pour commencer à programmer avec 
 Rust, soit utilisés dans le code de ce projet. Rust est un langage multi paradigmes, fortement typé, 
 compilé et performant. Il peut être utilisé en autres pour de la programmation orientée système, 
-pour créer des programmes CLI ou pour créer des applications web. Fort d'une communauté active, de 
+pour créer des programmes \acrshort{cli} ou pour créer des applications web. Fort d'une communauté active, de 
 nombreux packages et modules sont disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33} 
 et de nombreuses discussions sont présentes sur le \href{https://www.reddit.com/r/rust/}{reddit} 
 \cite{ref34} dédié. Pour plus de détails, l'excellent livre \cite{ref0} réalisé par les mainteneurs 
@@ -1436,6 +1433,7 @@ Il est alors de la responsabilité du programmeur de vérifier que le code n'est
 Pour plus de détails, se référer au chapitre 19.1 du \textit{book} \cite{ref0}.
 
 \subsection{Extended attributes}\label{extended_attributes}
+\subsubsection{Fonctionnement des \acrshort{xattr}}
 Les extended attributes (\acrshort{xattr}), ou "attributs étendus" en français, sont un moyen d'attacher des 
 méta-données aux fichiers et dossiers sous forme de paires \mintinline{text}{espace:nom:valeur}. 
 L'espace de nom, ou \textit{namespace} en anglais, définit les différentes classes d'attributs. 
@@ -1462,12 +1460,11 @@ Apple et freedesktop.org préconisent la notation DNS inversée pour
 nommer les attributs \cite{ref8}, \cite{ref24} car n'importe quel processus peut modifier les 
 attributs dans l'espace utilisateur. En préfixant du nom du programme le nom de l'attribut, par 
 exemple \mintinline{text}{user.myprogram.myattribute}, on diminue le risque qu'une autre 
-application utilise le même nom d'attribut. Malheureusement, la plupart des outils CLI Linux 
+application utilise le même nom d'attribut. Malheureusement, la plupart des outils \acrshort{cli} Linux 
 pour manipuler les fichiers comme \mintinline{text}{cp}, \mintinline{text}{tar}, etc. ne prennent 
 pas en compte les attributs avec leur syntaxe par défaut \cite{ref4}.
 
-\subsubsection{Petites manipulations}
-% TODO: trouver meilleur titre
+\subsubsection{Comportement lors des opérations d'accès courantes}
 Pour vérifier la portabilité des \acrshort{xattr}, quelques tests ont été réalisés entre un 
 SSD faisant office de disque système à Linux Mint avec 2 clés USB (de 8 et 64 Go) et un emplacement 
 réseau monté en NFS. Le listing suivant montre la sortie de la commande \mintinline{bash}{df}, qui 
@@ -1526,7 +1523,6 @@ Deux autres petites expériences ont
 l'explorateur de fichiers Nemo de Linux Mint. Ces deux opérations conservent par défaut les \acrshort{xattr}.
 
 \subsection{\mintinline{c}{inotify}}\label{inotify_techno}
-% TODO: mentionner fanotify, pourquoi pas bien, quoi de neuf
 Sous Linux, un outil (inclu au noyau) dédié à la surveillance du \acrshort{fs} existe, \mintinline{c}{inotify} 
 \cite{ref29}. Comme son nom l'indique, \mintinline{c}{inotify} donne la possibilité à une application d'être 
 notifiée sur des événements au niveau du système de fichiers. Une \acrshort{api} en C existe et 
@@ -1610,9 +1606,50 @@ Il existe plusieurs outils système qui utilisent \mintinline{c}{inotify} \cite{
 Pour plus d'informations, la page de \mintinline{text}{man} sur \mintinline{c}{inotify} existe \cite{ref29} et 
 un très bon article en deux parties sur les ajouts de \mintinline{c}{inotify} par rapport à \mintinline{c}{dnotify} 
 (son prédécesseur) \cite{ref31} et sur ses limitations par Michael Kerrisk \cite{ref32}.
+\\
+Pour conclure, il existe également une \acrshort{api} plus récente pour recevoir les notifications du 
+\acrshort{fs}, \mintinline{text}{fanotify} \cite{ref38}. Elle gomme quelques défauts d'\mintinline{c}{inotify}
+(notamment l'accès aux périphériques montés, tels que les clé USB), mais comporte un défaut de taille 
+pour ce projet : il n'y pas le support les événements de création, suppression et déplacement de fichiers 
+et répertoires. \mintinline{c}{fanotify} ne peut donc pas être utilisé pour ce projet.
 
-\subsection{Sockets}
-% TODO:
+\subsection{\textit{Sockets}}
+Les \textit{sockets} (littéralement "prise" en français) sont un moyen de communication entre 
+différents processus, qu'ils soient sur la même machine ou en réseau. Il existe plusieurs types 
+de \textit{sockets}, les deux plus connues sont les sockets "locales" (type \mintinline{c}{AF_UNIX} ou 
+\mintinline{c}{AF_LOCAL}), uniquement possibles sur la même machine car reliées par un fichier spécial 
+de sur le \acrshort{fs} de la machine et les sockets IP (type \mintinline{c}{AF_INET} ou 
+\mintinline{c}{AF_INET6}) qui sont reliées par des paires d'adresses IP et ports.
+Lors d'une communication socket entre deux processus, un des processus endosse le rôle de serveur 
+l'autre de client. Le serveur doit, dans l'ordre, exécuter les \acrshort{syscall} suivants : 
+\begin{enumerate}
+    \item Créer la socket avec \mintinline{c}{socket()}.
+    \item Associer la socket à une adresse d'écoute avec \mintinline{c}{bind()}.
+    \item Écouter l'arrivée d'une connexion avec \mintinline{c}{listen()}.
+    \item Accepter une connexion entrante avec \mintinline{c}{accept()}.
+    \item Recevoir les messages avec \mintinline{c}{read()}.
+    \item Émettre les messages avec \mintinline{c}{write()}.
+    \item Fermer la connexion avec \mintinline{c}{close()}.
+\end{enumerate}
+Le client, de son côté, doit exécuter les \acrshort{syscall} suivants :
+\begin{enumerate}
+    \item Créer la socket avec \mintinline{c}{socket()}.
+    \item Se connecter à un serveur en écoute avec \mintinline{c}{connect()}.
+    \item Recevoir les messages avec \mintinline{c}{read()}.
+    \item Émettre les messages avec \mintinline{c}{write()}.
+    \item Fermer la connexion avec \mintinline{c}{close()}.
+\end{enumerate}
+La figure \ref{sockets_procedure} résume la procédure d'initialisation et d'utilisation des sockets.
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{images/sockets.png}
+    \end{center}
+    \caption{Procédure d'initialisation et d'utilisation des sockets}
+    \label{sockets_procedure}
+\end{figure}
+Lors de l'établissement de la connexion, un canal est établi entre les deux processus, tout ce que 
+le serveur écrit est reçu par le client et inversement. Pour plus d'informations, la page de man 
+des sockets est disponible \cite{ref39}.
 \newpage
 
 
