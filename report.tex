@@ -1425,9 +1425,15 @@ fn main() {
 Des primitives plus bas niveau (Mutex) ainsi que des traits sont disponibles pour manipuler 
 plus finement les threads en Rust. Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
 
-\subsubsection{Divers}
-% TODO: unsafe rust + compilateur verbeux + macros
-
+\subsubsection{\textit{Unsafe} Rust}
+Le compilateur Rust est non seulement très verbeux lors d'erreurs mais également très restrictif. 
+Cette contrainte est la garantie pour le programmeur d'obtenir un code sûr et fiable sur la gestion 
+de la mémoire. Cependant, il arrive que du code doive transgresser les règles et bonnes pratiques
+de Rust sur la mémoire. C'est notamment le cas pour du code bas niveau (manipulation du kernel par 
+exemple). Pour ces cas de figure, Rust peut fonctionner en mode \textit{unsafe} ("non sûr"). Tout 
+bloc de code qui nécessite d'être non sûr doit être précédé du mot-clé \mintinline{rust}{unsafe}. 
+Il est alors de la responsabilité du programmeur de vérifier que le code n'est pas buggé ou dangereux.
+Pour plus de détails, se référer au chapitre 19.1 du \textit{book} \cite{ref0}.
 
 \subsection{Extended attributes}\label{extended_attributes}
 Les extended attributes (\acrshort{xattr}), ou "attributs étendus" en français, sont un moyen d'attacher des 
