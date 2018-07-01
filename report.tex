@@ -367,7 +367,7 @@ de données, est la suivante :
 % TODO: complexité -> mémoire ou calcul ?
 Une table de hachage est un tableau associatif. Les composantes de l'association sont la "clé", 
 reliée à une ou plusieurs valeurs. Pour insérer, accéder ou supprimer une entrée de la table, 
-il faut calculer le "hash" de la clé, c'est-à-dire son empreinte unique. Sur la figure \ref{hashmap_wiki}, 
+il faut calculer le "hash" de la clé, \textit{id est} son empreinte unique. Sur la figure \ref{hashmap_wiki}, 
 nous apercevons les clés en bleu, le résultat du hash en rouge et les valeurs associées en vert. 
 Le risque que deux clés ou plus produisent une même empreinte s'appelle une "collision", c'est 
 pour cela qu'une bonne implémentation d'une table de hachage doit non seulement utiliser une bonne 
@@ -668,7 +668,7 @@ documentation (qui peut être générée avec Cargo, voir sous-section \ref{carg
 
 \paragraph{Variables}
 Tout d'abord, pour déclarer une variable en Rust, il faut utiliser le mot-clé \mintinline{rust}{let}. Une variable 
-est par défaut déclarée immutable, c'est-à-dire qu'elle ne peut pas être modifiée dans la suite du 
+est par défaut déclarée immutable, \textit{id est} qu'elle ne peut pas être modifiée dans la suite du 
 code. Bien que Rust soit un langage fortement typé, son compilateur sait dans la plupart des cas 
 inférer le bon type de la variable, soit en analysant la valeur attribuée, soit en analysant la 
 première utilisation de la variable (arguments d'une fonction, insertion de données dans le cas 
@@ -939,7 +939,59 @@ fn main() {
 Pour plus de détails, se référer au chapitre 5 du \textit{book} \cite{ref0}.
 
 \subsubsection{Traits et généricité}\label{trait_generic}
-% TODO:
+Les traits en Rust sont l'équivalent des interfaces en Java. C'est une manière de définir 
+un comportement abstrait que pourrait suivre un type. Le listing \ref{rust_trait} définit 
+un trait "véhicule" (\mintinline{rust}{Vehicle}) qu'implémentent les structures "vélo" 
+(\mintinline{rust}{Bicycle}) et "avion" (\mintinline{rust}{Plane}). Le trait 
+\mintinline{rust}{Vehicle} donne la signature d'une seule fonction, \mintinline{rust}{description()} 
+qui décrit la variable du type en question. Les deux structures implémentant le trait doivent également 
+implémenter toutes les fonctions du trait.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+trait Vehicle { fn description(&self); }
+
+struct Bicycle { wheels : u8, passengers : u8 }
+impl Vehicle for Bicycle {
+    fn description(&self) {
+        println!("I'm a bicycle, I have {} wheels and \
+            can carry {} passengers.", 
+            self.wheels, self.passengers);
+    }
+}
+
+struct Plane { engines : u8, passengers : u16, fuel : String }
+impl Vehicle for Plane {
+    fn description(&self) {
+        println!("I'm a plane, I have {} engines and \
+            can carry {} passengers. I fly with {}.", 
+            self.engines, self.passengers, self.fuel);
+    }
+}
+
+fn main() {
+    let bicycle = Bicycle { wheels : 2, passengers : 1 };
+    bicycle.description();
+    let plane = Plane { engines : 1, passengers : 100, 
+        fuel : String::from("kerosene") };
+    plane.description();
+}
+    \end{minted}
+    \caption{Implémentations d'un trait en Rust}
+    \label{rust_trait}
+\end{code}
+\bigbreak
+Les traits peuvent être déclarés génériques, comme les fonctions d'ailleurs. La généricité 
+n'est pas un concept réservé à Rust, de nombreux langages de programmation l'utilisent. C'est une 
+manière d'éviter de répéter un même code pour des types de données différents, mais qui auraient 
+des similitudes. Prenons l'exemple d'une fonction faisant l'addition de deux nombres. Les arguments 
+pourraient être soit des nombres entiers, soit des nombres à virgule. La méthode pour additionner 
+ces deux types est la même. Mais pour un langage fortement typé comme Rust, il est nécessaire de 
+définir précisément les types des arguments des fonctions. C'est là qu'entre en jeu la généricité : 
+la déclaration d'une fonction attend un type générique, usuellement nommé \mintinline{rust}{T}, 
+et le manipule comme un type réel. De nombreux types de la librairie standard sont génériques, 
+comme les types \mintinline{rust}{Option} et \mintinline{rust}{Result} (voir sous-section 
+\ref{rust_enum_pattern_matching}).
 Pour plus de détails, se référer au chapitre 10 du \textit{book} \cite{ref0}.
 
 \subsubsection{Énumérations et \textit{pattern matching}}\label{rust_enum_pattern_matching}
@@ -1288,6 +1340,7 @@ Pour plus de détails, se référer au chapitre 11 du \textit{book} \cite{ref0}.
 
 \subsubsection{Concurrence et threads}
 % TODO:
+
 Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
 
 \subsubsection{Divers}
