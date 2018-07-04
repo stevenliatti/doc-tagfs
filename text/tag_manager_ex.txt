@@ -1,0 +1,26 @@
+$ ./tag_manager -f a -r
+File "a" has no tags
+File "a/a1" has no tags
+File "a/b" has no tags
+File "a/b/b1" has no tags
+File "a/a2" has no tags
+$ ./tag_manager -f a/* -s in_a
+Tag(s) {"in_a"} for file "a/a1" have been setted
+Tag(s) {"in_a"} for file "a/a2" have been setted
+Tag(s) {"in_a"} for file "a/b" have been setted
+$ ./tag_manager -f a/b a/b/b1 a/b/b2 -s myfiles
+Tag(s) {"myfiles"} for file "a/b" have been setted
+Tag(s) {"myfiles"} for file "a/b/b1" have been setted
+Tag(s) {"myfiles"} for file "a/b/b2" have been setted
+$ ./tag_manager -f a -r
+File "a" has no tags
+Tag(s) ["in_a"] for file "a/a1"
+Tag(s) ["in_a", "myfiles"] for file "a/b"
+Tag(s) ["myfiles"] for file "a/b/b1"
+Tag(s) ["myfiles"] for file "a/b/b2"
+Tag(s) ["in_a"] for file "a/a2"
+$ ./tag_manager -l
+in_a
+myfiles
+$ ./tag_manager -q myfiles AND in_a
+/home/stevenliatti/a/b
