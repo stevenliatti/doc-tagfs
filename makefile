@@ -5,7 +5,7 @@ PRES2=pres2
 
 # all: $(REPORT).pdf $(PRES1).pdf $(PRES2).pdf mostlyclean
 
-$(REPORT).pdf: $(REPORT).tex bib.bib images/* text/*
+$(REPORT).pdf: $(REPORT).tex bib.bib images/* text/* ../tag_manager/src/*
 	$(CC) $(REPORT).tex
 	makeglossaries $(REPORT)
 	bibtex $(REPORT)

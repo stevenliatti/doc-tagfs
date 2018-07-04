@@ -97,7 +97,7 @@ permet, le système développé sera intégré à un environnement desktop chois
 Lors de la rédaction de ce document, les conventions typographique ci-dessous ont
 été adoptées.
 \begin{itemize}[label=\textbullet]
-	\item Tous les mots empruntés à la langue anglaise ont été écrits en \textit{italique}
+	\item Tous les mots empruntés à la langue anglaise ou latine ont été écrits en \textit{italique}
 	\item Toute référence à un nom de fichier (ou dossier), un chemin d'accès, une 
     utilisation de paramètre, variable, commande utilisable par l'utilisateur, ou extrait de code 
     source est écrite avec une police d'écriture à \mintinline{text}{chasse fixe}.
@@ -114,13 +114,27 @@ fn main() {
 \end{itemize}
 
 \section*{Structure du document} %-----------------------------------------------------------------------------------------------
-% TODO: 
-% comment est écrit le doc
-% paraphrase la table des matières
-% où est dit quoi
+Le présent document commence par l'introduction, rappelant les motivations du projet et les buts à 
+atteindre. Il aborde ensuite les applications existantes fournissant un service similaire au but du 
+projet, mais avec quelques limitations pour la plupart. Il poursuit par une section sur l'architecture 
+logicielle du système final, avec ses différents composants et besoins. Après, une analyse technologique du 
+langage Rust et des outils utilisés pour la réalisation technique sera faite. La section suivante illustre 
+la réalisation technique en elle-même, avec les deux programmes réalisés. Le système est testé dans 
+la section d'après, expliquant le protocole et le résultat des tests. Finalement, le document se 
+termine par une section de discussion des résultats, de l'état du projet, des améliorations futures 
+et des différences entre Rust et C et une dernière section de conclusion. La dernière section 
+est réservée aux références.
 
 \section*{Remerciements} %-----------------------------------------------------------------------------------------------
-% TODO:
+Mes remerciements vont en premier lieu à ma compagne, pour son infinie patience et ses encouragements.
+Je remercie aussi ma famille et mes proches pour leur soutien tout au long de mes études et 
+lors de la réalisation de ce travail. Je tiens à remercier tous mes professeurs pour leurs 
+enseignements et tout particulièrement M. Florent Glück pour le suivi du projet et ses précieux 
+conseils ainsi que M. Orestis Malaspinas pour les conseils sur le langage Rust. J'aimerais remercier aussi 
+M. Joël Cavat, assistant ITI à l'hepia, pour m'avoir conseillé et m'avoir prêté son très bon 
+cours sur les Graphes et Réseaux de M. Jean-Francois Hêche, que je remercie indirectement. 
+Je tiens finalement à remercier mes collègues de classe pour leur camaraderie et aide durant mes 
+études et mon travail de bachelor.
 
 \newpage
 
@@ -1049,7 +1063,7 @@ Pour plus de détails, se référer au chapitre 6 du \textit{book} \cite{ref0}.
 
 \subsubsection{Collections}\label{rust_collections}
 Cette sous-section décrit les deux collections les plus utilisées en Rust, à savoir les vecteurs 
-(\mintinline{rust}{Vec})et les tables de 
+(\mintinline{rust}{Vec}) et les tables de 
 hachage associatives (\mintinline{rust}{HashMap}). Un vecteur est un tableau qui n'a pas de taille 
 fixe, des éléments peuvent lui être ajoutés ou enlevés. C'est l'équivalent des \mintinline{java}{ArrayList} 
 en Java. Un vecteur est générique (voir sous-section \ref{trait_generic}), il peut contenir tout type 
@@ -1656,7 +1670,10 @@ des sockets est disponible \cite{ref39}.
 
 
 \section{Réalisation} %-----------------------------------------------------------------------------------------------
-\subsection{Tag Manager}
+% TODO: schéma global des deux programmes avec interactions
+\subsection{Tag Manager}\label{tag_manager}
+% TODO: schéma résumant l'utilisation : clap -> soit sockets, soit modif fichiers avec lib
+% Schéma vertical avec flèches
 \subsubsection{Description du programme et du code}
 La première réalisation de ce projet est un outil en ligne de commande, écrit en Rust, permettant 
 de facilement lister, ajouter et supprimer des tags à des fichiers et dossiers (avec une option 
@@ -1665,25 +1682,25 @@ récursive pour les dossiers) et d'exécuter des requêtes vers le serveur (Tag 
 les tags existants, renommer un tag et demander la liste des fichiers correspondant à des tags 
 donnés. Cet outil dépend de deux \textit{crates} disponibles sur \href{https://crates.io}{crates.io} 
 : clap \cite{ref22} et xattr \cite{ref23}.
-\bigbreak
-Clap (Command Line Argument Parser for Rust) est une 
+\subparagraph{clap}
+(Command Line Argument Parser for Rust) est une 
 librairie pour parser les arguments d'un programme en ligne de commande. Elle s'occupe d'analyser 
 et de valider les arguments fournis par l'utilisateur. Elle dispose de plusieurs syntaxes pour 
-définir les arguments des commandes de notre programme. Sur le dépôt github de Clap, dans le 
+définir les arguments des commandes de notre programme. Sur le dépôt github de clap, dans le 
 dossier \textit{examples}, plusieurs exemples d'utilisation sont fournis. Pour illustrer son 
 utilisation, le listing \ref{tag_manager_clap} reprend l'exemple \mintinline{text}{01a_quick_example.rs} 
 avec la plupart des commentaires tronqués et des adaptations de mise en page. Des lignes 2 à 13, 
 les arguments attendus et les informations sur l'application sont définis avec entre autres la 
 version du programme, le nom de l'auteur, etc. Dans cet exemple, les arguments sont définis à 
-partir d'une chaîne de caractères respectant un format bien spécifique. Clap génère automatiquement 
+partir d'une chaîne de caractères respectant un format bien spécifique. clap génère automatiquement 
 une aide au programme à partir des arguments définis s'il est lancé sans aucun des arguments attendus.
 À partir de la ligne 15, les arguments reçus sont utilisés. La méthode \mintinline{rust}{value_of()} 
 retourne la valeur d'un argument présent à l'exécution. Il est donc aisé d'utiliser les arguments 
-donnés en tant que variables du programme. Clap donne également la possibilité de regrouper les 
+donnés en tant que variables du programme. clap donne également la possibilité de regrouper les 
 arguments. Un seul argument d'un groupe peut être présent à l'exécution, ce qui évite de nombreuses 
 conditions de détection des arguments.
-\bigbreak
-Le deuxième \textit{crate} utilisé est Xattr. C'est une \acrshort{api} 
+\subparagraph{xattr}
+est une \acrshort{api} 
 en Rust pour récupérer, lister, ajouter/modifier et supprimer des \acrshort{xattr} accrochés à des 
 fichiers avec Rust. C'est essentiellement un wrapper des \acrshort{syscall} en C fournis par Linux 
 et d'autres \acrshort{os} pour manipuler les \acrshort{xattr}. À noter que les fonctions offertes ne 
@@ -1731,17 +1748,19 @@ fn main() {
     }
 }
     \end{minted}
-    \caption{Exemple d'utilisation de Clap (commentaires tronqués) - \cite{ref42}}
+    \caption{Exemple d'utilisation de clap (commentaires tronqués) - \cite{ref42}}
     \label{tag_manager_clap}
 \end{code}
 \bigbreak
 Tag Manager est constitué de deux fichiers. Le premier, \mintinline{rust}{main.rs} contient les 
-définitions et détections des arguments fournis par l'utilisateur avec Clap (voir listing 
+définitions et détections des arguments fournis par l'utilisateur avec clap (voir listing 
 \ref{tag_manager_main_args}), les appels aux fonctions 
 manipulant les \acrshort{xattr} des fichiers et la partie socket de connexion, requête et attente 
 de réponse du serveur (Tag Engine, sous-section \ref{tag_engine_realisation}). Le deuxième fichier, 
 \mintinline{rust}{lib.rs}, contient l'\acrshort{api} publique pour récupérer, attribuer, renommer 
-et supprimer les tags pour un fichier donné et un module de test de ces fonctions. À titre d'exemple, 
+et supprimer les tags pour un fichier donné et un module de test de ces fonctions. À noter que 
+dans les \textit{output} du programme, il n'y a pas de distinction entre fichiers et répertoires.
+À titre d'exemple, 
 le listing \ref{tag_manager_del_tags} montre le code de la fonction \mintinline{rust}{del_tags()} 
 qui supprime les tags donnés d'un fichier. Elle préserve les tags existants qui ne doivent pas être 
 supprimés et supprime totalement le \acrshort{xattr} en cas de tableau de tags vide. L'usage 
@@ -1843,12 +1862,53 @@ une requête sur les deux tags. L'arborescence utilisée pour l'exemple se situe
 
 
 \subsection{Tag Engine}\label{tag_engine_realisation}
+\subsubsection{Description du programme et du code}
+La deuxième réalisation de ce projet est un programme "indexant" (ne crée pas un index au sens 
+strict du terme, voir explications plus loin) et surveillant une arborescence de 
+répertoires, fichiers et tags associés. Ce programme fait également office de serveur pour les 
+requêtes émises depuis Tag Manager. Ce programme dépend de quatre \textit{crates}. Le premier est 
+tag\_manager (la librairie des fonctions manipulant les \acrshort{xattr}, voir sous-section \ref{tag_manager}), 
+réalisé au cours de ce projet. Les trois autres sont disponibles sur \href{https://crates.io}{crates.io}, 
+il s'agit de walkdir \cite{ref43}, petgraph \cite{ref44} et notify \cite{ref45}.
+
+% TODO: Utilisation de tag manager lib
+% \subparagraph{tag\_manager}
+% est repris ici pour deux de ses fonctions publiques : \mintinline{rust}{get_tags()} et 
+% \mintinline{rust}{rename_tag()}. La première 
+
+\subparagraph{walkdir}
+% TODO: Utilisation de walkdir pour parcourir arborescence
+est une librairie pour parcourir efficacement et de manière récursive une arborescence de fichiers.
+Elle offre différentes structures, dont \mintinline{rust}{WalkDir} et \mintinline{rust}{DirEntry}. 
+\mintinline{rust}{WalkDir} attend un chemin de répertoire et retourne un itérateur récursif sur 
+chaque sous-répertoire et fichier contenu dans le répertoire de départ. Chaque entrée de cet 
+itérateur est représenté par la structure \mintinline{rust}{DirEntry}, qui détient des méthodes 
+pour obtenir des informations sur l'entrée (le chemin complet, les méta-données, si c'est un 
+répertoire ou un fichier, son nom, etc.).
+
+% \input{report/test.tex}
+
+\subparagraph{petgraph}
+Tentative d'implémentation arbre -> difficile -> switch vers graph
 \cite{ref26}
-% TODO:
-% Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
-% \mintinline{c}{inotify} limitations, inotifywait, dossier /media -> clé USB
+Explications petgraph
+Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
+
+\subparagraph{notify}
+Utilisation notify -> mieux qu'inotify -> Debounced events
+\mintinline{c}{inotify} limitations, inotifywait, dossier /media -> clé USB
+
+\subparagraph{Serveur sockets}
+
+\subparagraph{Threads et \textit{channel}}
+
+\subparagraph{Analyse d'une expression logique}
 algo infix postfix \cite{ref40}
 algo postfix evaluation \cite{ref41}
+
+\subsubsection{Utilisation du programme et exemples}
+
+
 \newpage
 
 \section{Protocole de test} %-----------------------------------------------------------------------------------------------
@@ -1866,7 +1926,12 @@ algo postfix evaluation \cite{ref41}
 % performances
 % Rust VS C
 % Bugs prob rencontrés
-% Améliorations futures
+% Améliorations futures :
+    % -Environnement de bureau (Nautilus, Nemo) et/ou page web
+    % -Daemon pour Tag Engine
+    % -Ajouter des paths à surveiller après coup
+    % -Clés USB
+    % -Davantage de tests
 
 \newpage
 
