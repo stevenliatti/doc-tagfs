@@ -1,0 +1,1099 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Rust}
+Cette section présente le langage de programmation Rust et certains de ses mécanismes, à 
+travers quelques exemples, qui sont soit absolument nécessaires pour commencer à programmer avec 
+Rust, soit utilisés dans le code de ce projet. Rust est un langage multi paradigmes, fortement typé, 
+compilé et performant. Il peut être utilisé en autres pour de la programmation orientée système, 
+pour créer des programmes \acrshort{cli} ou pour créer des applications web. Fort d'une communauté active, de 
+nombreux packages et modules sont disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33} 
+et de nombreuses discussions sont présentes sur le \href{https://www.reddit.com/r/rust/}{reddit} 
+\cite{ref34} dédié. Pour plus de détails, l'excellent livre \cite{ref0} réalisé par les mainteneurs 
+de Rust saura donner de plus amples et précises informations au lecteur avide de connaissances sur 
+Rust. Un autre livre \cite{ref2}, plus spécialisé, guide le débutant à Rust dans la conception de 
+listes chaînées, car non triviales en Rust de par le fait de ses contraintes
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Installation}
+L'installation de Rust sur Linux et macOS est très simple. Les prérequis sont un 
+compilateur C (certaines librairies Rust en nécessitent un) et l'outil de transfert de données 
+\mintinline{bash}{curl}. Il suffit ensuite d'ouvrir un terminal et d'entrer la commande suivante :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{bash}
+$ curl https://sh.rustup.rs -sSf | sh
+    \end{minted}
+    \caption{Installation de Rust sur Linux ou macOS}
+\end{code}
+\bigbreak
+Sur Windows, la procédure est un peu plus longue mais tout aussi simple, il faut s'assurer d'avoir 
+les C++ build tools pour Visual Studio 2013 ou supérieur. Rust installe son compilateur, 
+\mintinline{bash}{rustc}, qui permet de compiler un fichier source (\mintinline{text}{.rs}) en 
+fichier exécutable. Nous n'allons cependant pas en parler davantage, la compilation se fera avec 
+le gestionnaire de paquets et de compilation Cargo (voir sous-section \ref{cargo_crates}).
+Pour plus de détails, se référer au chapitre 1.1 du \textit{book} \cite{ref0}.
+Le site \href{https://areweideyet.com/}{Are we (I)DE yet?} \cite{ref1} donne un aperçu des éditeurs 
+de texte compatibles avec la chaîne de développement Rust. En ce qui concerne le projet de bachelor 
+présenté ici, tout le code a été écrit avec Visual Studio Code.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Cargo et Crates.io}\label{cargo_crates}
+Cargo est le système de compilation et exécution et le gestionnaire de paquets intégré à Rust.
+Depuis le terminal, ses commandes principales permettent de créer un nouveau projet 
+(\mintinline{bash}{cargo new myproject}), de le compiler (\mintinline{bash}{cargo build}), de 
+l'exécuter (\mintinline{bash}{cargo run}) ou de générer la documentation associée 
+(\mintinline{bash}{cargo doc}). Lorsqu'un nouveau projet est créé avec Cargo, un fichier 
+\mintinline{text}{Cargo.toml} est généré (à la manière du fichier \mintinline{text}{package.json} 
+avec Node.js et npm) avec le contenu minimal suivant :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{bash}
+[package]
+name = "myproject"
+version = "0.1.0"
+authors = ["Firstname Lastname <me@mail.com>"]
+
+[dependencies]
+    \end{minted}
+    \caption{Contenu du fichier \mintinline{text}{Cargo.toml}}
+\end{code}
+\bigbreak
+La section "package" contient les informations sur le projet en lui-même. La section "dependencies" 
+liste les paquets dont dépend notre application, appelés "\textit{crates}" par la communauté Rust. 
+Des milliers de \textit{crates} sont disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33}. 
+D'autres sections peuvent être ajoutées au fichier \mintinline{text}{Cargo.toml} pour personnaliser 
+les commandes de compilation, créer des workspaces à partir de plusieurs \textit{crates} ou ajouter 
+des commandes spécifiques par exemple.
+Un sous-chapitre (1.3) et un chapitre entier (14) sont dédiés à Cargo dans le livre de Rust \cite{ref0} 
+et il dispose également d'une \href{https://doc.rust-lang.org/cargo/}{documentation complète} 
+\cite{ref35} (comme le \textit{book} dédié à Rust).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Généralités}
+
+\paragraph{Commentaires}
+Tout texte écrit après deux slashs consécutifs ("//") est considéré comme un commentaire en Rust.
+La syntaxe multiligne qui existe en C par exemple n'est pas prise en compte. En mettant trois slashs 
+consécutifs ("///"), le commentateur indique au compilateur que ce commentaire fait partie de la 
+documentation (qui peut être générée avec Cargo, voir sous-section \ref{cargo_crates}).
+
+\paragraph{Variables}
+Tout d'abord, pour déclarer une variable en Rust, il faut utiliser le mot-clé \mintinline{rust}{let}. Une variable 
+est par défaut déclarée immutable, \textit{id est} qu'elle ne peut pas être modifiée dans la suite du 
+code. Bien que Rust soit un langage fortement typé, son compilateur sait dans la plupart des cas 
+inférer le bon type de la variable, soit en analysant la valeur attribuée, soit en analysant la 
+première utilisation de la variable (arguments d'une fonction, insertion de données dans le cas 
+des collections). Il existe toutefois la possibilité de déclarer explicitement le type de la variable 
+en l'indiquant avant le "=". Pour déclarer une variable mutable, il faut lui ajouter le mot-clé 
+\mintinline{rust}{mut} avant son nom. Ensuite, les constantes sont déclarées avec le mot-clé \mintinline{rust}{const} 
+et leur type doit obligatoirement être indiqué. La différence principale entre les constantes et 
+les variables immutables est qu'une constante ne peut être le résultat d'une valeur calculée à 
+l'exécution du programme. Enfin, une variable peut être "masquée" ou "obscurcie" (\textit{shadowed}) : 
+une nouvelle déclaration avec \mintinline{rust}{let} et le même nom écrase la précédente valeur et 
+peut être de type différent. Le listing \ref{rust_variables} montre quelques cas de déclarations de variables :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Déclaration d'une variable "x", immutable et de type inféré i32
+let x = 3;
+
+// Déclaration d'une variable "y", mutable et de type inféré bool
+let mut y = true;
+
+// Déclaration d'une variable "z", mutable et de type déclaré char
+let mut z : char = 'A';
+
+// La constante PI de type flottant 64 bits
+const PI : f64 = 3.1415;
+
+// Shadowing. La première déclaration crée une variable nommée "answer"
+// de type i32 et de valeur 42, alors que la deuxième écrase la 
+// précédente variable en lui prenant son nom et est de type String.
+let answer = 42;
+let answer = answer.to_string();
+    \end{minted}
+    \caption{Exemples de déclarations de variables en Rust}
+    \label{rust_variables}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 3.1 du \textit{book} \cite{ref0}.
+
+\paragraph{Types}\label{rust_types}
+Il existe deux familles de types en Rust : 
+\begin{itemize}
+    \item Les scalaires : nombres entiers, nombres à virgule, booleans et caractères.
+    \item Les composés (deux types primitifs) : les tuples et les tableaux.
+\end{itemize}
+Les entiers peuvent être signés ou non signés et sur 8, 16, 32, 64 ou dépendant de l'architecture
+du processeur (\mintinline{rust}{i8, u8, i16, u16, i32, u32, i64, u64, isize, usize}). Les nombres 
+à virgule ont deux possibilités, soit sur 32 bits, soit sur 64 bits (\mintinline{rust}{f32} ou 
+\mintinline{rust}{f64}). Le type bool, classique, peut prendre deux valeurs, \mintinline{rust}{true} 
+ou \mintinline{rust}{false}. Enfin, dernier type primitif scalaire, \mintinline{rust}{chat} stocke 
+un caractère Unicode entre simples guillemets. Le premier type primitif composé est le tuple. C'est 
+un regroupement de plusieurs valeurs qui peuvent être de différents types. Lors des déclarations, 
+les noms de variables, les types et les valeurs d'un tuple sont contenues entre parenthèses et 
+séparées par des virgules. Enfin, le type tableau, ou \textit{array} : classique type regroupant 
+plusieurs valeurs du même type cette fois. Un \textit{array} a une taille fixe, déterminée à la 
+compilation. La déclaration des valeurs d'un tableau se fait entre crochets "[]". Pour accéder à une 
+valeur du tableau, il faut utiliser la syntaxe \mintinline{rust}{array[i]} où \mintinline{rust}{i} 
+est un indice valide du tableau (entre zéro compris et la taille du tableau non compris). Quelques 
+exemples sont donnés dans le listing \ref{rust_types_ex}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+let myint : i32 = 1234;
+let mychar : char = 'a';
+let myfloat : f64 = 2.0;
+
+// Déclaration d'un tuple
+let tuple : (char, u32, f64) = ('c', 42, 2.8);
+// Destructuration du tuple en trois variables distinctes
+let (letter, age, score) = tuple;
+
+// Déclaration d'un tableau
+let myarray = ['a', 'b', 'c', 'd', 'e', 'f'];
+let x = myarray[4]; // x vaut 'e'
+    \end{minted}
+    \caption{Quelques types primitifs de Rust}
+    \label{rust_types_ex}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 3.2 du \textit{book} \cite{ref0}.
+
+\paragraph{Fonctions}
+Comme en C, tout programme a comme point d'entrée la fonction \mintinline{rust}{main()}. Une 
+déclaration de fonction commence par le mot-clé \mintinline{rust}{fn}, est suivi du nom de la 
+fonction, de la liste des éventuels paramètres et des éventuels types de retour. Lorsqu'une 
+fonction a une valeur de retour, la dernière ligne de la fonction qui n'a pas de point-virgule 
+à sa fin est évaluée comme une expression et est retournée. Le mot-clé \mintinline{rust}{return} 
+existe néanmoins si la fonction doit retourner dans des cas bien précis (dans une condition par 
+exemple). Les variables déclarées dans la fonction ne sont pas accessibles depuis l'extérieur de la 
+fonction. Les arguments de la fonction sont passés par copie par défaut (voir la sous-section 
+\ref{rust_ownership_borrowing} pour plus de détails). Le listing suivant donne l'exemple d'une même 
+fonction, en deux versions plus ou moins courtes. Ces fonctions attendent deux entiers et retournent 
+également un entier.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn x_plus_y_plus_one(x : i32, y : i32) -> i32 {
+    let x_plus_y = x + y;
+    x_plus_y + 1
+}
+
+fn x_plus_y_plus_one_short(x : i32, y : i32) -> i32 {
+    x + y + 1
+}
+    \end{minted}
+    \caption{Exemples de fonctions en Rust}
+    \label{rust_functions}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 3.3 du \textit{book} \cite{ref0}.
+
+\paragraph{Structures de contrôle}
+Comme tout langage de programmation, Rust possède des structures de contrôle pour gérer les 
+consditions et les répétitions (boucles). Il y a le classique \mintinline{rust}{if condition 
+{ ... } else if autre_condition { ... } else { ... }} avec une différence notable par rapport à C : 
+il est possible d'affecter une variable avec un \mintinline{rust}{if}, comme dans le listing 
+\ref{rust_if}. Il n'y a pas de \mintinline{c}{switch ... case} à proprement parler en Rust, 
+nous verrons le \mintinline{rust}{match ... case} à la sous-section \ref{rust_enum_pattern_matching}.
+En ce qui concerne les boucles, elles sont au nombre de trois : \mintinline{rust}{loop} (boucle 
+infinie), \mintinline{rust}{while} (boucle avec condition initiale) et \mintinline{rust}{for} 
+boucle pour traverser les collections par leurs itérateurs principalement (voir sous-section 
+\ref{rust_collections}).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Exemple d'un simple if ... else
+let name = "fred";
+if name == "fred" {
+    println!("Hello buddy !");
+}
+else {
+    println!("Hello World !");
+}
+
+// Exemple d'affectation d'une variable avec un if. Ici, n vaudra 42
+let condition = true;
+let n = if condition { 42 }
+else { 66 };
+    \end{minted}
+    \caption{Exemples de conditions en Rust}
+    \label{rust_if}
+\end{code}
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Boucle infinie
+loop {
+    println!("Forever");
+}
+
+// Boucle avec condition
+let mut x = 0;
+while x < 10 {
+    println!("{}", x);
+    x = x + 1;
+}
+
+// Parcours d'un tableau
+let myarray = [1, 2, 3, 4, 5];
+for elem in myarray.iter() {
+    println!("value : {}", elem);
+}
+    \end{minted}
+    \caption{Exemples de boucles en Rust}
+    \label{rust_loop}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 3.5 du \textit{book} \cite{ref0}.
+
+\paragraph{Organisation des fichiers et modules}
+Un programme écrit en Rust a la possibilité d'être découpé en plusieurs fichiers (autres que 
+\mintinline{rust}{main.rs}) et modules. 
+Un module peut contenir des déclarations de fonctions, de structures et leurs implémentations (voir 
+section \ref{rust_struct_data}), etc. Le mot-clé pour déclarer un module est \mintinline{rust}{mod}. 
+Le code à l'intérieur du module est par défaut privé, pour le rendre accessible en dehors du module, 
+le préfixe \mintinline{rust}{pub} est disponible. Pour utiliser un module au sein d'un autre ou dans 
+\mintinline{rust}{main.rs}, il faut l'importer avec le mot-clé \mintinline{rust}{use}. Par défaut, 
+tout module est défini dans le fichier \mintinline{text}{src/lib.rs} d'un projet. Si de nombreux 
+modules sont déclarés, il est possible de les mentionner dans \mintinline{text}{src/lib.rs} de cette 
+manière : \mintinline{rust}{mod mymodule;} et de créer un fichier ayant le même nom que le module 
+(dans cet exemple, \mintinline{text}{src/mymodule.rs}) contenant le code en question. Une déclaration 
+de module peut en contenir d'autres également, créant ainsi une hiérarchie de modules.
+Pour plus de détails, se référer au chapitre 7 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Structures de données}\label{rust_struct_data}
+Comme en C, Rust octroie la possibilité au programmeur de définir ses propres types composés, les 
+\mintinline{rust}{struct}. La déclaration et l'instanciation d'une structure se font comme en C 
+avec quelques raccourcis disponibles. Une structure sans noms de champs est également disponible, 
+appelée "tuple struct". Pour accéder aux champs d'une structure, il suffit d'utiliser la notation 
+pointée (\mintinline{rust}{player.name}).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Structure définissant un personnage dans un jeu vidéo
+struct Player {
+    name: String,
+    class: String,
+    life: i32,
+    active: bool
+}
+// Création d'une variable Player
+let player_one = Player {
+    name: String::from("Groumf"),
+    class: String::from("Wizard"),
+    life: 100,
+    active: true
+};
+
+// Structure sans noms aux champs
+struct Coordinates(f64, f64);
+let geneva = Coordinates(46.2016, 6.146);
+
+// Structure vide ()
+struct Nil;
+    \end{minted}
+    \caption{Exemples de structures en Rust}
+    \label{rust_struct}
+\end{code}
+\bigbreak
+La particularité des structures, par rapport à C, est qu'il est possible de définir des méthodes 
+rattachées aux structures, à la manière des méthodes en Java, sans pour autant obtenir une classe 
+\textit{stricto sensu} des langages orientés objets, même si le résultat final est très semblable.
+Pour définir des méthodes à une structure, il est nécessaire de déclarer un bloc de code commençant 
+par le mot-clé \mintinline{rust}{impl} suivi du nom de la structure et d'accolades. À l'intérieur 
+de ce bloc sont définies des fonctions en relation avec la structure. Dans le listing 
+\ref{rust_struct_impl}, nous voyons la déclaration de la structure \mintinline{rust}{Player} et de 
+son implémentation, comportant trois méthodes (avec la syntaxe des fonctions) pour créer un nouveau 
+personnage, qu'il puisse en attaquer un autre et qu'il puisse saluer. La seule différence entre une 
+méthode et une fonction est qu'une méthode qui est appelée sur une variable du type de la structure 
+avec la notation pointée attend le paramètre \mintinline{rust}{self} comme premier paramètre, 
+obligatoirement. \mintinline{rust}{self} réfère à la variable elle-même, comme \mintinline{java}{this} 
+en Java. Nous pouvons voir que \mintinline{rust}{self} et les autres paramètres ont une syntaxe non 
+décrite pour l'instant (\mintinline{rust}{&} et \mintinline{rust}{&mut}), la sous-section 
+\ref{rust_ownership_borrowing} donne de plus amples explications.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+struct Player {
+    name: String, class: String, life: i32, force: i32
+}
+
+impl Player {
+    fn new(name : String, class : String) -> Player {
+        Player { name, class, life : 100, force : 10 }
+    }
+
+    fn attack(&self, other : &mut Player) {
+        other.life = other.life - self.force;
+    }
+
+    fn say_hi(&self) {
+        println!("Hi, I'm {}, powerfull {} !", self.name, self.class);
+    }
+}
+
+fn main() {
+    let player_one = Player::new(String::from("Groumf"),
+        String::from("Wizard"));
+    let mut player_two = Player::new(String::from("Trabi"),
+        String::from("Thief"));
+    player_one.attack(&mut player_two);
+    player_one.say_hi();
+}
+    \end{minted}
+    \caption{Bloc \mintinline{rust}{impl} d'une structure en Rust}
+    \label{rust_struct_impl}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 5 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Traits et généricité}\label{trait_generic}
+Les traits en Rust sont l'équivalent des interfaces en Java. C'est une manière de définir 
+un comportement abstrait que pourrait suivre un type. Le listing \ref{rust_trait} définit 
+un trait "véhicule" (\mintinline{rust}{Vehicle}) qu'implémentent les structures "vélo" 
+(\mintinline{rust}{Bicycle}) et "avion" (\mintinline{rust}{Plane}). Le trait 
+\mintinline{rust}{Vehicle} donne la signature d'une seule fonction, \mintinline{rust}{description()} 
+qui décrit la variable du type en question. Les deux structures implémentant le trait doivent également 
+implémenter toutes les fonctions du trait.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+trait Vehicle { fn description(&self); }
+
+struct Bicycle { wheels : u8, passengers : u8 }
+impl Vehicle for Bicycle {
+    fn description(&self) {
+        println!("I'm a bicycle, I have {} wheels and \
+            can carry {} passengers.", 
+            self.wheels, self.passengers);
+    }
+}
+
+struct Plane { engines : u8, passengers : u16, fuel : String }
+impl Vehicle for Plane {
+    fn description(&self) {
+        println!("I'm a plane, I have {} engines and \
+            can carry {} passengers. I fly with {}.", 
+            self.engines, self.passengers, self.fuel);
+    }
+}
+
+fn main() {
+    let bicycle = Bicycle { wheels : 2, passengers : 1 };
+    bicycle.description();
+    let plane = Plane { engines : 1, passengers : 100, 
+        fuel : String::from("kerosene") };
+    plane.description();
+}
+    \end{minted}
+    \caption{Implémentations d'un trait en Rust}
+    \label{rust_trait}
+\end{code}
+\bigbreak
+Les traits peuvent être déclarés génériques, comme les fonctions d'ailleurs. La généricité 
+n'est pas un concept réservé à Rust, de nombreux langages de programmation l'utilisent. C'est une 
+manière d'éviter de répéter un même code pour des types de données différents, mais qui auraient 
+des similitudes. Prenons l'exemple d'une fonction faisant l'addition de deux nombres. Les arguments 
+pourraient être soit des nombres entiers, soit des nombres à virgule. La méthode pour additionner 
+ces deux types est la même. Mais pour un langage fortement typé comme Rust, il est nécessaire de 
+définir précisément les types des arguments des fonctions. C'est là qu'entre en jeu la généricité : 
+la déclaration d'une fonction attend un type générique, usuellement nommé \mintinline{rust}{T}, 
+et le manipule comme un type réel. De nombreux types de la librairie standard sont génériques, 
+comme les types \mintinline{rust}{Option} et \mintinline{rust}{Result} (voir sous-section 
+\ref{rust_enum_pattern_matching}).
+Pour plus de détails, se référer au chapitre 10 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Énumérations et \textit{pattern matching}}\label{rust_enum_pattern_matching}
+Les énumérations sont une autre manière de concevoir ses propres types. Comme en C, une énumération
+liste toutes les variantes possibles d'une valeur d'un même type. L'exemple classique d'une énumération 
+sont les jours de la semaine. Sept cas différents, sans évolutions possibles. Les énumérations en 
+Rust prennent tout leur sens en combinaison avec les \textit{pattern matching} : une structure 
+de contrôle ressemblant à un \mintinline{c}{switch ... case} en C mais avec un côté davantage 
+emprunté à la programmation fonctionnelle (on les retrouve d'ailleurs en Scala). Tous les cas 
+possibles d'une énumération doivent être traité avec un \mintinline{rust}{match} (d'où la clause 
+par défaut \mintinline{rust}{_}). Le bloc de code à droite de chaque \mintinline{rust}{=>} peut être 
+retourné, comme pour une fonction (voir listing \ref{rust_enum}).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum Direction {
+    North, South, East, West
+}
+
+fn print_direction(direction : Direction) {
+    match direction {
+        Direction::North => println!("Go North"),
+        Direction::South => println!("Go South"),
+        _ => println!("Go East or West") // clause par défaut
+    }
+}
+    \end{minted}
+    \caption{Définition d'une \mintinline{rust}{enum} et son utilisation avec un \textit{pattern matching} en Rust}
+    \label{rust_enum}
+\end{code}
+\bigbreak
+Rust possède dans la librairie standard une énumération très puissante : \mintinline{rust}{Option} 
+(recopiée dans le listing \ref{rust_option}). Elle remplace le tristement fameux \mintinline{c}{NULL} 
+en C ou d'autres langages. Elle supprime simplement d'innombrables bugs souvent rencontrés à cause 
+de \mintinline{c}{NULL}. Si une variable existe, elle se retrouve dans le cas \mintinline{rust}{Some} 
+de l'option, si elle n'existe pas, dans le cas \mintinline{rust}{None}. Cette énumération est de 
+plus générique (voir sous-section \ref{trait_generic}), elle accepte tout type de données.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+fn process(value : Option<u32>) {
+    match value {
+        Some(data) => println!("{}", data),
+        None => println!("Error, no data")
+    }
+}
+    \end{minted}
+    \caption{L'énumération \mintinline{rust}{Option} et son utilisation avec un \textit{pattern matching} en Rust}
+    \label{rust_option}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 6 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Collections}\label{rust_collections}
+Cette sous-section décrit les deux collections les plus utilisées en Rust, à savoir les vecteurs 
+(\mintinline{rust}{Vec}) et les tables de 
+hachage associatives (\mintinline{rust}{HashMap}). Un vecteur est un tableau qui n'a pas de taille 
+fixe, des éléments peuvent lui être ajoutés ou enlevés. C'est l'équivalent des \mintinline{java}{ArrayList} 
+en Java. Un vecteur est générique (voir sous-section \ref{trait_generic}), il peut contenir tout type 
+de données, mais un seul type à la fois. 
+De nombreuses méthodes existent pour manipuler un vecteur, que ce soit pour lui ajouter ou enlever 
+des éléments ou pour le convertir vers d'autre formes. Une macro, \mintinline{rust}{vec!} est 
+disponible pour rapidement créer un vecteur (éléments séparés par des virgules entre "[]").
+Le listing \ref{rust_collections_vec} donne quelques exemples :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Déclaration d'un vecteur avec new, puis avec la macro
+let v: Vec<char> = Vec::new();
+let mut v = vec!['a', 'b', 'c'];
+// Ajout d'un élément au vecteur
+v.push('d');
+// Accès au deuxième élément du vecteur, de deux manière différentes
+let second: &char = &v[1];
+let second: Option<&char> = v.get(1);
+// Parcours (immutable) du vecteur avec la syntaxe for .. in ..
+for i in &v {
+    println!("{}", i);
+}
+    \end{minted}
+    \caption{Exemples de déclarations et utilisations d'un vecteur}
+    \label{rust_collections_vec}
+\end{code}
+\bigbreak
+Une \mintinline{rust}{HashMap} est une table de hachage associative, tel qu'il en existe en Java.
+Elle est, comme le vecteur, générique (voir sous-section \ref{trait_generic}), elle accepte tout 
+type de données. C'est une structure de données efficace pour accéder rapidement à une information.
+Le listing \ref{rust_collections_hashmap} donne quelques exemples :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Déclaration d'une hashmap avec new
+let h: HashMap<char, u32> = HashMap::new();
+// Ajout d'une paire clé-valeur à la hashmap
+h.insert('a', 97);
+// Accès à la valeur associée à la clé 'a', retourne une Option
+let a: Option<&u32> = h.get('a');
+// Parcours (immutable) de la hashmap avec la syntaxe for .. in ..
+for (key, value) in &h {
+    println!("{}: {}", key, value);
+}
+    \end{minted}
+    \caption{Exemples de déclaration et utilisation d'une \mintinline{rust}{HashMap}}
+    \label{rust_collections_hashmap}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 8 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\textit{Ownership}, \textit{Borrowing} et références}\label{rust_ownership_borrowing}
+La caractéristique unique de Rust est sans aucun doute l'\textit{ownership}, ou "possession". 
+L'\textit{ownership} est défini par ces trois règles :
+\begin{itemize}
+    \item Chaque variable est dite le "possesseur" (\textit{owner}) d'une valeur.
+    \item Il ne peut y avoir q'un seul \textit{owner} pour une valeur.
+    \item Lorsque l'\textit{owner} est détruit ou change de portée, la valeur est détruite.
+\end{itemize}
+Avant de continuer sur cette notion, un bref rappel sur l'utilisation de la mémoire est nécessaire. 
+L'\acrshort{os} met à disposition d'un programme deux zones mémoire différentes pour stocker ses 
+variables : la pile (\textit{stack}) et le tas (\textit{heap}). Le mécanisme d'accès à la pile est 
+simple et rapide et stocke des variables dont la taille est fixe et connue à la compilation. Les 
+variables de type primitifs (voir paragraphe \ref{rust_types}) sont stockées dans la pile. Lorsqu'une 
+variable dont la taille n'est pas connue à l'avance (type évolué, par exemple les collections) est 
+déclarée, elle placée dans le tas. Un programme voulant stocker une variable sur le tas est obligé 
+de demander à l'\acrshort{os} de chercher un espace disponible assez grand pour stocker la variable 
+et qu'il lui donne un pointeur vers cette zone, pour la retrouver par la suite.
+\bigbreak
+Lorsqu'une valeur est assignée à une variable, elle est détenue par cette variable jusqu'à sa 
+destruction. Le listing \ref{rust_ownership_scope} illustre un exemple :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+{
+    // my_vec est le "propriétaire" de ce vecteur
+    let my_vec = vec![3, 2, 1]; 
+    ... // my_vec est utilisé
+} // la portée de my_vec se termine ici, my_vec est alors supprimé
+    \end{minted}
+    \caption{Portée d'une variable en Rust}
+    \label{rust_ownership_scope}
+\end{code}
+\bigbreak
+La variable \mintinline{rust}{my_vec} se trouve sur la pile, mais les données vers lesquelles elle 
+pointe se trouvent dans le tas. Lorsque \mintinline{rust}{my_vec} sera hors de portée, les données 
+dans la pile et dans le tas seront libérées. Si \mintinline{rust}{my_vec} est assigné à une autre 
+variable, l'\textit{ownership} des données est transféré à cette nouvelle variable, 
+\mintinline{rust}{my_vec} ne sera plus accessible et utilisable après l'affectation, comme illustré
+au listing \ref{rust_ownership_transfer}. Ce cas de figure ne se présente pas avec les types primitifs 
+dont la taille en mémoire est connue à la compilation et où une copie des données est effectuée. 
+Pour qu'un type évolué puisse être copié de cette façon, il doit implémenter le trait \mintinline{rust}{Copy}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+{
+    // Ici pas de problèmes, a et b sont de type primitif i32, de
+    // taille fixe et connue, la valeur de a est copiée dans b.
+    let a = 10;
+    let b = a;
+
+    let mut my_vec = vec![3, 2, 1]; 
+    let other_vec = my_vec;
+    my_vec.push(42); // Erreur, la valeur a été déplacée (move)
+} // la portée de my_vec se termine ici, my_vec est alors supprimé
+    \end{minted}
+    \caption{Transfert de l'\textit{ownership} en Rust}
+    \label{rust_ownership_transfer}
+\end{code}
+\bigbreak
+À la ligne 8 du listing \ref{rust_ownership_transfer}, la variable \mintinline{rust}{my_vec} est 
+invalidée, mais les données vers lesquelles elle pointe. Il n'y a que le pointeur vers ces données 
+qui transféré vers \mintinline{rust}{other_vec}. C'est ici que la deuxième règle de l'\textit{ownership} 
+s'applique, il ne peut y avoir plus d'un \textit{owner} d'une même valeur au même moment. 
+Pour réaliser une vraie copie des données d'un vecteur à un autre, ou de manière générale pour un 
+type évolué, il faut appeler la méthode \mintinline{rust}{clone()}, qui copie entièrement les 
+données en mémoire. Cette situation de transfert d'\textit{ownership} survient également lors des 
+appels à des fonctions. Si un paramètre est donné à une fonction, la fonction en prend possession, 
+comme illustré au listing \ref{rust_ownership_transfer_function}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn main() {
+    let mut my_vec = vec![3, 2, 1]; 
+    print_vec(my_vec); // La fonction prend possession du vecteur
+    my_vec.push(42); // Erreur, la valeur a été déplacée (move)
+}
+
+fn print_vec(v : Vec<i32>) {
+    println!("My super vector : {:?}", v);
+}
+    \end{minted}
+    \caption{Transfert de l'\textit{ownership} vers une fonction en Rust}
+    \label{rust_ownership_transfer_function}
+\end{code}
+\bigbreak
+Pour palier à ce problème de transfert de possession lors d'appels aux fonctions, deux solutions existent :
+\begin{enumerate}
+    \item La fonction doit retourner la valeur possédée. Ce n'est pas pratique si le but de la fonction 
+        est de retourner le résultat d'une opération. Elle peut retourner un tuple formé de la ou 
+        les valeurs accaparées et du résultat de son opération. Cette manière de faire est lourde 
+        et non conseillée.
+    \item La fonction peut "emprunter" la variable de différentes manières (voir ci-dessous).
+\end{enumerate}
+Heureusement, les fonctions peuvent se "prêter" les variables par \textit{Borrowing} ("emprunt").
+Deux types de références aux variables sont disponibles :
+\begin{enumerate}
+    \item Les références immutables (syntaxe \mintinline{rust}{&ma_variable}).
+    \item Les références mutables (syntaxe \mintinline{rust}{&mut ma_variable}).
+\end{enumerate}
+Le listing \ref{rust_borrowing} montre un exemple d'emprunt immutable et mutable.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn main() {
+    let mut my_vec = vec![3, 2, 1]; 
+    // La fonction emprunte de manière immutable le vecteur
+    ref_immutable(&my_vec);
+    // La fonction emprunte de manière mutable le vecteur
+    ref_mutable(&mut my_vec);
+}
+
+fn ref_immutable(v : &Vec<i32>) {
+    println!("My super vector : {:?}", v);
+}
+
+fn ref_mutable(v : &mut Vec<i32>) {
+    v.push(42);
+}
+    \end{minted}
+    \caption{Emprunts de variables entre fonctions en Rust}
+    \label{rust_borrowing}
+\end{code}
+\bigbreak
+Ces références sont proches conceptuellement des pointeurs en C (Rust accepte d'ailleurs le 
+déréférencement des variables avec le symbole \mintinline{rust}{*}) mais obéissent à deux 
+règles fondamentales :
+\begin{enumerate}
+    \item À tout moment, il peut y avoir soit une seule référence mutable, soit plusieurs 
+        références immutables, mais pas les deux en même temps.
+    \item Les références doivent toujours être valides.
+\end{enumerate}
+Grâce aux références, Rust évite les problèmes de concurrence sur les valeurs pointées ainsi que 
+les pointeurs invalides. Pour plus de détails, se référer au chapitre 4 du \textit{book} \cite{ref0}.
+Il existe également d'autres types de pointeurs, dits "intelligents". Le livre sur Rust dédie un 
+chapitre entier à eux (chapitre 15 du \textit{book} \cite{ref0}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Gestion des erreurs} 
+Nonobstant son compilateur très restrictif, détectant à la compilation de nombreuses erreurs, Rust 
+a une gestion avancée des erreurs survenant à l'exécution. Il distingue deux types : les erreurs 
+récupérables et les erreurs irrécupérables (non pas comme dans les langages comme Java ou le concept 
+d'exceptions mélange ces deux types d'erreurs). Pour ces dernières, Rust offre une macro, 
+\mintinline{rust}{panic!}, stopant abruptement le programme et affichant un message d'erreur sur 
+la sortie standard en indiquant à quelle ligne le programme a planté. Pour les erreurs récupérables, 
+une manière plus élégante existe : à la manière de l'énumération \mintinline{rust}{Option} vue à 
+la section \ref{rust_enum_pattern_matching}, l'énumération \mintinline{rust}{Result} a été conçue 
+pour gérer les erreurs au \textit{runtime}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+fn process(value : Result<u32, std::io::Error>) {
+    match value {
+        Ok(data) => println!("u32 value : {}", data),
+        Err(error) => println!("Error : {}", error)
+    }
+}
+    \end{minted}
+    \caption{L'énumération \mintinline{rust}{Result} et son utilisation avec un \textit{pattern matching} en Rust}
+    \label{rust_result}
+\end{code}
+\bigbreak
+De nombreuses fonctions de la librairie standard et de la communauté retournent des 
+\mintinline{rust}{Result}, notamment lors de l'ouverture d'un fichier. Comme ce genre d'opérations 
+sont courantes, Rust met à disposition deux fonctions équivalentes à réaliser un \mintinline{rust}{match} 
+sur un \mintinline{rust}{Result}, \mintinline{rust}{unwrap()} et \mintinline{rust}{expect()}. La 
+seule différence entre les deux est qu'avec la deuxième fonctions, un message personnalisé est 
+attendu en argument. Le listing \ref{rust_result_file} montre les différentes façons de traiter un 
+\mintinline{rust}{Result} lors de l'ouverture d'un fichier :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn main() {
+    // Version 1
+    let f = File::open("test.txt");
+    let f = match f {
+        Ok(file) => file,
+        Err(error) => {
+            panic!("Error on opening file : {:?}", error)
+        },
+    };
+    // Version 2
+    let f = File::open("test.txt").unwrap();
+    // Version 3
+    let f = File::open("test.txt").expect("Error on opening test.txt");
+}
+    \end{minted}
+    \caption{Ouverture d'un fichier et son traitement en Rust}
+    \label{rust_result_file}
+\end{code}
+\bigbreak
+Pour plus de détails, se référer au chapitre 9 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Tests}
+Lorsqu'un nouveau projet \textit{librairie} est créé avec \mintinline{bash}{cargo new mylib --lib}, 
+un module de tests unitaires est \textit{de facto} ajouté au fichier \mintinline{rust}{lib.rs}, 
+comme dans le listing \ref{rust_test_module} :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}
+    \end{minted}
+    \caption{Module de test ajouté automatiquement}
+    \label{rust_test_module}
+\end{code}
+\bigbreak
+Chaque fonction précédée par l'attribut \mintinline{rust}{#[test]} est considérée par le compilateur 
+comme un test. Pour exécuter les tests, Cargo met à disposition une commande, \mintinline{bash}{cargo test}. 
+Lorsque cette commande est exécutée, tous les tests sont effectués en parallèle, sans garantir un 
+ordre d'exécution prédéfini. Un résumé des tests effectués, réussis et échoués est affichés sur la 
+sortie standard à la fin de l'exécution de la commande. Pour réaliser nos tests, Rust fournit 
+quelques macros :
+\begin{itemize}
+    \item \mintinline{rust}{assert!} : attend un argument de type \mintinline{rust}{bool}.
+    \item \mintinline{rust}{assert_eq!} : attend deux arguments de même type, pour vérifier qu'ils sont égaux.
+    \item \mintinline{rust}{assert_ne!} : inverse du précédent, vérifie l'inégalité des deux arguments donnés.
+\end{itemize}
+Il existe également un autre attribut, \mintinline{rust}{#[should_panic]}, pour réaliser des 
+fonctions qui testent si un morceau de code doit "paniquer", donc échouer. Finalement, la 
+\textit{killer feature} des tests en Rust, c'est que la commande \mintinline{bash}{cargo test} 
+vérifie également le code donné en exemple dans la documentation de notre code, pour garder une 
+documentation à jour avec notre code.
+Pour plus de détails, se référer au chapitre 11 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Concurrence et threads}
+Rust fournit une implémentation des threads dans sa librairie standard. Un thread en Rust 
+correspond à un thread système. Le listing \ref{rust_thread_create} donne un exemple de création 
+d'un thread. La méthode \mintinline{rust}{spawn()} retourne un \textit{handler} pour terminer le 
+thread proprement avec la méthode \mintinline{rust}{join()}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use std::thread;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        println!("Hello from thread !");
+    });
+    
+    println!("Hello from main !");
+    handle.join().unwrap();
+}
+    \end{minted}
+    \caption{Création d'un thread en Rust}
+    \label{rust_thread_create}
+\end{code}
+\bigbreak
+Un thread peut prendre possession d'une variable si le mot-clé \mintinline{rust}{move} est ajouté à 
+l'appel de \mintinline{rust}{spawn()}. La variable n'est plus disponible dans la fonction ayant 
+appelé le thread. Le listing \ref{rust_thread_create_variable} montre un exemple de cette situation.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use std::thread;
+
+fn main() {
+    let my_vec = vec!['a', 'b', 'c'];
+    let handle = thread::spawn(move || {
+        println!("{:?}", my_vec);
+    });
+    handle.join().unwrap();
+}
+    \end{minted}
+    \caption{Création d'un thread en Rust et passage d'une variable}
+    \label{rust_thread_create_variable}
+\end{code}
+\bigbreak
+Pour communiquer entre threads, un mécanisme de messages est disponible. Les threads communiquent à 
+travers un canal selon la topologie \textit{Multiple Producer, Single Consumer} ("multiple producteur, 
+unique consommateur", voir figure \ref{rust_channel}) : il est possible que plusieurs threads 
+envoient (produisent) des messages dans le canal mais un seul thread peut les recevoir (consommer). 
+Le listing \ref{rust_thread_message} donne un exemple.
+\begin{figure}
+    \begin{center}
+        \fbox{\includegraphics[width=0.8\textwidth]{images/mpsc.png}}
+    \end{center}
+    \caption{Canal de communication entre threads - \cite{ref37}}
+    \label{rust_channel}
+\end{figure}
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use std::thread;
+use std::sync::mpsc;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    let new_tx = mpsc::Sender::clone(&tx);
+    thread::spawn(move || {
+        let val = String::from("Hello from first thread");
+        new_tx.send(val).unwrap();
+    });
+
+    thread::spawn(move || {
+        let val = String::from("Hello from second thread");
+        tx.send(val).unwrap();
+    });
+
+    for received in rx {
+        println!("Message from threads: {}", received);
+    }
+}
+    \end{minted}
+    \caption{\textit{Message passing} avec deux producteurs et un consommateur en Rust}
+    \label{rust_thread_message}
+\end{code}
+\bigbreak
+Des primitives plus bas niveau (Mutex) ainsi que des traits sont disponibles pour manipuler 
+plus finement les threads en Rust. Pour plus de détails, se référer au chapitre 16 du \textit{book} \cite{ref0}.
+Un article illustrant l'utilisation des threads en Rust par la réalisation d'un programme simple 
+de calcul de hash donne une bonne base pour construire son propre programme \cite{ref37}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{\textit{Unsafe} Rust}
+Le compilateur Rust est non seulement très verbeux lors d'erreurs mais également très restrictif. 
+Cette contrainte est la garantie pour le programmeur d'obtenir un code sûr et fiable sur la gestion 
+de la mémoire. Cependant, il arrive que du code doive transgresser les règles et bonnes pratiques
+de Rust sur la mémoire. C'est notamment le cas pour du code bas niveau (manipulation du kernel par 
+exemple). Pour ces cas de figure, Rust peut fonctionner en mode \textit{unsafe} ("non sûr"). Tout 
+bloc de code qui nécessite d'être non sûr doit être précédé du mot-clé \mintinline{rust}{unsafe}. 
+Il est alors de la responsabilité du programmeur de vérifier que le code n'est pas buggé ou dangereux.
+Pour plus de détails, se référer au chapitre 19.1 du \textit{book} \cite{ref0}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Extended attributes}\label{extended_attributes}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Fonctionnement des \acrshort{xattr}}
+Les extended attributes (\acrshort{xattr}), ou "attributs étendus" en français, sont un moyen d'attacher des 
+méta-données aux fichiers et dossiers sous forme de paires \mintinline{text}{espace:nom:valeur}. 
+L'espace de nom, ou \textit{namespace} en anglais, définit les différentes classes d'attributs. 
+Dans le cadre de ce projet, l'accent est mis sur le système de fichiers ext4 \cite{ref36}
+sous Linux, il existe actuellement quatre espaces de noms 
+ou classes : \mintinline{text}{user}, \mintinline{text}{trusted}, \mintinline{text}{security} et 
+\mintinline{text}{system}. L'espace qui nous intéresse est \mintinline{text}{user}. C'est là que 
+l'utilisateur ou l'application, pour autant qu'il ait les droits usuels UNIX sur les fichiers, peut 
+manipuler les extended attributes. Les trois autres espaces de noms sont utilisés entre autres pour 
+les listes d'accès ACL (\mintinline{text}{system}), les modules de sécurité du kernel 
+(\mintinline{text}{security}) ou par \mintinline{text}{root} (\mintinline{text}{trusted})
+\cite{ref11} \cite{ref12}.
+Le nom est une chaine de caractères et la valeur peut être une chaine de caractères ou des données binaires. 
+Les extended attributes sont stockés dans les fichiers. De nombreux \acrshort{fs} gèrent leur 
+usage : ext2-3-4, XFS, Btrfs, UFS1-2, NTFS, HFS+, ZFS. Ces \acrshort{fs} sont utilisés par 
+les quatre \acrshort{os} les plus répandus : Windows, macOS, Linux et FreeBSD. Windows utilise 
+les extended attributes notamment dans sa gestion des permissions Unix dans le shell Linux intégré 
+à Windows 10 \cite{ref21}. macOS, comme vu à la section \ref{existant_macOS}, les utilise entre 
+autres dans son système de gestion des tags. La commande \mintinline{text}{xattr} permet de les 
+manipuler. Sous Linux, il en existe trois : \mintinline{text}{attr}, \mintinline{text}{getfattr} et 
+\mintinline{text}{setfattr}. Sous Linux avec ext2-3-4, chaque attribut dispose d'un bloc de données 
+(1024, 2048 ou 4096 bytes) \cite{ref12}.
+Apple et freedesktop.org préconisent la notation DNS inversée pour 
+nommer les attributs \cite{ref8}, \cite{ref24} car n'importe quel processus peut modifier les 
+attributs dans l'espace utilisateur. En préfixant du nom du programme le nom de l'attribut, par 
+exemple \mintinline{text}{user.myprogram.myattribute}, on diminue le risque qu'une autre 
+application utilise le même nom d'attribut. Malheureusement, la plupart des outils \acrshort{cli} Linux 
+pour manipuler les fichiers comme \mintinline{text}{cp}, \mintinline{text}{tar}, etc. ne prennent 
+pas en compte les attributs avec leur syntaxe par défaut \cite{ref4}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Comportement lors des opérations d'accès courantes}
+Pour vérifier la portabilité des \acrshort{xattr}, quelques tests ont été réalisés entre un 
+SSD faisant office de disque système à Linux Mint avec 2 clés USB (de 8 et 64 Go) et un emplacement 
+réseau monté en NFS. Le listing suivant montre la sortie de la commande \mintinline{bash}{df}, qui 
+renvoie l'utilisation des différents emplacements de stockage, dans l'ordre : le disque système, en 
+ext4, la clé de 8 Go formatée une fois en FAT32, puis une autre fois en NTFS, la clé de 64 Go formatée 
+en ext4 et finalement une machine virtuelle sous Debian 9 montée en NFS.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{text}
+Sys. de fichiers        Type   Taille Utilisé Dispo Uti% Monté sur
+/dev/sda2               ext4     451G    334G   96G  78% /
+/dev/sdg1               vfat     7.7G    4.0K  7.7G   1% /media/pc/cle1
+/dev/sdg1               fuseblk  7.7G     41M  7.7G   1% /media/pc/cle1
+/dev/sdg1               ext4      59G     33G   23G  59% /media/pc/cle2
+192.168.1.21:/home/user nfs4     916G    198G  673G  23% /mnt/debian
+    \end{minted}
+    \caption{Output de \mintinline{bash}{df -Th} : le disque système, les clés USB et le NFS}
+\end{code}
+\bigbreak
+La démarche est la suivante : un \acrshort{xattr} dans l'espace \mintinline{text}{user} avec 
+comme nom \mintinline{text}{author} et comme valeur \mintinline{text}{steven} est ajouté au fichier 
+\mintinline{text}{file.txt} avec \mintinline{bash}{attr}. Ce fichier est copié avec 
+\mintinline{bash}{cp} en prenant garde à préserver l'attribut (option 
+\mintinline{bash}{--preserve=xattr}). Une fois copié, on tente de lire le même attribut, toujours 
+avec \mintinline{bash}{attr}. Les résultats sont les suivants :
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=45,lastline=49]{text}{text/test_attr.txt}
+    \caption{Copie sur clé USB 8 Go, FAT32}
+\end{code}
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=54,lastline=61]{text}{text/test_attr.txt}
+    \caption{Copie sur clé USB 8 Go, NTFS}
+\end{code}
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=66,lastline=73]{text}{text/test_attr.txt}
+    \caption{Copie sur clé USB 64 Go, ext4}
+\end{code}
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=78,lastline=79]{text}{text/test_attr.txt}
+    \caption{Copie sur l'emplacement réseau distant, NFS}
+\end{code}
+\bigbreak
+On constate que l'opération est infructueuse sur la clé en FAT32 et sur l'emplacement réseau monté 
+en NFS alors qu'elle réussit sur les clés USB en NTFS et ext4. 
+\\
+Deux autres petites expériences ont 
+été menées avec la commande \mintinline{bash}{mv} et la copie/déplacement de fichiers avec 
+l'explorateur de fichiers Nemo de Linux Mint. Ces deux opérations conservent par défaut les \acrshort{xattr}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\mintinline{c}{inotify}}\label{inotify_techno}
+Sous Linux, un outil (inclu au noyau) dédié à la surveillance du \acrshort{fs} existe, \mintinline{c}{inotify} 
+\cite{ref29}. Comme son nom l'indique, \mintinline{c}{inotify} donne la possibilité à une application d'être 
+notifiée sur des événements au niveau du système de fichiers. Une \acrshort{api} en C existe et 
+offre les \acrshort{syscall} suivants :
+\begin{enumerate}
+    \item \mintinline{c}{int inotify_init(void)} : initialise une instance \mintinline{c}{inotify} et retourne un 
+        descripteur de fichier.
+    \item \mintinline{c}{int inotify_add_watch(int fd, const char *pathname, uint32_t mask)} : 
+        cette fonction attend le descripteur de fichier renvoyé par \mintinline{c}{inotify_init}, 
+        un chemin de fichier ou répertoire à surveiller et un masque binaire constitué des 
+        événements à surveiller (voir plus loin). Il retourne un nouveau descripteur de fichier 
+        qui pourra être lu avec le \acrshort{syscall} \mintinline{c}{read()}.
+    \item \mintinline{c}{int inotify_rm_watch(int fd, int wd)} : appel inverse du précédent, 
+        supprime la surveillance du descripteur de fichier \mintinline{c}{wd} de l'instance \mintinline{c}{inotify} 
+        retournée par \mintinline{c}{fd}.
+\end{enumerate}
+\mintinline{c}{inotify} s'utilise comme suit : il faut initialiser l'instance (1), ajouter les fichiers et répertoires 
+pour la surveillance avec le masque des événements voulus (2) et, généralement, dans une boucle, 
+appeler le \acrshort{syscall} \mintinline{c}{read()} avec comme argument le descripteur de fichier 
+renvoyé par \mintinline{c}{inotify_init()}. Chaque appel abouti à \mintinline{c}{read()} retourne 
+la structure suivante :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{c}
+struct inotify_event {
+    int      wd;       /* Descripteur de surveillance */
+    uint32_t mask;     /* Masque d'événements */
+    uint32_t cookie;   /* Cookie unique d'association des
+                          événements (pour rename(2)) */
+    uint32_t len;      /* Taille du champ name */
+    char     name[];   /* Nom optionnel terminé par un nul */
+};
+    \end{minted}
+    \caption{Structure \mintinline{c}{inotify_event} - \cite{ref29}}
+\end{code}
+\bigbreak
+Le champ \mintinline{c}{mask} peut prendre les valeurs suivantes (multiples valeurs autorisées, 
+séparées par des "ou" logiques -> "|") :
+\begin{itemize}
+    \item IN\_ACCESS : accès au fichier.
+    \item IN\_ATTRIB : changement sur les attributs du fichier.
+    \item IN\_CLOSE\_WRITE : fichier ouvert en écriture fermé.
+    \item IN\_CLOSE\_NOWRITE : fichier ouvert en écriture fermé.
+    \item IN\_CREATE : création de fichier/répertoire.
+    \item IN\_DELETE : suppression d'un fichier/répertoire.
+    \item IN\_DELETE\_SELF : suppression du répertoire surveillé lui-même.
+    \item IN\_MODIFY : modification d'un fichier/répertoire.
+    \item IN\_MOVE\_SELF : suppression d'un fichier/répertoire.
+    \item IN\_MOVE\_FROM : déplacement/renommage du répertoire (ancien nom).
+    \item IN\_MOVE\_TO : déplacement/renommage du répertoire (nouveau nom).
+    \item IN\_OPEN : ouverture d'un fichier.
+    \item IN\_ALL\_EVENTS : macro combinant tous les événements précédents.
+\end{itemize}
+Le champ \mintinline{c}{cookie} de la structure \mintinline{c}{inotify_event} prend tout son sens 
+lors des événements IN\_MOVE : un numéro unique est généré pour faire le lien entre ces deux 
+sous-événements, qui ne sont en réalité qu'un seul. \mintinline{c}{inotify} offre donc une très bonne base pour 
+la surveillance du \acrshort{fs}. Il possède cependant quelques limitations :
+\begin{itemize}
+    \item Pas de surveillance récursive d'un répertoire : si une arborescence complète doit être 
+        surveillée, il faut pour chaque sous-répertoire ajouter une surveillance dédiée.
+    \item Les chemins de fichiers peuvent changer entre l'émission d'un événement et son traitement.
+    \item \mintinline{c}{inotify} ne permet que la surveillance de répertoires en espace utilisateur par défaut.
+    \item Il n'y pas de moyen de discriminer quel processus ou utilisateur a généré un événement.
+\end{itemize}
+Il existe plusieurs outils système qui utilisent \mintinline{c}{inotify} \cite{ref30} :
+\begin{itemize}
+    \item \mintinline{bash}{incron} : équivalent de \mintinline{bash}{cron}, mais l'exécution 
+        des tâches se fait non pas selon un horaire donné, mais selon un événement donné sur un fichier.
+    \item \mintinline{bash}{lsyncd} : outil de synchronisation, basé sur \mintinline{bash}{rsync}. 
+        La synchronisation est effectuée à chaque changement dans le répertoire surveillé vers une 
+        liste d'emplacements distants configurés à l'avance.
+    \item \mintinline{bash}{iwatch} : déclenchement d'une commande selon un événement \mintinline{bash}{inotify}.
+    \item \mintinline{bash}{inotify-tools} : deux commandes permettant d'utiliser \mintinline{bash}{inotify} 
+        directement dans le terminal :
+        \begin{itemize}
+            \item \mintinline{bash}{inotifywait} : exécute une attente sur un événement, avant de 
+                continuer le fil d'exécution.
+            \item \mintinline{bash}{inotifywatch} : retourne une liste d'événements des répertoires surveillés.
+        \end{itemize}
+\end{itemize}
+Pour plus d'informations, la page de \mintinline{text}{man} sur \mintinline{c}{inotify} existe \cite{ref29} et 
+un très bon article en deux parties sur les ajouts de \mintinline{c}{inotify} par rapport à \mintinline{c}{dnotify} 
+(son prédécesseur) \cite{ref31} et sur ses limitations par Michael Kerrisk \cite{ref32}.
+\\
+Pour conclure, il existe également une \acrshort{api} plus récente pour recevoir les notifications du 
+\acrshort{fs}, \mintinline{text}{fanotify} \cite{ref38}. Elle gomme quelques défauts d'\mintinline{c}{inotify}
+(notamment l'accès aux périphériques montés, tels que les clé USB), mais comporte un défaut de taille 
+pour ce projet : il n'y pas le support les événements de création, suppression et déplacement de fichiers 
+et répertoires. \mintinline{c}{fanotify} ne peut donc pas être utilisé pour ce projet.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Sockets}}\label{sockets_doc}
+Les \textit{sockets} (littéralement "prise" en français) sont un moyen de communication entre 
+différents processus, qu'ils soient sur la même machine ou en réseau. Il existe plusieurs types 
+de \textit{sockets}, les deux plus connues sont les sockets "locales" (type \mintinline{c}{AF_UNIX} ou 
+\mintinline{c}{AF_LOCAL}), uniquement possibles sur la même machine car reliées par un fichier spécial 
+de sur le \acrshort{fs} de la machine et les sockets IP (type \mintinline{c}{AF_INET} ou 
+\mintinline{c}{AF_INET6}) qui sont reliées par des paires d'adresses IP et ports.
+Lors d'une communication socket entre deux processus, un des processus endosse le rôle de serveur 
+l'autre de client. Le serveur doit, dans l'ordre, exécuter les \acrshort{syscall} suivants : 
+\begin{enumerate}
+    \item Créer la socket avec \mintinline{c}{socket()}.
+    \item Associer la socket à une adresse d'écoute avec \mintinline{c}{bind()}.
+    \item Écouter l'arrivée d'une connexion avec \mintinline{c}{listen()}.
+    \item Accepter une connexion entrante avec \mintinline{c}{accept()}.
+    \item Recevoir les messages avec \mintinline{c}{read()}.
+    \item Émettre les messages avec \mintinline{c}{write()}.
+    \item Fermer la connexion avec \mintinline{c}{close()}.
+\end{enumerate}
+Le client, de son côté, doit exécuter les \acrshort{syscall} suivants :
+\begin{enumerate}
+    \item Créer la socket avec \mintinline{c}{socket()}.
+    \item Se connecter à un serveur en écoute avec \mintinline{c}{connect()}.
+    \item Recevoir les messages avec \mintinline{c}{read()}.
+    \item Émettre les messages avec \mintinline{c}{write()}.
+    \item Fermer la connexion avec \mintinline{c}{close()}.
+\end{enumerate}
+La figure \ref{sockets_procedure} résume la procédure d'initialisation et d'utilisation des sockets.
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{images/sockets.png}
+    \end{center}
+    \caption{Procédure d'initialisation et d'utilisation des sockets}
+    \label{sockets_procedure}
+\end{figure}
+Lors de l'établissement de la connexion, un canal est établi entre les deux processus, tout ce que 
+le serveur écrit est reçu par le client et inversement. Pour plus d'informations, la page de man 
+des sockets est disponible \cite{ref39}.

@@ -1,0 +1,246 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Tag Manager}\label{tag_manager}
+% TODO: schéma résumant l'utilisation : clap -> soit sockets, soit modif fichiers avec lib
+% Schéma vertical avec flèches
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Description du programme et du code}
+La première réalisation de ce projet est un outil en ligne de commande, écrit en Rust, permettant 
+de facilement lister, ajouter et supprimer des tags à des fichiers et dossiers (avec une option 
+récursive pour les dossiers) et d'exécuter des requêtes vers le serveur (Tag Engine, sous-section 
+\ref{tag_engine_realisation}) pour lister 
+les tags existants, renommer un tag et demander la liste des fichiers correspondant à des tags 
+donnés. Cet outil dépend de deux \textit{crates} disponibles sur \href{https://crates.io}{crates.io} 
+: clap \cite{ref22} et xattr \cite{ref23}.
+\subparagraph{clap}
+(Command Line Argument Parser for Rust) est une 
+librairie pour parser les arguments d'un programme en ligne de commande. Elle s'occupe d'analyser 
+et de valider les arguments fournis par l'utilisateur. Elle dispose de plusieurs syntaxes pour 
+définir les arguments des commandes de notre programme. Sur le dépôt github de clap, dans le 
+dossier \textit{examples}, plusieurs exemples d'utilisation sont fournis. Pour illustrer son 
+utilisation, le listing \ref{tag_manager_clap} reprend l'exemple \mintinline{text}{01a_quick_example.rs} 
+avec la plupart des commentaires tronqués et des adaptations de mise en page. Des lignes 2 à 13, 
+les arguments attendus et les informations sur l'application sont définis avec entre autres la 
+version du programme, le nom de l'auteur, etc. Dans cet exemple, les arguments sont définis à 
+partir d'une chaîne de caractères respectant un format bien spécifique. clap génère automatiquement 
+une aide au programme à partir des arguments définis s'il est lancé sans aucun des arguments attendus.
+À partir de la ligne 15, les arguments reçus sont utilisés. La méthode \mintinline{rust}{value_of()} 
+retourne la valeur d'un argument présent à l'exécution. Il est donc aisé d'utiliser les arguments 
+donnés en tant que variables du programme. clap donne également la possibilité de regrouper les 
+arguments. Un seul argument d'un groupe peut être présent à l'exécution, ce qui évite de nombreuses 
+conditions de détection des arguments.
+\subparagraph{xattr}
+est une \acrshort{api} 
+en Rust pour récupérer, lister, ajouter/modifier et supprimer des \acrshort{xattr} accrochés à des 
+fichiers avec Rust. C'est essentiellement un wrapper des \acrshort{syscall} en C fournis par Linux 
+et d'autres \acrshort{os} pour manipuler les \acrshort{xattr}. À noter que les fonctions offertes ne 
+suivent pas les liens symboliques (il est fait de même pour Tag Manager lui-même). Quatre fonctions 
+sont disponibles : \mintinline{rust}{get()}, \mintinline{rust}{list()}, \mintinline{rust}{set()} 
+et \mintinline{rust}{remove()}. Toutes attendent le nom du fichier et selon les cas le nom du 
+\acrshort{xattr} ainsi que sa valeur.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn main() {
+    let matches = App::new("MyApp")
+        .version("1.0")
+        .author("Kevin K. <kbknapp@gmail.com>")
+        .about("Does awesome things")
+        .args_from_usage(
+            "-c, --config=[FILE] 'Sets a custom config file'
+            <output> 'Sets an optional output file'
+            -d... 'Turn debugging information on'")
+        .subcommand(SubCommand::with_name("test")
+            .about("does testing things")
+            .arg_from_usage("-l, --list 'lists test values'"))
+        .get_matches();
+
+    if let Some(o) = matches.value_of("output") {
+        println!("Value for output: {}", o);
+    }
+    if let Some(c) = matches.value_of("config") {
+        println!("Value for config: {}", c);
+    }
+
+    match matches.occurrences_of("d") {
+        0 => println!("Debug mode is off"),
+        1 => println!("Debug mode is kind of on"),
+        2 => println!("Debug mode is on"),
+        3 | _ => println!("Don't be crazy"),
+    }
+
+    if let Some(matches) = matches.subcommand_matches("test") {
+        if matches.is_present("list") {
+            println!("Printing testing lists...");
+        } else {
+            println!("Not printing testing lists...");
+        }
+    }
+}
+    \end{minted}
+    \caption{Exemple d'utilisation de clap (commentaires tronqués) - \cite{ref42}}
+    \label{tag_manager_clap}
+\end{code}
+\bigbreak
+Tag Manager est constitué de deux fichiers. Le premier, \mintinline{rust}{main.rs} contient les 
+définitions et détections des arguments fournis par l'utilisateur avec clap (voir listing 
+\ref{tag_manager_main_args}), les appels aux fonctions 
+manipulant les \acrshort{xattr} des fichiers et la partie socket de connexion, requête et attente 
+de réponse du serveur (Tag Engine, sous-section \ref{tag_engine_realisation}). Le deuxième fichier, 
+\mintinline{rust}{lib.rs}, contient l'\acrshort{api} publique pour récupérer, attribuer, renommer 
+et supprimer les tags pour un fichier donné et un module de test de ces fonctions. À noter que 
+dans les \textit{output} du programme, il n'y a pas de distinction entre fichiers et répertoires.
+À titre d'exemple, 
+le listing \ref{tag_manager_del_tags} montre le code de la fonction \mintinline{rust}{del_tags()} 
+qui supprime les tags donnés d'un fichier. Elle préserve les tags existants qui ne doivent pas être 
+supprimés et supprime totalement le \acrshort{xattr} en cas de tableau de tags vide. L'usage 
+des \mintinline{rust}{enum} \mintinline{rust}{Option} et \mintinline{rust}{Result} en association 
+avec des \textit{pattern matching} sont utilisées dès que possible.
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=37,lastline=56]{rust}{../tag_manager/src/main.rs}
+    \caption{Déclaration des arguments dans \mintinline{rust}{main.rs}}
+    \label{tag_manager_main_args}
+\end{code}
+\bigbreak
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=52,lastline=79]{rust}{../tag_manager/src/lib.rs}
+    \caption{Code de la fonction \mintinline{rust}{del_tags()} dans \mintinline{rust}{lib.rs}}
+    \label{tag_manager_del_tags}
+\end{code}
+\bigbreak
+La communication socket est réalisée grâce la librairie standard \mintinline{rust}{UnixStream}, 
+équivalent aux sockets \mintinline{c}{AF_UNIX} en C (voir sous-section \ref{sockets_doc}). Le 
+fichier adresse des sockets est par défaut écrit dans \mintinline{text}{/tmp/tag_engine}. Le format 
+des requêtes respecte le petit protocole décrit dans la table \ref{tag_manager_sockets_protocol}.
+La requête listant les fichiers selon une expression logique des tags accepte les opérateurs 
+\mintinline{text}{AND} et \mintinline{text}{OR}, avec la précédance logique du premier sur le 
+second (voir sous-section \ref{tag_engine_realisation} pour plus de détails). Les opérateurs et 
+opérandes (les tags) doivent être espacés par un espace.
+\begin{center}
+    \begin{tabular}{|p{6cm}|c|p{6cm}|} \hline
+        \textbf{Requête} & \textbf{Code} & \textbf{Exemple} \\ \hline
+        Fichers et dossiers correspondant à une expression logique de tags & \mintinline{text}{0x0} & 
+            \mintinline{text}{0x0 tag1 OR tag2 AND tag3} \\ \hline
+        Liste des tags existants & \mintinline{text}{0x1} & \mintinline{text}{0x1} \\ \hline
+        Renommage d'un tag & \mintinline{text}{0x2} & \mintinline{text}{0x2 old_name new_name} \\ \hline
+    \end{tabular}
+    \captionof{table}{Format du protocole des requêtes au serveur Tag Engine}
+    \label{tag_manager_sockets_protocol}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Utilisation du programme et exemples}
+L'utilisation des différents arguments du programme est résumée dans la table \ref{tag_manager_usage}. 
+Les arguments sont divisés en deux groupes, le premier pour manipuler directement les fichiers et 
+leurs tags, le deuxième pour exécuter des requêtes au serveur Tag Engine. Pour le premier groupe, 
+l'argument \mintinline{text}{-f} ou \mintinline{text}{--files} est obligatoire. Pour les opérations 
+du deuxième groupe, il faut évidemment que le serveur Tag Engine soit lancé.
+\begin{center}
+    \begin{tabular}{|p{3.7cm}|p{2.3cm}|p{8.5cm}|} \hline
+        \textbf{Opération} & \textbf{Arguments} & \textbf{Exemple} \\ \hline
+        Afficher l'aide & \mintinline{text}{-h} & \mintinline{text}{tag_manager -h} \\ \hline
+        Afficher les tags d'un ou plusieurs fichiers & 
+            \mintinline{text}{-f} ou \mintinline{text}{--files} & 
+            \mintinline{text}{tag_manager -f file1 file2} \\ \hline
+        Afficher les tags d'un dossier récursivement & 
+            \mintinline{text}{-r} ou \mintinline{text}{--recursive} & 
+            \mintinline{text}{tag_manager -f myfolder -r} \\ \hline
+        Attribuer des tags à un ou plusieurs fichiers & 
+            \mintinline{text}{-s} ou \mintinline{text}{--set} & 
+            \mintinline{text}{tag_manager -f file1 file2 -s bob fred} \\ \hline
+        Supprimer des tags à un ou plusieurs fichiers & 
+            \mintinline{text}{-d} ou \mintinline{text}{--del} & 
+            \mintinline{text}{tag_manager -f file1 file2 -d bob fred} \\ \hline
+        Lister les fichiers correspondants à une requête de tags & 
+            \mintinline{text}{-q} ou \mintinline{text}{--query} & 
+            \mintinline{text}{tag_manager -q bob AND fred} \\ \hline
+        Lister les tags existants & 
+            \mintinline{text}{-l} ou \mintinline{text}{--list} & 
+            \mintinline{text}{tag_manager -l} \\ \hline
+        Renommer un tag & 
+            \mintinline{text}{-R} ou \mintinline{text}{--rename} & 
+            \mintinline{text}{tag_manager -R old_name new_name} \\ \hline
+    \end{tabular}
+    \captionof{table}{Utilisation et arguments attendus par Tag Manager}
+    \label{tag_manager_usage}
+\end{center}
+Le listing \ref{tag_manager_ex} illustre les usages et retours de Tag Manager. Le terminal se situe 
+dans le répertoire \mintinline{text}{home} de l'utilisateur. Tout d'abord, Tag Manager est utilisé pour 
+lister récursivement les tags des fichiers et sous-dossiers donnés, attribuer les tags \mintinline{text}{in_a} 
+et \mintinline{text}{myfiles} à différents fichiers et dossiers, lister les tags existants et faire 
+une requête sur les deux tags. L'arborescence utilisée pour l'exemple se situe dans le répertoire 
+\mintinline{text}{home} de l'utilisateur et est constituée des quatre fichiers et deux répertoires suivants :
+\dirtree{%
+.1 a.
+.2 a1.
+.2 a2.
+.2 b.
+.3 b1.
+.3 b2.
+}
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2]{bash}{text/tag_manager_ex.txt}
+    \caption{Exemples d'utilisation de Tag Manager}
+    \label{tag_manager_ex}
+\end{code}
+\bigbreak
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Tag Engine}\label{tag_engine_realisation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Description du programme et du code}
+La deuxième réalisation de ce projet est un programme "indexant" (ne crée pas un index au sens 
+strict du terme, voir explications plus loin) et surveillant une arborescence de 
+répertoires, fichiers et tags associés. Ce programme fait également office de serveur pour les 
+requêtes émises depuis Tag Manager. Ce programme dépend de quatre \textit{crates}. Le premier est 
+tag\_manager (la librairie des fonctions manipulant les \acrshort{xattr}, voir sous-section \ref{tag_manager}), 
+réalisé au cours de ce projet. Les trois autres sont disponibles sur \href{https://crates.io}{crates.io}, 
+il s'agit de walkdir \cite{ref43}, petgraph \cite{ref44} et notify \cite{ref45}.
+
+% TODO: Utilisation de tag manager lib
+% \subparagraph{tag\_manager}
+% est repris ici pour deux de ses fonctions publiques : \mintinline{rust}{get_tags()} et 
+% \mintinline{rust}{rename_tag()}. La première 
+
+\subparagraph{walkdir}
+% TODO: Utilisation de walkdir pour parcourir arborescence
+est une librairie pour parcourir efficacement et de manière récursive une arborescence de fichiers.
+Elle offre différentes structures, dont \mintinline{rust}{WalkDir} et \mintinline{rust}{DirEntry}. 
+\mintinline{rust}{WalkDir} attend un chemin de répertoire et retourne un itérateur récursif sur 
+chaque sous-répertoire et fichier contenu dans le répertoire de départ. Chaque entrée de cet 
+itérateur est représenté par la structure \mintinline{rust}{DirEntry}, qui détient des méthodes 
+pour obtenir des informations sur l'entrée (le chemin complet, les méta-données, si c'est un 
+répertoire ou un fichier, son nom, etc.).
+
+\subparagraph{petgraph}
+Tentative d'implémentation arbre -> difficile -> switch vers graph
+\cite{ref26}
+Explications petgraph
+Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
+
+\subparagraph{notify}
+Utilisation notify -> mieux qu'inotify -> Debounced events
+\mintinline{c}{inotify} limitations, inotifywait, dossier /media -> clé USB
+
+\subparagraph{Serveur sockets}
+
+\subparagraph{Threads et \textit{channel}}
+
+\subparagraph{Analyse d'une expression logique}
+algo infix postfix \cite{ref40}
+algo postfix evaluation \cite{ref41}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Utilisation du programme et exemples}
