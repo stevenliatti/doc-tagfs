@@ -203,7 +203,23 @@ une requête sur les deux tags. L'arborescence utilisée pour l'exemple se situe
 La deuxième réalisation de ce projet est un programme "indexant" (ne crée pas un index au sens 
 strict du terme, voir explications plus loin) et surveillant une arborescence de 
 répertoires, fichiers et tags associés. Ce programme fait également office de serveur pour les 
-requêtes émises depuis Tag Manager. Ce programme dépend de quatre \textit{crates}. Le premier est 
+requêtes émises depuis Tag Manager. Il est divisé en plusieurs fichiers et modules :
+\begin{itemize}
+    \item \mintinline{rust}{graph.rs} : module relatif à la construction et 
+        maintenance du graphe des tags, fichiers et répertoires (voir paragraphe \textbf{petgraph}).
+    \item \mintinline{rust}{lib.rs} : regroupe les modules et contient la fonction 
+        \mintinline{rust}{dispatcher()}, appelée lors d'un événement sur l'arborescence surveillée 
+        (voir paragraphe \textbf{notify}).
+    \item \mintinline{rust}{main.rs} : point d'entrée du programme, initialise les variables 
+        partagées, le thread socket serveur et écoute indéfiniment sur les événements survenus 
+        sur l'arborescence surveillée (voir paragraphe \textbf{Threads et \textit{channel}}).
+    \item \mintinline{rust}{parse.rs} : module de conversion d'une expression infixe vers postfixe 
+        (voir paragraphe \textbf{Analyse d'une expression logique}).
+    \item \mintinline{rust}{server.rs} : module construisant le serveur socket et répondant 
+        aux différentes requêtes émises depuis Tag Manager (voir paragraphe \textbf{Serveur sockets}).
+\end{itemize}
+% TODO: schéma résumant l'utilisation
+Ce programme dépend de quatre \textit{crates}. Le premier est 
 tag\_manager (la librairie des fonctions manipulant les \acrshort{xattr}, voir sous-section \ref{tag_manager}), 
 réalisé au cours de ce projet. Les trois autres sont disponibles sur \href{https://crates.io}{crates.io}, 
 il s'agit de walkdir \cite{ref43}, petgraph \cite{ref44} et notify \cite{ref45}.
@@ -221,23 +237,111 @@ Elle offre différentes structures, dont \mintinline{rust}{WalkDir} et \mintinli
 chaque sous-répertoire et fichier contenu dans le répertoire de départ. Chaque entrée de cet 
 itérateur est représenté par la structure \mintinline{rust}{DirEntry}, qui détient des méthodes 
 pour obtenir des informations sur l'entrée (le chemin complet, les méta-données, si c'est un 
-répertoire ou un fichier, son nom, etc.).
+répertoire ou un fichier, son nom, etc.). Le listing \ref{walkdir_demo} illustre un exemple de 
+parcours d'un répertoire. walkdir est utilisé pour réaliser le premier scan de l'arborescence 
+fournie et constituer le graphe (voir listing \ref{tag_engine_graph_make_graph}).
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use walkdir::WalkDir;
 
-\subparagraph{petgraph}
-Tentative d'implémentation arbre -> difficile -> switch vers graph
-\cite{ref26}
-Explications petgraph
-Taille des index de petgraph, 32 bits = ~ 4 millions de fichiers, 64 bits = 10 puissance 19 = ~ 2 puissance 190 fichiers
+fn main() {
+    for entry in WalkDir::new("/home") {
+        let entry = entry.unwrap();
+        println!("{}", entry.path().display());
+    }
+}
+    \end{minted}
+    \caption{Parcours d'un répertoire avec walkdir}
+    \label{walkdir_demo}
+\end{code}
+% \bigbreak
 
-\subparagraph{notify}
+\subparagraph{petgraph}\label{tag_engine_petgraph}
+est une librairie de représentation de graphes. Elle fournit différentes structures de données pour 
+représenter un graphe et des modules de manipulation et parcours de graphes. Les structures de 
+données sont au nombre de trois :
+\begin{enumerate}
+    \item \mintinline{rust}{Graph<N, E, Ty = Directed, Ix = DefaultIx>} : représente un graphe et 
+        ses données sous forme de deux listes d'adjacence (deux \mintinline{rust}{Vec}, un pour les 
+        noeuds et l'autre pour les arcs ou arêtes). Les noeuds sont de type générique \mintinline{rust}{N}, 
+        les arcs ou arêtes de type générique \mintinline{rust}{E}, le graphe est par défaut orienté (type 
+        \mintinline{rust}{Directed}) et le type pour l'index (l'identifiant numérique d'un noeud et 
+        d'un arc ou arête dans les vecteurs respectifs, déterminant la taille maximale du graphe) 
+        est par défaut \mintinline{rust}{u32} (ce qui autorise plus de quatre milliards de noeuds, 
+        4'294'967'296 précisément).
+    \item \mintinline{rust}{StableGraph<N, E, Ty = Directed, Ix = DefaultIx>} : semblable à 
+        \mintinline{rust}{Graph}, avec une différence notable, elle garde les identifiants des noeuds et 
+        arcs ou arêtes supprimés. Cette structure comporte également moins de méthodes.
+    \item \mintinline{rust}{GraphMap<N, E, Ty>} : représente un graphe et ses données sous forme 
+        d'une table associative, dont les clés sont les noeuds de type générique \mintinline{rust}{N}, 
+        avec l'obligation pour ce type d'être conforme pour l'utilisation en tant que clé. Permet 
+        de tester l'existence d'un noeud en temps constant avec la contrepartie de ne pas pouvoir 
+        stocker plus qu'un noeud avec une même donnée.
+\end{enumerate}
+Avant de continuer les explications sur l'utilisation de petgraph, faisons un bref rappel de l'architecture 
+choisie pour représenter l'arborescence des fichiers et tags à surveiller. Un noeud du graphe peut 
+être soit un fichier, soit un répertoire, soit un tag. Le lien entre un répertoire et un sous-répertoire 
+ou un fichier est symbolisé par un arc partant du répertoire en question. Le lien entre un tag et 
+un répertoire ou un fichier est également un arc partant du tag en question. Un arc n'a pas de 
+donnée à sauvegarder, il n'a donc pas de type effectif. Pour accélérer l'accès à un tag dans le 
+graphe à partir de son nom, une \textit{hashmap} associant le nom du tag à son identifiant dans le graphe 
+est maintenue.
+
+La structure \mintinline{rust}{StableGraph} a été choisie en raison de sa rétention des identifiants lors 
+des suppressions de noeuds et d'arcs. En effet, lors des opérations de suppression de tags ou de 
+fichiers, pour maintenir cohérente la \textit{hashmap} des tags associés aux identifiants du graphe, il 
+ne faut pas que cesdits identifiants changent. Dans le cas contraire, cette \textit{hashmap} ne 
+serait pas utilisable. Le listing \ref{tag_engine_graph_structs} montre les structures de données 
+utilisées pour notre graphe. Un noeud du graphe est représenté par la structure \mintinline{rust}{Node}, 
+contenant le nom du noeud et son genre (tag, fichier ou répertoire). Un arc est simplement défini 
+par un type vide, nommé \mintinline{rust}{Nil}. petgraph offre de nombreuses méthodes pour 
+\mintinline{rust}{StableGraph} : accès, ajout et suppression de noeuds et d'arcs, un itérateur sur 
+les voisins d'un noeud (avec indication du sens), recherche d'arcs entre deux noeuds, etc. La 
+fonction \mintinline{rust}{make_graph()} listée au listing \ref{tag_engine_graph_make_graph} est 
+la fonction première du module, elle crée le graphe et la \textit{hashmap} avec walkdir à partir du
+chemin du répertoire racine. Elle retourne le graphe contenant les fichiers, répertoires et tags 
+trouvés, la \textit{hashmap} et l'identifiant du noeud racine, point de départ pour les mises à 
+jour suivantes du graphe (sur les fichiers et répertoires). La fonction \mintinline{rust}{make_subgraph()}, 
+appelée dans la boucle s'assure d'ajouter correctement les noeuds en fonction du chemin, pour éviter 
+de créer deux fois le même noeud par exemple.
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=15,lastline=31]{rust}{../tag_engine/src/graph.rs}
+    \caption{Structures pour les noeuds et les arcs du graphe dans \mintinline{rust}{src/graph.rs}}
+    \label{tag_engine_graph_structs}
+\end{code}
+\bigbreak
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=78,lastline=103]{rust}{../tag_engine/src/graph.rs}
+    \caption{Fonction \mintinline{rust}{make_graph()} dans \mintinline{rust}{src/graph.rs}}
+    \label{tag_engine_graph_make_graph}
+\end{code}
+\bigbreak
+Pour chaque fichier et répertoire la fonction \mintinline{rust}{update_tags()}, listée au listing 
+\ref{tag_engine_graph_update_tags} compare les tags dans les \acrshort{xattr} aux tags présents 
+dans le graphe et met à jour les relations au besoin.
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=213,lastline=225]{rust}{../tag_engine/src/graph.rs}
+    \caption{Fonction \mintinline{rust}{update_tags()} dans \mintinline{rust}{src/graph.rs}}
+    \label{tag_engine_graph_update_tags}
+\end{code}
+\bigbreak
+
+\subparagraph{notify}\label{tag_engine_notify}
 Utilisation notify -> mieux qu'inotify -> Debounced events
 \mintinline{c}{inotify} limitations, inotifywait, dossier /media -> clé USB
 
-\subparagraph{Serveur sockets}
+\subparagraph{Serveur sockets}\label{tag_engine_socket}
 
-\subparagraph{Threads et \textit{channel}}
+\subparagraph{Threads et \textit{channel}}\label{tag_engine_main}
 
-\subparagraph{Analyse d'une expression logique}
+\subparagraph{Analyse d'une expression logique}\label{tag_engine_parse}
 algo infix postfix \cite{ref40}
 algo postfix evaluation \cite{ref41}
 
