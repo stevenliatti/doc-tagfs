@@ -263,10 +263,16 @@ dans ce même buffer (simple pattern producteur-consommateur).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Recherche par tags}
-% TODO:
-% communication sockets
-% simple programme qui attend des arguments en ligne de commande
-% opérateurs logiques (OU et AND)
-% liste des chemins de fichiers
-% génération de symlinks ?
+\subsection{Requêtes sur tags et fichiers}
+Une fois que la surveillance du \acrshort{fs} est en place, le système doit pouvoir répondre 
+à des requêtes de la part de l'utilisateur. À travers un outil en ligne de commande, l'utilisateur 
+a la possibilité de : 
+\begin{itemize}
+    \item Demander la liste des fichiers et répertoires associés à un ou plusieurs tags. La requête 
+        peut être sous la forme d'une expression logique simple (avec les opérateurs logiques "et" 
+        et "ou").
+    \item Demander la liste des tags déjà existants. 
+    \item Renommer un tag. 
+\end{itemize}
+Pour échanger les requêtes et les réponses, client et serveur communiquent par sockets, avec un 
+format de protocole très simple pour distinguer le type d'une requête.

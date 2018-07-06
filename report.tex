@@ -52,20 +52,22 @@
 \rfoot{\thepage}
 \renewcommand{\footrulewidth}{1pt}
 
+\usepackage{pdfpages}
+
 \begin{document}
 
-\title{Conception d'un système de "tagging" des fichiers avec Rust}
+\title{TagFS \protect\\ Système d'étiquetage des fichiers avec Rust}
 \author{Steven Liatti}
 \affil{\small Projet de bachelor - Prof. Florent Glück}
 \affil{\small Hepia ITI 3\up{ème} année}
 \maketitle
 
-\subparagraph{Résumé}
-Le but de ce projet est de concevoir et développer un "moteur de gestion de tags" pouvant gérer des dizaines de milliers
-de fichiers et tags associés de manière efficace, en Rust. Le stockage des tags utilisera le mécanisme des "extended
-attributes" disponibles dans la plupart des systèmes de fichiers modernes. Le moteur d'indexation devra surveiller les
-fichiers modifiés, créés, ou supprimés afin d'indexer les tags avec un minimum de latence (temps réel). Si le temps le
-permet, le système développé sera intégré à un environnement desktop choisi (Gnome, KDE, etc.).
+% \subparagraph{Résumé}
+% Le but de ce projet est de concevoir et développer un "moteur de gestion de tags" pouvant gérer des dizaines de milliers
+% de fichiers et tags associés de manière efficace, en Rust. Le stockage des tags utilisera le mécanisme des "extended
+% attributes" disponibles dans la plupart des systèmes de fichiers modernes. Le moteur d'indexation devra surveiller les
+% fichiers modifiés, créés, ou supprimés afin d'indexer les tags avec un minimum de latence (temps réel). Si le temps le
+% permet, le système développé sera intégré à un environnement desktop choisi (Gnome, KDE, etc.).
 
 % \begin{figure}
 % 	\begin{center}
@@ -75,17 +77,23 @@ permet, le système développé sera intégré à un environnement desktop chois
 
 \begin{figure}[!b]
 	\centering
-	\begin{minipage}{.4\textwidth}
+	\begin{minipage}{.5\textwidth}
 		\centering
-		\includegraphics[width=.6\linewidth]{images/hepia.jpg}
+		\includegraphics[width=.7\linewidth]{images/hepia.jpg}
 	\end{minipage}%
-	\begin{minipage}{.4\textwidth}
+	\begin{minipage}{.5\textwidth}
 		\centering
-		\includegraphics[width=.6\linewidth]{images/hesso.jpg}
+		\includegraphics[width=.7\linewidth]{images/hesso.jpg}
 	\end{minipage}
 \end{figure}
 \newpage
 
+\includepdf[pages=1]{enonce.pdf}
+\addcontentsline{toc}{subsection}{Énoncé du travail}
+\newpage
+
+\subsection*{Résumé} %-----------------------------------------------------------------------------------------------
+\addcontentsline{toc}{subsection}{Résumé}
 \newpage
 
 % \setcounter{tocdepth}{2}
@@ -176,7 +184,6 @@ Je tiens finalement à remercier mes collègues de classe pour leur camaraderie 
 
 
 \section{Introduction} %-----------------------------------------------------------------------------------------------
-% TODO:
 \input{report/introduction.tex}
 \newpage
 
