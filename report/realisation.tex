@@ -5,7 +5,7 @@
 % Schéma vertical avec flèches
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Description du programme et du code}
+\subsubsection{Description du programme et du code}\label{tag_manager_description}
 La première réalisation de ce projet est un outil en ligne de commande, écrit en Rust, permettant 
 de facilement lister, ajouter et supprimer des tags à des fichiers et dossiers (avec une option 
 récursive pour les dossiers) et d'exécuter des requêtes vers le serveur (Tag Engine, sous-section 
@@ -204,6 +204,7 @@ La deuxième réalisation de ce projet est un programme "indexant" (ne crée pas
 strict du terme, voir explications plus loin) et surveillant une arborescence de 
 répertoires, fichiers et tags associés. Ce programme fait également office de serveur pour les 
 requêtes émises depuis Tag Manager. Il est divisé en plusieurs fichiers et modules :
+% TODO: expliquer mutex + arc
 \begin{itemize}
     \item \mintinline{rust}{graph.rs} : module relatif à la construction et 
         maintenance du graphe des tags, fichiers et répertoires (voir paragraphe \textbf{petgraph}).
@@ -230,7 +231,6 @@ il s'agit de walkdir \cite{ref43}, petgraph \cite{ref44} et notify \cite{ref45}.
 % \mintinline{rust}{rename_tag()}. La première 
 
 \subparagraph{walkdir}
-% TODO: Utilisation de walkdir pour parcourir arborescence
 est une librairie pour parcourir efficacement et de manière récursive une arborescence de fichiers.
 Elle offre différentes structures, dont \mintinline{rust}{WalkDir} et \mintinline{rust}{DirEntry}. 
 \mintinline{rust}{WalkDir} attend un chemin de répertoire et retourne un itérateur récursif sur 
@@ -332,19 +332,206 @@ dans le graphe et met à jour les relations au besoin.
     \label{tag_engine_graph_update_tags}
 \end{code}
 \bigbreak
+% TODO: relire, éventuellement ajouter qqch
 
 \subparagraph{notify}\label{tag_engine_notify}
-Utilisation notify -> mieux qu'inotify -> Debounced events
-\mintinline{c}{inotify} limitations, inotifywait, dossier /media -> clé USB
+est une librairie multiplateforme de notifications d'événements sur le système de fichier. 
+Elle utilise différentes implémentations selon sur quel \acrshort{os} elle est utilisée. Sur Linux, 
+elle repose sur \mintinline{text}{inotify}. Elle attend un chemin de fichier ou répertoire. Elle 
+dispose également d'une option récursive pour la surveillance d'un répertoire. Elle offre deux 
+\acrshort{api} distinctes :
+\begin{itemize}
+    \item \textit{Debounced} \acrshort{api} (par défaut) : retourne tous les événements avec un 
+        pré-traitement effectué par notify, regroupant certains événements en un seul, par exemple :
+        le renommage d'un fichier, événement \textit{create} unique lors de la création d'un fichier 
+        plutôt qu'un \textit{create} + \textit{write} + \mintinline{text}{chmod}. Les événements 
+        sont envoyés après un délai (défini à la création), pour justement pouvoir les regrouper 
+        en amont si nécessaire. Chaque événement est un membre de l'énumération \mintinline{rust}{DebouncedEvent}.
+    \item \textit{Raw} \acrshort{api} : retourne tous les événements sans pré-traitement par notify 
+        et de manière immédiate. Elle a l'avantage d'être exhaustive mais davantage de traitement 
+        logique doit être effectué (notamment pour les événements de renommage). Chaque événement 
+        est contenu dans la structure \mintinline{rust}{RawEvent}, contenant elle-même le chemin 
+        du fichier ayant subi l'événement (\mintinline{rust}{path}), l'événement en question 
+        (\mintinline{rust}{op}) et un "cookie" faisant le lien entre deux sous-événements faisant 
+        partie d'un seul événement de renommage (voir section \ref{inotify_techno} pour plus de détails).
+\end{itemize}
+\textit{Debounced} \acrshort{api} est utilisée ici pour faciliter la détection d'événements de 
+renommage. Les deux \acrshort{api} nécessitent la création d'un canal de communication entre deux 
+threads ou plus : notify aura le rôle d'un producteur en émettant les événements. Dans une boucle 
+infinie, les événements nécessaires à la mise à jour du graphe sont attrapés et traités. C'est la 
+partie thread consommateur du canal. Les événements nécessaires à la mise à jour du graphe sont 
+les suivants :
+\begin{itemize}
+    \item Création de fichier ou répertoire.
+    \item Modification des attributs (dans notre cas, les tags).
+    \item Suppression de fichier ou répertoire. 
+    \item Renommage de fichier ou répertoire.
+\end{itemize}
+Le détail de ce mécanisme est disponible au listing \ref{tag_engine_notify_main}, des lignes 14 à 33.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+// Initialisation des variables partagées : graphe et hashmap
+// Multiples références possibles grâce à Arc 
+// Accès concurrent grâce à Mutex
+let (graph, tags_index, root_index) = make_graph(path, base_path);
+let graph = Arc::new(Mutex::new(graph));
+let tags_index = Arc::new(Mutex::new(tags_index));
+let main_graph = Arc::clone(&graph);
+let main_tags_index = Arc::clone(&tags_index);
+// Lancement du socket serveur dans un thread séparé
+thread::spawn(move || {
+    server(base_path, &graph, &tags_index);
+});
+// Initialisation de la surveillance avec notify
+let (tx, rx) = channel();
+let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+watcher.watch(path, RecursiveMode::Recursive).unwrap();
+loop {
+    match rx.recv() {
+        match event {
+            Create(_) | Chmod(_) | Remove(_) | Rename(_, _) => {
+                // Prise du verrou sur le graphe et la hashmap 
+                // pour modifications éventuelles
+                let mut ref_graph = main_graph.lock().unwrap();
+                let mut ref_tags_index = main_tags_index.lock()
+                    .unwrap();
+                // dispatcher s'occupe de réaliser la bonne action
+                // en fonction de l'événement
+                dispatcher(event, &mut ref_tags_index,
+                    &mut ref_graph, root_index, base_path);
+            }
+        }
+    }
+}
+    \end{minted}
+    \caption{Fonction \mintinline{rust}{main.rs} de Tag Engine (réduite et simplifiée, non fonctionnelle)}
+    \label{tag_engine_notify_main}
+\end{code}
+\bigbreak
 
 \subparagraph{Serveur sockets}\label{tag_engine_socket}
-
-\subparagraph{Threads et \textit{channel}}\label{tag_engine_main}
+Le fichier \mintinline{rust}{src/server.rs} contient toute la logique des traitements de requêtes 
+provenant de Tag Manager. Comme vu sur le listing \ref{tag_engine_notify_main} aux lignes 10 à 12, 
+le serveur est lancé dans un thread séparé. De ce fait, Tag Engine peut écouter à la fois sur les 
+événements du \acrshort{fs} et sur les requêtes provenant de Tag Manager. Trois types de requêtes 
+sont implémentés, le détail est disponible dans la table \ref{tag_manager_sockets_protocol} de la 
+sous-section \ref{tag_manager_description}. Le code reçu est converti en une \mintinline{rust}{enum}, 
+\mintinline{rust}{RequestKind}, visible dans le listing \ref{tag_engine_socket_enum}, pour faciliter 
+la manipulation par \textit{pattern matching}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum RequestKind {
+    Entries(String),
+    Tags,
+    RenameTag(String)
+}
+    \end{minted}
+    \caption{Énumération \mintinline{rust}{RequestKind} dans le fichier \mintinline{rust}{server.rs}}
+    \label{tag_engine_socket_enum}
+\end{code}
+\bigbreak
+Chaque requête est tout d'abord analysée avec la 
+fonction \mintinline{rust}{parse_request()} qui détermine si la requête est valide et de quel type 
+il s'agit. Les verrous sont ensuite pris pour accéder au graphe et à la \textit{hashmap} pour 
+construire la réponse. Les fonctions lisant et écrivant les requêtes et réponses manipulent un 
+\mintinline{rust}{UnixStream}. 
+\bigbreak
+Il y a un mécanisme intéressant à montrer dans la fonction 
+\mintinline{rust}{request_tags()} recopiée dans le listing \ref{tag_engine_socket_collect}. La 
+fonction en elle-même n'est pas très complexe, elle prend le verrou sur la \textit{hashmap} des 
+tags associés aux identifiants des noeuds du graphe et retourne un vecteur contenant tous les tags, 
+\textit{id est} les clés de la table associative. C'est cette dernière opération qui est 
+particulièrement puissante, aux lignes 5 et 6 de la fonction. Pour générer le vecteur 
+\mintinline{rust}{entries} à partir des clé de \mintinline{rust}{tags_index}, la fonction 
+\mintinline{rust}{collect()} est utilisée. Cette fonction permet de transformer un itérateur en 
+un autre, très simplement.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn request_tags(tags_index_thread : &Arc<Mutex<HashMap<String, 
+    NodeIndex>>>, stream : &mut UnixStream) {
+    println!("Request for Tags");
+    let tags_index = tags_index_thread.lock().unwrap();
+    let mut entries : Vec<String> = tags_index.keys()
+        .map(|key| key.clone()).collect();
+    entries.sort();
+    write_response(entries, stream);
+}
+    \end{minted}
+    \caption{Illustration de l'utilisation de la fonction \mintinline{rust}{collect()}}
+    \label{tag_engine_socket_collect}
+\end{code}
+\bigbreak
+% \subparagraph{Threads et \textit{channel}}\label{tag_engine_main}
 
 \subparagraph{Analyse d'une expression logique}\label{tag_engine_parse}
-algo infix postfix \cite{ref40}
-algo postfix evaluation \cite{ref41}
+Le fichier \mintinline{rust}{src/parse.rs} contient principalement une fonction transformant 
+une expression logique infixe en postfixe (appelée également "notation polonaise inverse"). 
+Dans le cadre de ce programme, elle est utilisée par la requête fournissant un ou plusieurs tags, 
+séparés par des "et" ou des "ou" logiques pour récupérer la liste des fichiers et répertoires 
+correspondants. Le type d'expression infixe est la manière "naturelle" en mathématiques ou en 
+logique de déclarer la séquence d'opérateurs et opérandes d'un calcul ou d'une expression logique 
+booléenne. Les exemples suivants sont plus explicites : l'expression logique infixe 
+\mintinline{text}{bob OR fred AND max} se traduirait en l'expression postfixe 
+\mintinline{text}{bob fred max AND OR}. L'algorithme utilisé pour implémenter cette fonction 
+a été réalisé par Premshree Pillai \cite{ref40}. Le listing \ref{tag_engine_infix_postfix} montre 
+les deux \mintinline{rust}{enum} utilisée pour la conversion. Un \mintinline{rust}{Arg} est soit 
+un opérande avec un nom, soit un opérateur "AND" ou "OR". La méthode \mintinline{rust}{compare()}, 
+inspirée de Java, compare les deux opérateurs pour donner la priorité à "AND" sur "OR". Cette 
+méthode illustre la puissance des \textit{pattern matching}, destructurant deux variables en 
+même temps de manière élégante.
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2,firstline=5,lastline=21]{rust}{../tag_engine/src/parse.rs}
+    \caption{Énumérations \mintinline{rust}{Operator} et \mintinline{rust}{Arg} et méthode \mintinline{rust}{compare()}}
+    \label{tag_engine_infix_postfix}
+\end{code}
+\bigbreak
+La raison de manipuler une expression postfixe 
+plutôt qu'infixe est que l'algorithme d'évaluation postfixe est bien plus simple à implémenter, il 
+ne nécessite qu'une pile pour stocker les opérateurs \cite{ref41}. L'algorithme est disponible dans 
+le listing \ref{tag_engine_postfix_algo}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{text}
+for each token in the postfix expression:
+    if token is an operator:
+        operand_2 <-- pop from the stack
+        operand_1 <-- pop from the stack
+        result <-- evaluate token with operand_1 and operand_2
+        push result back onto the stack
+    else if token is an operand:
+        push token onto the stack
+result <-- pop from the stack
+    \end{minted}
+    \caption{Algorithme d'évaluation d'une expression postfixe - \cite{ref41}}
+    \label{tag_engine_postfix_algo}
+\end{code}
+\bigbreak
+Il n'est ainsi pas nécessaire d'établir une grammaire pour un analyseur de code source ou d'expressions 
+régulières. Pour l'évaluation simple d'une expression comportant deux opérateurs différents uniquement, 
+cette solution est largement satisfaisante et efficace. La fonction convertissant l'expression 
+infixe vers postfixe se nomme \mintinline{rust}{infix_to_postfix()} et se trouve dans le fichier 
+\mintinline{rust}{src/parse.rs} et la fonction implémentant l'algorithme d'évaluation d'une 
+expression postfixe se nomme \mintinline{rust}{expression_to_entries()} et se trouve dans le fichier 
+\mintinline{rust}{server.rs}. Les opérandes de l'expression sont des tags et les deux opérateurs sont 
+"AND" et "OR". "AND" a la priorité sur "OR", comme la multiplication sur l'addition. Pour chaque tag, 
+un ensemble au sens mathématique des fichiers et répertoires vers lesquels il pointe est réalisé et 
+est empiler sur la pile. Lorsqu'un opérateur survient, les deux derniers ensembles d'entrées sont 
+dépilés et l'opération ensembliste correspondante leur est appliquée (une intersection pour un "AND" 
+et une union pour un "OR"). Le nouvel ensemble ainsi obtenu est de nouveau empilé sur la pile. 
+À la fin de l'algorithme, l'ensemble final est retourné.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Utilisation du programme et exemples}
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=1\textwidth]{images/graph.jpg}
+    \end{center}
+    \caption{légende}
+    \label{label}
+\end{figure}
