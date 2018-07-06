@@ -135,7 +135,7 @@ opérandes (les tags) doivent être espacés par un espace.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Utilisation du programme et exemples}
+\subsubsection{Utilisation du programme et exemples}\label{tag_manager_utilisation}
 L'utilisation des différents arguments du programme est résumée dans la table \ref{tag_manager_usage}. 
 Les arguments sont divisés en deux groupes, le premier pour manipuler directement les fichiers et 
 leurs tags, le deuxième pour exécuter des requêtes au serveur Tag Engine. Pour le premier groupe, 
@@ -171,7 +171,7 @@ du deuxième groupe, il faut évidemment que le serveur Tag Engine soit lancé.
     \label{tag_manager_usage}
 \end{center}
 Le listing \ref{tag_manager_ex} illustre les usages et retours de Tag Manager. Le terminal se situe 
-dans le répertoire \mintinline{text}{home} de l'utilisateur. Tout d'abord, Tag Manager est utilisé pour 
+dans le répertoire \mintinline{text}{/home/stevenliatti}. Tout d'abord, Tag Manager est utilisé pour 
 lister récursivement les tags des fichiers et sous-dossiers donnés, attribuer les tags \mintinline{text}{in_a} 
 et \mintinline{text}{myfiles} à différents fichiers et dossiers, lister les tags existants et faire 
 une requête sur les deux tags. L'arborescence utilisée pour l'exemple se situe dans le répertoire 
@@ -224,11 +224,6 @@ Ce programme dépend de quatre \textit{crates}. Le premier est
 tag\_manager (la librairie des fonctions manipulant les \acrshort{xattr}, voir sous-section \ref{tag_manager}), 
 réalisé au cours de ce projet. Les trois autres sont disponibles sur \href{https://crates.io}{crates.io}, 
 il s'agit de walkdir \cite{ref43}, petgraph \cite{ref44} et notify \cite{ref45}.
-
-% TODO: Utilisation de tag manager lib
-% \subparagraph{tag\_manager}
-% est repris ici pour deux de ses fonctions publiques : \mintinline{rust}{get_tags()} et 
-% \mintinline{rust}{rename_tag()}. La première 
 
 \subparagraph{walkdir}
 est une librairie pour parcourir efficacement et de manière récursive une arborescence de fichiers.
@@ -308,7 +303,7 @@ de créer deux fois le même noeud par exemple.
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
-        tabsize=2,firstline=15,lastline=31]{rust}{../tag_engine/src/graph.rs}
+        tabsize=2,firstline=16,lastline=32]{rust}{../tag_engine/src/graph.rs}
     \caption{Structures pour les noeuds et les arcs du graphe dans \mintinline{rust}{src/graph.rs}}
     \label{tag_engine_graph_structs}
 \end{code}
@@ -316,7 +311,7 @@ de créer deux fois le même noeud par exemple.
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
-        tabsize=2,firstline=78,lastline=103]{rust}{../tag_engine/src/graph.rs}
+        tabsize=2,firstline=85,lastline=110]{rust}{../tag_engine/src/graph.rs}
     \caption{Fonction \mintinline{rust}{make_graph()} dans \mintinline{rust}{src/graph.rs}}
     \label{tag_engine_graph_make_graph}
 \end{code}
@@ -327,7 +322,7 @@ dans le graphe et met à jour les relations au besoin.
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
-        tabsize=2,firstline=213,lastline=225]{rust}{../tag_engine/src/graph.rs}
+        tabsize=2,firstline=220,lastline=232]{rust}{../tag_engine/src/graph.rs}
     \caption{Fonction \mintinline{rust}{update_tags()} dans \mintinline{rust}{src/graph.rs}}
     \label{tag_engine_graph_update_tags}
 \end{code}
@@ -368,6 +363,35 @@ les suivants :
     \item Renommage de fichier ou répertoire.
 \end{itemize}
 Le détail de ce mécanisme est disponible au listing \ref{tag_engine_notify_main}, des lignes 14 à 33.
+
+\subparagraph{Serveur sockets}\label{tag_engine_socket}
+Le fichier \mintinline{rust}{src/server.rs} contient toute la logique des traitements de requêtes 
+provenant de Tag Manager. Comme vu sur le listing \ref{tag_engine_notify_main} aux lignes 10 à 12, 
+le serveur est lancé dans un thread séparé. De ce fait, Tag Engine peut écouter à la fois sur les 
+événements du \acrshort{fs} et sur les requêtes provenant de Tag Manager. Trois types de requêtes 
+sont implémentés, le détail est disponible dans la table \ref{tag_manager_sockets_protocol} de la 
+sous-section \ref{tag_manager_description}. Le code reçu est converti en une \mintinline{rust}{enum}, 
+\mintinline{rust}{RequestKind}, visible dans le listing \ref{tag_engine_socket_enum}, pour faciliter 
+la manipulation par \textit{pattern matching}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum RequestKind {
+    Entries(String),
+    Tags,
+    RenameTag(String)
+}
+    \end{minted}
+    \caption{Énumération \mintinline{rust}{RequestKind} dans le fichier \mintinline{rust}{server.rs}}
+    \label{tag_engine_socket_enum}
+\end{code}
+\bigbreak
+Chaque requête est tout d'abord analysée avec la 
+fonction \mintinline{rust}{parse_request()} qui détermine si la requête est valide et de quel type 
+il s'agit. Les verrous sont ensuite pris pour accéder au graphe et à la \textit{hashmap} pour 
+construire la réponse. Les fonctions lisant et écrivant les requêtes et réponses manipulent un 
+\mintinline{rust}{UnixStream}. 
+
 \bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
@@ -410,34 +434,6 @@ loop {
 \end{code}
 \bigbreak
 
-\subparagraph{Serveur sockets}\label{tag_engine_socket}
-Le fichier \mintinline{rust}{src/server.rs} contient toute la logique des traitements de requêtes 
-provenant de Tag Manager. Comme vu sur le listing \ref{tag_engine_notify_main} aux lignes 10 à 12, 
-le serveur est lancé dans un thread séparé. De ce fait, Tag Engine peut écouter à la fois sur les 
-événements du \acrshort{fs} et sur les requêtes provenant de Tag Manager. Trois types de requêtes 
-sont implémentés, le détail est disponible dans la table \ref{tag_manager_sockets_protocol} de la 
-sous-section \ref{tag_manager_description}. Le code reçu est converti en une \mintinline{rust}{enum}, 
-\mintinline{rust}{RequestKind}, visible dans le listing \ref{tag_engine_socket_enum}, pour faciliter 
-la manipulation par \textit{pattern matching}.
-\bigbreak
-\begin{code}
-    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-enum RequestKind {
-    Entries(String),
-    Tags,
-    RenameTag(String)
-}
-    \end{minted}
-    \caption{Énumération \mintinline{rust}{RequestKind} dans le fichier \mintinline{rust}{server.rs}}
-    \label{tag_engine_socket_enum}
-\end{code}
-\bigbreak
-Chaque requête est tout d'abord analysée avec la 
-fonction \mintinline{rust}{parse_request()} qui détermine si la requête est valide et de quel type 
-il s'agit. Les verrous sont ensuite pris pour accéder au graphe et à la \textit{hashmap} pour 
-construire la réponse. Les fonctions lisant et écrivant les requêtes et réponses manipulent un 
-\mintinline{rust}{UnixStream}. 
-\bigbreak
 Il y a un mécanisme intéressant à montrer dans la fonction 
 \mintinline{rust}{request_tags()} recopiée dans le listing \ref{tag_engine_socket_collect}. La 
 fonction en elle-même n'est pas très complexe, elle prend le verrou sur la \textit{hashmap} des 
@@ -528,10 +524,39 @@ et une union pour un "OR"). Le nouvel ensemble ainsi obtenu est de nouveau empil
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Utilisation du programme et exemples}
+Le programme attend un chemin absolu valide pointant vers un répertoire. Il admet un argument 
+facultatif, \mintinline{text}{-d} ou \mintinline{text}{--debug}, qui imprime sur la sortie 
+standard l'état du graphe et de la \textit{hashmap} et écrit deux fichiers, \mintinline{text}{graph.dot} 
+et \mintinline{text}{graph.png}, après chaque événement survenu. Le listing \ref{tag_engine_ex} montre les 
+\textit{outputs} de Tag Engine correspondants aux opérations sur l'arborescence manipulée par 
+Tag Manager (voir section \ref{tag_manager_utilisation} et le listing \ref{tag_manager_ex}). 
+On aperçoit aux lignes 13 à 18 l'ajout des tags "in\_a" et "myfiles" et aux lignes 34 et 35 les 
+requêtes de tags et d'entrées effectuées.
+Les deux fichiers représentent également l'état du graphe. Le fichier \mintinline{text}{graph.dot} 
+respecte la syntaxe d'un outil appelé Graphviz \cite{ref50}, dédié à la modélisation et visualisation 
+de graphes. Il comprend plusieurs moteurs de génération de graphes à partir de données texte ou 
+brutes, dont \mintinline{bash}{dot} utilisé ici. À partir du fichier graph.dot, disponible au 
+listing \ref{tag_engine_petgraph_dot}, la figure \ref{tag_engine_petgraph_dot_image} est obtenue. 
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2]{bash}{text/tag_engine_ex.txt}
+    \caption{Exemple d'utilisation de Tag Engine}
+    \label{tag_engine_ex}
+\end{code}
+\bigbreak
+\bigbreak
+\begin{code}
+    \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
+        tabsize=2]{text}{text/graph.dot}
+    \caption{Fichier \mintinline{text}{dot} produit par petgraph}
+    \label{tag_engine_petgraph_dot}
+\end{code}
+\bigbreak
 \begin{figure}
     \begin{center}
-        \includegraphics[width=1\textwidth]{images/graph.jpg}
+        \includegraphics[width=1\textwidth]{images/graph.png}
     \end{center}
-    \caption{légende}
-    \label{label}
+    \caption{Image du graphe obtenue avec la commande \mintinline{bash}{dot}}
+    \label{tag_engine_petgraph_dot_image}
 \end{figure}
