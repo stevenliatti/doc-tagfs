@@ -1,0 +1,134 @@
+
+\documentclass[a4paper, 12pt]{article}
+\usepackage[utf8]{inputenc}
+\renewcommand\familydefault{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[francais]{babel}
+\usepackage[left=2.5cm,top=2.5cm,right=2.5cm,bottom=2.5cm]{geometry}
+\usepackage[onehalfspacing]{setspace}
+\usepackage{graphicx}
+\usepackage[usenames, dvipsnames]{xcolor}
+\definecolor{mygray}{gray}{0.95}
+
+\usepackage{minted}
+\usemintedstyle{colorful}
+\usepackage{float}
+\floatplacement{figure}{H}
+\usepackage{authblk}
+\usepackage{enumitem}
+\setlist[enumerate]{label*=\arabic*.}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=blue
+}
+
+\usepackage{caption}
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\usepackage{array}
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+
+\usepackage{dirtree}
+\usepackage{tabularx}
+
+\usepackage{glossaries}
+	\let\oldnewacronym\newacronym
+	\newcommand*{\provideacronym}[3]{%
+	  \ifglsentryexists{#1}{%
+	  }{%
+	    \oldnewacronym{#1}{#2}{#3}%
+	  }%
+	}
+\makeglossaries
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\leftmark}
+\lfoot{Steven Liatti}
+\rfoot{\thepage}
+\renewcommand{\footrulewidth}{1pt}
+
+\usepackage{pdfpages}
+
+\begin{document}
+
+\title{Annexes - TagFS}
+\author{Steven Liatti}
+\affil{\small Projet de bachelor - Prof. Florent Glück}
+\affil{\small Hepia ITI 3\up{ème} année}
+\maketitle
+
+\begin{figure}[!b]
+	\centering
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=.7\linewidth]{images/hepia.jpg}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=.7\linewidth]{images/hesso.jpg}
+	\end{minipage}
+\end{figure}
+\newpage
+
+
+% \setcounter{tocdepth}{2}
+% \addcontentsline{toc}{subsection}{Table des annexes}
+\tableofcontents
+\newpage
+% \renewcommand\listoflistingscaption{Table des listings de code source}
+% \addcontentsline{toc}{subsection}{Table des listings de code source}
+% \listoflistings
+% \newpage
+
+
+\appendix
+
+\section{Code source de Tag Manager}
+
+\subsection{\mintinline{rust}{src/lib.rs}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_manager/src/lib.rs}
+
+\newpage
+\subsection{\mintinline{rust}{src/main.rs}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_manager/src/main.rs}
+
+\newpage
+\subsection{\mintinline{rust}{Cargo.toml}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_manager/Cargo.toml}
+
+
+
+\newpage
+\section{Code source de Tag Engine}
+
+\subsection{\mintinline{rust}{src/graph.rs}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_engine/src/graph.rs}
+
+\newpage
+\subsection{\mintinline{rust}{src/lib.rs}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_engine/src/lib.rs}
+
+\newpage
+\subsection{\mintinline{rust}{src/main.rs}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_engine/src/main.rs}
+
+\newpage
+\subsection{\mintinline{rust}{src/parse.rs}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_engine/src/parse.rs}
+
+\newpage
+\subsection{\mintinline{rust}{src/server.rs}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_engine/src/server.rs}
+
+\newpage
+\subsection{\mintinline{rust}{Cargo.toml}}
+\inputminted[breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}{../tag_engine/Cargo.toml}
+
+
+\end{document}
