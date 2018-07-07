@@ -1,26 +1,247 @@
-\begin{itemize}
-    \item cahier des charges rempli ?
-    \item réalisation OK ?
-    \item performances
-\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Discussion des résultats des tests}
+% TODO: discussion des résultats
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Rust VS C}
+Dans cette sous-section, nous allons discuter de l'implémentation du système en Rust plutôt qu'en 
+C. Les avantages sont nombreux et les inconvénients sont acceptables.
+
+\subsubsection{Avantages de Rust par rapport à C}
+L'avantage principal de Rust par rapport à C est la garantie sur la sécurité de la mémoire (\textit{safe}). 
+Tant que le code compile, il sera sûr en termes d'allocation/désallocation mémoire et concurrence 
+(les erreurs de logique sont néanmoins toujours à la charge du programmeur). Cette garantie est 
+fournie par le compilateur de Rust, qu'on pourrait définir d'"intelligent". Intelligent car la 
+quasi-totalité des erreurs liées à la mémoire sont détectées à la compilation. Il va même plus 
+loin en étant très verbeux sur les erreurs survenues, en suggérant souvent le moyen de résoudre 
+le problème. Ce qui, avec le temps, sont devenues des bonnes pratiques à connaître lorsque 
+nous programmons en C, Rust force les programmeur à les implémenter avant même que le code soit 
+compilé. Les listings de code suivant illustrent deux exemples où Rust se comporte "mieux" que 
+C. Les listings \ref{undefined_pointer_c} et \ref{undefined_pointer_rust} montrent une fonction, 
+respectivement écrite en C et en Rust, qui retourne un pointeur indéfini. En C, la détection de 
+l'erreur surviendrait à l'exécution du programme (bien que selon le compilateur C utilisé, un 
+avertissement, \textit{warning}, sera affiché au programmeur), avec le fameux \textit{Segmentation fault}.
+L'équivalent Rust refuserait de compiler ce code, à cause de la règle de la durée de vie non respectée.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{c}
+int* undefined_pointer() {
+    int data[10] = {114, 117, 115, 116, 105, 115, 98, 101, 115, 116};
+    return &data[3];
+}
+    \end{minted}
+    \caption{Création d'un pointeur indéfini en C}
+    \label{undefined_pointer_c}
+\end{code}
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn undefined_pointer() -> &i32 {
+    let data = [114, 117, 115, 116, 105, 115, 98, 101, 115, 116];
+    &data[3]
+}
+    \end{minted}
+    \caption{Création d'un pointeur indéfini en Rust}
+    \label{undefined_pointer_rust}
+\end{code}
+\bigbreak
+Un autre exemple est l'accès non autorisé à de la mémoire. Les listings \ref{memory_access_c} 
+et \ref{memory_access_rust} montrent une fonction, respectivement écrite en C et en Rust, qui 
+imprime sur la sortie standard un élément d'un tableau à un index non correct. En C, "aucun problème", 
+la fonction imprimera ce qu'elle trouve à cette adresse mémoire, sans se plaindre. Ce genre 
+d'erreurs est potentiellement une vulnérabilité qui peut être exploitée à des fins malicieuses.
+En Rust, cette erreur ne serait pas détectée à la compilation, mais au moins le programme 
+s'arrêterait abruptement à son exécution (\textit{panicked}) et l'erreur pourrait être corrigée.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{c}
+void print_data() {
+    int data[10] = {114, 117, 115, 116, 105, 115, 98, 101, 115, 116};
+    printf("%d\n", data[10]);
+}
+    \end{minted}
+    \caption{Accès non autorisé à de la mémoire en C}
+    \label{memory_access_c}
+\end{code}
+\bigbreak
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+fn print_data() {
+    let data = [114, 117, 115, 116, 105, 115, 98, 101, 115, 116];
+    println!("{}", data[10]);
+}
+    \end{minted}
+    \caption{Accès non autorisé à de la mémoire en Rust}
+    \label{memory_access_rust}
+\end{code}
+\bigbreak
+Nous pouvons également citer que Rust est parfois plus rapide que C pour certaines tâches, ou 
+presque aussi rapide. Le site \textit{The Computer Language Benchmarks Game} \cite{ref51} dresse 
+une comparaison entre Rust et un à un C, C++, Go et Java sur les temps d'exécution, quantité de 
+mémoire et charge processeur pour une variété d'applications. Rust comparé à C et C++ est parfois 
+plus rapide et souvent distancé de peu. Rust comparé à Go et Java est toujours le plus rapide. 
+On peut en conclure que sécurité peut rimer au propre comme au figuré avec rapidité.
+\bigbreak
+Un autre grand avantage de Rust sur C est sa gestion des erreurs et l'absence de \mintinline{c}{NULL}. 
+Tony Hoare, un chercheur en informatique, est l'inventeur de \mintinline{c}{NULL} et l'appel 
+aujourd'hui son erreur à un milliard de dollars \cite{ref52}. \mintinline{c}{NULL} autorise de 
+nombreuses erreurs inattendues, malgré le fait que l'idée n'est pas mauvaise (il est pratique de 
+déclarer une variable ne contenant pas de valeur). En Rust, \mintinline{c}{NULL} n'existe pas, à la 
+place une énumération très puissante est disponible, \mintinline{rust}{Option} (voir listing \ref{rust_option}).
+Elle évite ainsi de manipuler des données vides.
+\bigbreak
+Viennent ensuite plusieurs avantages moins déterminants, mais toutefois bien pratiques dans la 
+vie de tous les jours du programmeur. Citons par exemple le formidable outil Cargo et la source 
+de \textit{crates} disponible sur \href{crates.io}{crates.io}, contenant des milliers de librairies 
+réalisées et éprouvées par la communauté. Les tests unitaires du programme sont intégrés directement 
+au langage et leur exécution est facilitée avec Cargo. La librairie standard de Rust est bien fournie,
+notamment avec les collections (vecteurs, tables de hachage, etc.). Enfin, s'il fallait terminer, 
+la gestion des types génériques directement inclue au langage est un atout bien pratique.
+
+\subsubsection{Inconvénients de Rust par rapport à C}
+Rust a malgré tout deux défauts, plus ou moins handicapants selon le temps et la situation, liés 
+l'un à l'autre. Le premier est la courbe d'apprentissage du langage pouvant être longue et décourageante. 
+Rust est régi par certaines règles contraignantes, simples mais pas faciles à cerner dans toutes 
+les situations. C'est notamment le cas des règles d'\textit{ownership}, de \textit{borrowing} et 
+des références (voir sous-section \ref{rust_ownership_borrowing}), assez uniques à Rust. 
+Le deuxième défaut découle du premier : il faut parfois revoir certains algorithmes ou structures 
+de données facilement implémentables en C ou autres langages similaires. C'est notamment ce qu'il 
+s'est produit durant l'implémentation de Tag Engine et sa structure de données pour contenir 
+l'arborescence des répertoires, fichiers et tags (voir sous-section \ref{problemes} pour plus de détails).
+D'autres petits défauts peuvent être mentionnés, comme par exemple le manque d'arguments par défaut 
+lors des déclarations de fonctions ou la surcharge de méthodes ou fonctions. Ce ne sont pas des 
+défauts à proprement parler, mais des facilités qu'il aurait été souhaitable de disposer. 
+Finalement, le frein majeur à l'adoption massive du langage (comme bien d'autres nouveau langages) 
+est le manque de soutien de la part d'une importante société (même si Mozilla l'utilise pour 
+son navigateur Firefox) et la "flemme" des programmeurs de se détourner de C ou C++.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Bugs prob rencontrés}
-\begin{itemize}
-    \item Tentative d'implémentation arbre -> difficile -> switch vers graph 
-    \item explications pourquoi c'est dur d'implémenter un arbre ou similaire \cite{ref2}
-        \cite{ref26} \cite{ref46} \cite{ref47} \cite{ref48} \cite{ref49}
-\end{itemize}
+\subsection{Problèmes rencontrés}\label{problemes}
+Le principal problème rencontré durant ce travail a été l'implémentation d'un arbre en Rust pour 
+les besoins de Tag Engine. L'implémentation simple d'un noeud d'un arbre en C est similaire à celle 
+décrite au listing \ref{problemes_tree_c}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{c}
+struct Node {
+    int data; // le type n'est pas important pour l'exemple
+    struct Node** children;
+};
+    \end{minted}
+    \caption{Implémentation de la structure d'un arbre en C}
+    \label{problemes_tree_c}
+\end{code}
+\bigbreak
+C'est une structure récursive et relativement facile à comprendre : un noeud est constitué d'une 
+donnée d'un type choisi et d'un tableau de pointeurs vers des noeuds enfants. Ce genre de déclaration 
+est impossible en Rust, car le compilateur a besoin de connaître la taille exacte des données à la 
+compilation (éviter les structure récursives infinies). Une solution est d'envelopper les noeuds 
+enfants dans un pointeur intelligent de type \mintinline{rust}{Box} (voir chapitre 15 du 
+\textit{book} \cite{ref0}). Mais un autre problème surviendra au moment de l'utilisation des noeuds, 
+car Rust ne permet pas plusieurs références mutables vers une même valeur. Pour résoudre ce dernier 
+problème, l'utilisation des \mintinline{rust}{Rc<T>}, ou \textit{reference counting}. C'est un autre 
+pointeur intelligent, qui autorise plusieurs \textit{ownership} pour une seule valeur. On se 
+retrouve alors avec une imbrication de pointeurs avancés, comme dans le listing \ref{node_rust_leipzig}, 
+solution proposée par Rust Leipzig \cite{ref49} :
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+use std::rc::Rc;
+use std::cell::RefCell;
+
+struct Node<T> {
+    previous: Rc<RefCell<Box<Node<T>>>>,
+    //        ^  ^       ^   ^
+    //        |  |       |   |
+    //        |  |       |   - The next Node with generic `T`
+    //        |  |       |
+    //        |  |       - Heap allocated memory, needed
+    //        |  |         if `T` is a trait object.
+    //        |  |
+    //        |  - A mutable memory location with
+    //        |    dynamically checked borrow rules.
+    //        |    Needed because `Box` is immutable.
+    //        |
+    //        - Reference counted pointer, will be
+    //          dropped when every reference is gone.
+    //          Needed to create multiple node references.
+
+    next: Vec<Rc<RefCell<Box<T>>>>,
+    data: T,
+    // ...
+}
+    \end{minted}
+    \caption{Structure d'un noeud en Rust avec pointeurs intelligents - \cite{ref49}}
+    \label{node_rust_leipzig}
+\end{code}
+\bigbreak
+Non seulement cette solution n'est pas très lisible mais en plus elle a le défaut de supprimer 
+tous les avantages qu'offre le compilateur Rust sur les contraintes de portée et durée de vie 
+des variables. Une solution qui semble résoudre tous les problèmes précédents est décrite au 
+listing \ref{rust_leipzig_arena}. Elle utilise une \textit{arena}, une région mémoire \cite{ref53}. Plutôt 
+qu'avoir des pointeurs entre noeuds de l'arbre, cette solution utilise une collection pour 
+stocker les données (ici un vecteur) et les relations entre noeuds sont tenues grâce aux 
+identifiants dans cette même collection (ici les indices du vecteur). Ainsi, le problème 
+de durée de vie des valeurs et des multiples \textit{ownership} est résolu, car l'\textit{arena}
+est la seule détentrice des données (donc des noeuds). Les noeuds restent accessibles depuis 
+l'extérieur de l'\textit{arena} en gardant leurs identifiants dans l'\textit{arena}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+pub struct Arena<T> {
+    nodes: Vec<Node<T>>,
+}
+
+pub struct Node<T> {
+    parent: Option<NodeId>,
+    previous_sibling: Option<NodeId>,
+    next_sibling: Option<NodeId>,
+    first_child: Option<NodeId>,
+    last_child: Option<NodeId>,
+    /// The actual data which will be stored within the tree
+    pub data: T,
+}
+
+pub struct NodeId {
+    index: usize,
+}
+    \end{minted}
+    \caption{Structure d'un noeud en Rust avec une \textit{arena} - \cite{ref49}}
+    \label{rust_leipzig_arena}
+\end{code}
+\bigbreak
+Le \textit{crate} petgraph utilisé pour stocker les données des fichiers, répertoires et tags d'une 
+arborescence fonctionne de cette manière : il utilise deux vecteurs, l'un pour les noeuds, l'autre 
+pour les arcs, pour stocker les données. Ce \textit{crate} répondait parfaitement aux besoins de 
+la nouvelle architecture pour l'index des fichiers, répertoires et tags : il fournit une implémentation 
+d'un graphe et permet l'accès aux noeud de l'extérieur du graphe.
+Pour plus de détails sur cette sous-section, ces différents articles abordent cette problématique 
+et donnent davantage de détails sur les possibles solutions \cite{ref2} \cite{ref26} \cite{ref49} 
+\cite{ref46} \cite{ref47} \cite{ref48}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Améliorations futures}
+Bien que le cahier des charges a été rempli, l'état du système au moment du rendu n'était pas parfait, 
+voici une liste non exhaustive d'améliorations qui pourraient être apportées :
 \begin{itemize}
-    \item Environnement de bureau (Nautilus, Nemo) et/ou page web
-    \item Daemon pour Tag Engine
-    \item Ajouter des paths à surveiller après coup
-    \item Clés USB -> \mintinline{c}{inotify} limitations, inotifywait, dossier /media
-    \item Davantage de tests
+    \item Intégration à un gestionnaire de fichiers Linux (Nautilus, Nemo, etc.) pour la manipulation
+        des tags (ajout, suppression) et pour exécuter les requêtes. Une alternative serait de réaliser 
+        une interface similaire sous forme d'application web par exemple.
+    \item Transformation de Tag Engine en \textit{Daemon} (un processus détaché du shell parent et 
+        qui n'imprime pas ses résultats sur la sortie standard). Il pourrait se lancer au démarrage 
+        de l'\acrshort{os} et écrire ses résultats et indexes dans des fichiers.
+    \item Possibilité d'ajouter des nouveaux chemins de répertoires à surveiller après le lancement 
+        initial de Tag Engine. Actuellement, le programme se lance avec un seul chemin de répertoire
+        à surveiller. Il faut pour cela modifier la gestion des threads et des données dans Tag 
+        Engine.
+    \item Gestion des périphériques amovibles et de leurs \acrshort{fs}. \mintinline{bash}{inotify} ne 
+        permet pas de surveiller le dossier \mintinline{text}{/media} de la même manière qu'un 
+        autre répertoire. Il faut donc pouvoir détecter le branchement d'un périphérique de stockage 
+        et ajouter une nouvelle surveillance sur le répertoire monté.
+    \item Réaliser davantage de tests, plus globaux que des tests unitaires et de performances.
 \end{itemize}

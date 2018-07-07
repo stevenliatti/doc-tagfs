@@ -1,7 +1,6 @@
 CC=xelatex -shell-escape
 REPORT=report
-PRES1=pres1
-PRES2=pres2
+PRES=pres
 ANNEXES=annexes
 
 all: $(REPORT).pdf $(ANNEXES).pdf
@@ -19,14 +18,9 @@ $(ANNEXES).pdf: $(ANNEXES).tex ../tag_manager/src/* ../tag_engine/src/*
 	$(CC) $(ANNEXES).tex
 	make mostlyclean
 
-$(PRES1).pdf: $(PRES1).tex images/*
-	$(CC) $(PRES1).tex
-	$(CC) $(PRES1).tex
-	make mostlyclean
-
-$(PRES2).pdf: $(PRES2).tex images/*
-	$(CC) $(PRES2).tex
-	$(CC) $(PRES2).tex
+$(PRES).pdf: $(PRES).tex images/*
+	$(CC) $(PRES).tex
+	$(CC) $(PRES).tex
 	make mostlyclean
 
 mostlyclean:

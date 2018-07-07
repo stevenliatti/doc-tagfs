@@ -106,8 +106,7 @@ l'opération en utilisant la notation \textit{Big O}. Les variables suivantes so
         Suppression d'un tag d'un fichier/répertoire & Supprimer le fichier de l'ensemble des 
             chemins de fichiers associés au tag -> $O(c)$ & Parcourir l'arbre à la recherche 
             du fichier et supprimer le tag de l'ensemble des tags existants -> $O(p * c)$ \\ \hline
-        % TODO:
-        % Renommage d'un tag &  &  \\ \hline
+        % TODO: Renommage d'un tag &  &  \\ \hline
         Ajout d'un fichier & Pour tous les tags du fichier, ajouter au besoin le tag et lui 
             associer le chemin de fichier -> $O(t * c)$ & Parcourir l'arbre à 
             la recherche du répertoire parent du fichier, ajouter le nouveau noeud et l'ensemble 
@@ -213,8 +212,7 @@ lorsque le \acrshort{fs} est manipulé. Les variables suivantes sont définies :
             noeud fichier et supprimer le lien entre noeud tag et fichier. Si le noeud tag 
             n'est relié à aucun autre noeud, le supprimer -> $O(p * c)$ & Si le noeud tag 
             n'est relié à aucun autre noeud, supprimer l'entrée -> $O(c)$ \\ \hline
-        % TODO:
-        % Renommage d'un tag &  &  \\ \hline
+        % TODO: Renommage d'un tag &  &  \\ \hline
         Ajout d'un fichier & Parcourir le graphe à la recherche du répertoire parent, 
             ajouter le nouveau noeud. Pour les tags existants, lier le nouveau noeud, sinon créer 
             le nouveau noeud tag correspondant -> $O(p * t * c)$ & Identique à l'ajout d'un tag à 
