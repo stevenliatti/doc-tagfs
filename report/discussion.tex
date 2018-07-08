@@ -1,10 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Discussion des résultats des tests}
-% TODO: discussion des résultats
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Rust VS C}
 Dans cette sous-section, nous allons discuter de l'implémentation du système en Rust plutôt qu'en 
 C. Les avantages sont nombreux et les inconvénients sont acceptables.
@@ -225,8 +220,16 @@ et donnent davantage de détails sur les possibles solutions \cite{ref2} \cite{r
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Améliorations futures}
-Bien que le cahier des charges a été rempli, l'état du système au moment du rendu n'était pas parfait, 
+\subsection{Résultats et améliorations futures}
+Les résultats des mesures de performances réalisés à la sous-section \ref{mesures_performances} 
+montrent que le parcours initial du graphe est relativement rapide, tout du moins se déroule 
+avec très peu de latence même pour un répertoire contenant plus de 15'000 répertoires et plus de 
+100'000 fichiers (une moyenne d'exécution de deux secondes pour scanner toute l'arborescence). Il 
+est raisonnable de dire que cette opération est parmi celles les plus lourdes pour une arborescence 
+donnée, le programme peut donc être labélisé performant. Cependant, pour s'en assurer totalement, 
+il faudrait réaliser des tests supplémentaires lors de plus longues utilisations.
+\bigbreak
+Bien que le cahier des charges ait été rempli, l'état du système au moment du rendu n'était pas parfait, 
 voici une liste non exhaustive d'améliorations qui pourraient être apportées :
 \begin{itemize}
     \item Intégration à un gestionnaire de fichiers Linux (Nautilus, Nemo, etc.) pour la manipulation
