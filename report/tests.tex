@@ -28,8 +28,8 @@ fn main() {
 \end{code}
 \bigbreak
 En tout, 200 exécutions ont été réalisées, 100 avec le programme compilé 
-en mode \textit{debug} (\mintinline{bash}{cargo build}, non optimisé) et 100 avec le programme 
-compilé en mode \textit{release} (\mintinline{bash}{cargo build --release}, avec optimisations maximum).
+en mode \textit{debug} (\mintinline{bash}{cargo build}, non optimisé) et 100 avec le mode 
+\textit{release} (\mintinline{bash}{cargo build --release}, avec optimisations maximum).
 Les versions de Cargo et rustc sont les suivantes : cargo 0.26.0 (41480f5cc 2018-02-26) et rustc 1.25.0 (84203cac6 2018-03-25).
 Les répertoires cibles diffèrent grandement dans leur nombre de sous-répertoires et fichiers contenus, allant 
 de cinq répertoires et 863 fichiers à plusieurs milliers de répertoires et une centaine de milliers 
@@ -78,20 +78,20 @@ logicielles suivantes (les commandes \mintinline{bash}{lscpu}, \mintinline{bash}
     \label{script_bash_measures}
 \end{code}
 \bigbreak
-Les moyennes obtenues sont représentées à la figure \ref{histo}. L'axe des y représente le temps 
-moyen d'exécution du programme. L'axe des x représente les sept répertoires utilisés pour ce test. 
+Les moyennes obtenues sont représentées sur la figure \ref{histo}. L'axe des ordonnées représente le temps 
+moyen d'exécution du programme. L'axe des abscisses représente les sept répertoires utilisés pour ce test. 
 Pour chaque répertoire, il y a une mesure du programme compilé en mode \textit{debug} (barre bleue) 
 et une mesure du programme compilé en mode \textit{release} (barre orange). On remarque que les 
 deux répertoires contenant le plus de fichiers, à savoir \mintinline{text}{Android} et 
 \mintinline{text}{Documents}, sont ceux dont le temps d'exécution est le plus long. Globalement, 
 moins un répertoire contient d'entrées, moins le temps d'exécution sera long. À deux répertoires 
 équivalents en termes d'entrées, les variations qui peuvent survenir sont très certainement dûes 
-au spécificités des fichiers contenus, comme leur taille sur le disque par exemple.
+aux spécificités des fichiers contenus, comme leur taille sur le disque.
 \begin{figure}
     \begin{center}
         \fbox{\includegraphics[width=1\textwidth]{images/histo.png}}
     \end{center}
-    \caption{Temps d'exécution en fonction du répertoire}
+    \caption{Temps d'exécution en fonction du répertoire et par type de mode de compilation}
     \label{histo}
 \end{figure}
 Il est intéressant de remarquer que le rapport de temps d'exécution entre la version non-optimisée 
@@ -99,14 +99,14 @@ et optimisée peut être important. La figure \ref{histo2} donne illustre ces ra
 voyons que la différence varie entre 5.93 pour \mintinline{text}{android-studio} et 1.33 pour 
 \mintinline{text}{Images}, de manière générale ce sont à nouveau les répertoires 
 avec le plus d'entrées qui ont les rapports les plus importants. Le répertoire \mintinline{text}{Images} 
-contenant peu d'éléments en comparaison, il est difficile d'optimiser davantage le nombre 
-également réduit d'opérations effectuées à l'exécution du programme. La leçon à tirer de ces rapports est 
+contenant peu d'éléments, moins d'opérations sont exécutées, il est donc plus difficile d'optimiser ce nombre 
+réduit d'opérations durant l'exécution du programme. La leçon à tirer de ces rapports est 
 que le compilateur Rust est capable de grandes optimisations sur le code.
 \begin{figure}
     \begin{center}
         \fbox{\includegraphics[width=1\textwidth]{images/histo2.png}}
     \end{center}
-    \caption{Rapport entre le temps d'exécution en mode \textit{debug} et en mode \textit{release}}
+    \caption{Rapport entre le temps d'exécution en mode \textit{debug} et \textit{release}}
     \label{histo2}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
