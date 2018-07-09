@@ -1,11 +1,7 @@
-
-% TODO: schéma global des deux programmes avec interactions
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Tag Manager}\label{tag_manager}
-% TODO: schéma résumant l'utilisation : clap -> soit sockets, soit modif fichiers avec lib
-% Schéma vertical avec flèches
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Description du programme et du code}\label{tag_manager_description}
@@ -19,8 +15,8 @@ donnés. Cet outil dépend de deux \textit{crates} disponibles sur \href{https:/
 \mintinline{text}{user.tags} et sont séparés entre eux par des virgules.
 \subparagraph{clap}
 (Command Line Argument Parser for Rust) est une 
-librairie pour \textit{parse} les arguments d'un programme en ligne de commande. Elle s'occupe d'analyser 
-et de valider les arguments fournis par l'utilisateur. Elle dispose de plusieurs syntaxes pour 
+librairie pour \textit{parse} les arguments d'un programme en ligne de commande. Elle analyse 
+et valide les arguments fournis par l'utilisateur. Elle dispose de plusieurs syntaxes pour 
 définir les arguments des commandes et options attendues par notre programme \acrshort{cli}. 
 Sur le dépôt github de clap, dans le 
 dossier \textit{examples}, plusieurs exemples d'utilisation sont fournis. Pour illustrer son 
@@ -138,6 +134,19 @@ opérandes (les tags) doivent être séparés par un espace.
     \captionof{table}{Format du protocole des requêtes au serveur Tag Engine}
     \label{tag_manager_sockets_protocol}
 \end{center}
+La figure \ref{tag_manager_schema} résume le fonctionnement du programme : 
+\begin{enumerate}
+    \item Analyse des arguments.
+    \item Exécution des commandes (soit sur les fichiers, soit requête vers le serveur).
+    \item Impression des résultats.
+\end{enumerate}
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{images/tag_manager.png}
+    \end{center}
+    \caption{Schéma de fonctionnement de Tag Manager}
+    \label{tag_manager_schema}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,8 +185,7 @@ du deuxième groupe, il faut évidemment que le serveur Tag Engine soit lancé.
     \captionof{table}{Utilisation et arguments attendus par Tag Manager}
     \label{tag_manager_usage}
 \end{center}
-Le listing \ref{tag_manager_ex} illustre les usages et retours de Tag Manager. Le terminal se situe 
-dans le répertoire \mintinline{text}{/home/stevenliatti}. Tout d'abord, Tag Manager est utilisé pour 
+Le listing \ref{tag_manager_ex} illustre les usages et retours de Tag Manager. Tout d'abord, Tag Manager est utilisé pour 
 lister récursivement les tags des fichiers et sous-répertoires donnés, attribuer les tags \mintinline{text}{in_a} 
 et \mintinline{text}{myfiles} à différents fichiers et répertoires, lister les tags existants et faire 
 une requête sur les deux tags. L'arborescence utilisée pour l'exemple est constituée des quatre fichiers 
@@ -199,11 +207,9 @@ et deux répertoires suivants :
 \end{code}
 \bigbreak
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Tag Engine}\label{tag_engine_realisation}
-% TODO: schéma résumant l'utilisation
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -543,7 +549,19 @@ un ensemble au sens mathématique des fichiers et répertoires vers lesquels il 
 est placé sur la pile. Lorsqu'un opérateur survient, les deux derniers ensembles d'entrées sont 
 dépilés et l'opération ensembliste correspondante leur est appliquée (une intersection pour un "AND" 
 et une union pour un "OR"). Le nouvel ensemble ainsi obtenu est de nouveau poussé sur la pile. 
-À la fin de l'algorithme, l'ensemble final est retourné.
+À la fin de l'algorithme, l'ensemble final est retourné. La figure \ref{tag_engine_schema} résume 
+le fonctionnement du programme : 
+\begin{enumerate}
+    \item Thread \mintinline{rust}{main}, maintenant graphe et \textit{hashmap} et surveillant l'arborescence.
+    \item Thread serveur sockets répondant aux requêtes.
+\end{enumerate}
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=1\textwidth]{images/tag_engine.png}
+    \end{center}
+    \caption{Schéma de fonctionnement de Tag Engine}
+    \label{tag_engine_schema}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -585,4 +603,20 @@ pour dessiner un graphe. Nous pouvons voir que le résultat obtenu concorde avec
     \end{center}
     \caption{Image du graphe obtenue avec la commande \mintinline{bash}{dot}}
     \label{tag_engine_petgraph_dot_image}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{TagFS}
+La figure \ref{tagfs_schema} résume le fonctionnement global du système TagFS, comportant Tag Manager et Tag Engine : 
+\begin{enumerate}
+    \item Gestion des tags avec Tag Manager.
+    \item Indexation et surveillance de l'arborescence et serveur avec Tag Engine.
+\end{enumerate}
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=1\textwidth]{images/tagfs.png}
+    \end{center}
+    \caption{Schéma de fonctionnement global de TagFS}
+    \label{tagfs_schema}
 \end{figure}
