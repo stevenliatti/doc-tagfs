@@ -1,14 +1,12 @@
 $ ./tag_engine /home/stevenliatti/a -d
 graph StableGraph {
-    Ty: "Directed",
-    node_count: 6, edge_count: 5,
+    Ty: "Directed", node_count: 6, edge_count: 5,
     edges: (0, 1), (1, 2), (1, 3), (0, 4), (0, 5),
     node weights: {
         0: Directory "a", 1: Directory "b", 2: File "b1", 
         3: File "b2", 4: File "a2", 5: File "a1"
     },
-    free_node: NodeIndex(4294967295),
-    free_edge: EdgeIndex(4294967295)
+    free_node: NodeIndex(4294967295),free_edge: EdgeIndex(4294967295)
 }, tags_index {}
 chmod : "a/a1"
 chmod : "a/a2"
@@ -17,8 +15,7 @@ chmod : "a/b"
 chmod : "a/b/b1"
 chmod : "a/b/b2"
 graph StableGraph {
-    Ty: "Directed",
-    node_count: 8, edge_count: 11,
+    Ty: "Directed", node_count: 8, edge_count: 11,
     edges: (0, 1), (1, 2), (1, 3), (0, 4), (0, 5), (6, 5), (6, 4), 
         (6, 1), (7, 1), (7, 2), (7, 3),
     node weights: {
@@ -26,8 +23,7 @@ graph StableGraph {
         3: File "b2", 4: File "a2", 5: File "a1",
         6: Tag "in_a", 7: Tag "myfiles"
     },
-    free_node: NodeIndex(4294967295),
-    free_edge: EdgeIndex(4294967295)
+    free_node: NodeIndex(4294967295),free_edge: EdgeIndex(4294967295)
 }, tags_index {
     "in_a": NodeIndex(6), "myfiles": NodeIndex(7)
 }

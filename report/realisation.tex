@@ -10,33 +10,35 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Description du programme et du code}\label{tag_manager_description}
 La première réalisation de ce projet est un outil en ligne de commande, écrit en Rust, permettant 
-de facilement lister, ajouter et supprimer des tags à des fichiers et dossiers (avec une option 
-récursive pour les dossiers) et d'exécuter des requêtes vers le serveur (Tag Engine, sous-section 
+de facilement lister, ajouter et supprimer des tags à des fichiers et répertoires (avec une option 
+récursive pour ces derniers) et d'exécuter des requêtes vers le serveur (Tag Engine, sous-section 
 \ref{tag_engine_realisation}) pour lister 
 les tags existants, renommer un tag et demander la liste des fichiers correspondant à des tags 
 donnés. Cet outil dépend de deux \textit{crates} disponibles sur \href{https://crates.io}{crates.io} 
-: clap \cite{ref22} et xattr \cite{ref23}.
+: clap \cite{ref22} et xattr \cite{ref23}. Les tags sont stockés dans un \acrshort{xattr} nommé 
+\mintinline{text}{user.tags} et sont séparés entre eux par des virgules.
 \subparagraph{clap}
 (Command Line Argument Parser for Rust) est une 
-librairie pour parser les arguments d'un programme en ligne de commande. Elle s'occupe d'analyser 
+librairie pour \textit{parse} les arguments d'un programme en ligne de commande. Elle s'occupe d'analyser 
 et de valider les arguments fournis par l'utilisateur. Elle dispose de plusieurs syntaxes pour 
-définir les arguments des commandes de notre programme. Sur le dépôt github de clap, dans le 
+définir les arguments des commandes et options attendues par notre programme \acrshort{cli}. 
+Sur le dépôt github de clap, dans le 
 dossier \textit{examples}, plusieurs exemples d'utilisation sont fournis. Pour illustrer son 
 utilisation, le listing \ref{tag_manager_clap} reprend l'exemple \mintinline{text}{01a_quick_example.rs} 
 avec la plupart des commentaires tronqués et des adaptations de mise en page. Des lignes 2 à 13, 
 les arguments attendus et les informations sur l'application sont définis avec entre autres la 
 version du programme, le nom de l'auteur, etc. Dans cet exemple, les arguments sont définis à 
 partir d'une chaîne de caractères respectant un format bien spécifique. clap génère automatiquement 
-une aide au programme à partir des arguments définis s'il est lancé sans aucun des arguments attendus.
+une aide au programme à partir des arguments définis s'il est lancé sans aucun des arguments obligatoires.
 À partir de la ligne 15, les arguments reçus sont utilisés. La méthode \mintinline{rust}{value_of()} 
 retourne la valeur d'un argument présent à l'exécution. Il est donc aisé d'utiliser les arguments 
 donnés en tant que variables du programme. clap donne également la possibilité de regrouper les 
 arguments. Un seul argument d'un groupe peut être présent à l'exécution, ce qui évite de nombreuses 
-conditions de détection des arguments.
+conditions de détection et d'exclusion des arguments.
 \subparagraph{xattr}
 est une \acrshort{api} 
 en Rust pour récupérer, lister, ajouter/modifier et supprimer des \acrshort{xattr} accrochés à des 
-fichiers avec Rust. C'est essentiellement un wrapper des \acrshort{syscall} en C fournis par Linux 
+fichiers avec Rust. C'est essentiellement un \textit{wrapper} des \acrshort{syscall} en C fournis par Linux 
 et d'autres \acrshort{os} pour manipuler les \acrshort{xattr}. À noter que les fonctions offertes ne 
 suivent pas les liens symboliques (il est fait de même pour Tag Manager lui-même). Quatre fonctions 
 sont disponibles : \mintinline{rust}{get()}, \mintinline{rust}{list()}, \mintinline{rust}{set()} 
@@ -89,7 +91,7 @@ fn main() {
 Tag Manager est constitué de deux fichiers. Le premier, \mintinline{rust}{main.rs} contient les 
 définitions et détections des arguments fournis par l'utilisateur avec clap (voir listing 
 \ref{tag_manager_main_args}), les appels aux fonctions 
-manipulant les \acrshort{xattr} des fichiers et la partie socket de connexion, requête et attente 
+manipulant les tags des fichiers et la partie socket de connexion, requêtes et attente 
 de réponse du serveur (Tag Engine, sous-section \ref{tag_engine_realisation}). Le deuxième fichier, 
 \mintinline{rust}{lib.rs}, contient l'\acrshort{api} publique pour récupérer, attribuer, renommer 
 et supprimer les tags pour un fichier donné et un module de test de ces fonctions. À noter que 
@@ -119,15 +121,16 @@ avec des \textit{pattern matching} sont utilisées dès que possible.
 La communication socket est réalisée grâce la librairie standard \mintinline{rust}{UnixStream}, 
 équivalent aux sockets \mintinline{c}{AF_UNIX} en C (voir sous-section \ref{sockets_doc}). Le 
 fichier adresse des sockets est par défaut écrit dans \mintinline{text}{/tmp/tag_engine}. Le format 
-des requêtes respecte le petit protocole décrit dans la table \ref{tag_manager_sockets_protocol}.
+des requêtes respecte le petit protocole décrit dans la table \ref{tag_manager_sockets_protocol}. 
+Le début de la requête est formé du code à troix caractères.
 La requête listant les fichiers selon une expression logique des tags accepte les opérateurs 
 \mintinline{text}{AND} et \mintinline{text}{OR}, avec la précédance logique du premier sur le 
 second (voir sous-section \ref{tag_engine_realisation} pour plus de détails). Les opérateurs et 
-opérandes (les tags) doivent être espacés par un espace.
+opérandes (les tags) doivent être séparés par un espace.
 \begin{center}
     \begin{tabular}{|p{6cm}|c|p{6cm}|} \hline
         \textbf{Requête} & \textbf{Code} & \textbf{Exemple} \\ \hline
-        Fichers et dossiers correspondant à une expression logique de tags & \mintinline{text}{0x0} & 
+        Fichiers et répertoires correspondants à une expression logique de tags & \mintinline{text}{0x0} & 
             \mintinline{text}{0x0 tag1 OR tag2 AND tag3} \\ \hline
         Liste des tags existants & \mintinline{text}{0x1} & \mintinline{text}{0x1} \\ \hline
         Renommage d'un tag & \mintinline{text}{0x2} & \mintinline{text}{0x2 old_name new_name} \\ \hline
@@ -141,7 +144,7 @@ opérandes (les tags) doivent être espacés par un espace.
 \subsubsection{Utilisation du programme et exemples}\label{tag_manager_utilisation}
 L'utilisation des différents arguments du programme est résumée dans la table \ref{tag_manager_usage}. 
 Les arguments sont divisés en deux groupes, le premier pour manipuler directement les fichiers et 
-leurs tags, le deuxième pour exécuter des requêtes au serveur Tag Engine. Pour le premier groupe, 
+leurs tags, le deuxième pour exécuter des requêtes vers le serveur Tag Engine. Pour le premier groupe, 
 l'argument \mintinline{text}{-f} ou \mintinline{text}{--files} est obligatoire. Pour les opérations 
 du deuxième groupe, il faut évidemment que le serveur Tag Engine soit lancé.
 \begin{center}
@@ -175,10 +178,10 @@ du deuxième groupe, il faut évidemment que le serveur Tag Engine soit lancé.
 \end{center}
 Le listing \ref{tag_manager_ex} illustre les usages et retours de Tag Manager. Le terminal se situe 
 dans le répertoire \mintinline{text}{/home/stevenliatti}. Tout d'abord, Tag Manager est utilisé pour 
-lister récursivement les tags des fichiers et sous-dossiers donnés, attribuer les tags \mintinline{text}{in_a} 
-et \mintinline{text}{myfiles} à différents fichiers et dossiers, lister les tags existants et faire 
-une requête sur les deux tags. L'arborescence utilisée pour l'exemple se situe dans le répertoire 
-\mintinline{text}{home} de l'utilisateur et est constituée des quatre fichiers et deux répertoires suivants :
+lister récursivement les tags des fichiers et sous-répertoires donnés, attribuer les tags \mintinline{text}{in_a} 
+et \mintinline{text}{myfiles} à différents fichiers et répertoires, lister les tags existants et faire 
+une requête sur les deux tags. L'arborescence utilisée pour l'exemple est constituée des quatre fichiers 
+et deux répertoires suivants :
 \dirtree{%
 .1 a.
 .2 a1.
@@ -200,30 +203,29 @@ une requête sur les deux tags. L'arborescence utilisée pour l'exemple se situe
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Tag Engine}\label{tag_engine_realisation}
+% TODO: schéma résumant l'utilisation
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Description du programme et du code}
-La deuxième réalisation de ce projet est un programme "indexant" (ne crée pas un index au sens 
-strict du terme, voir explications plus loin) et surveillant une arborescence de 
+La deuxième réalisation pratique de ce projet est un programme indexant et surveillant une arborescence de 
 répertoires, fichiers et tags associés. Ce programme fait également office de serveur pour les 
 requêtes émises depuis Tag Manager. Il est divisé en plusieurs fichiers et modules :
-% TODO: expliquer mutex + arc
 \begin{itemize}
     \item \mintinline{rust}{graph.rs} : module relatif à la construction et 
         maintenance du graphe des tags, fichiers et répertoires (voir paragraphe \textbf{petgraph}).
-    \item \mintinline{rust}{lib.rs} : regroupe les modules et contient la fonction 
+    \item \mintinline{rust}{lib.rs} : regroupe les autres modules et contient la fonction 
         \mintinline{rust}{dispatcher()}, appelée lors d'un événement sur l'arborescence surveillée 
         (voir paragraphe \textbf{notify}).
     \item \mintinline{rust}{main.rs} : point d'entrée du programme, initialise les variables 
         partagées, le thread socket serveur et écoute indéfiniment sur les événements survenus 
-        sur l'arborescence surveillée (voir paragraphe \textbf{Threads et \textit{channel}}).
+        sur l'arborescence surveillée.
     \item \mintinline{rust}{parse.rs} : module de conversion d'une expression infixe vers postfixe 
         (voir paragraphe \textbf{Analyse d'une expression logique}).
     \item \mintinline{rust}{server.rs} : module construisant le serveur socket et répondant 
         aux différentes requêtes émises depuis Tag Manager (voir paragraphe \textbf{Serveur sockets}).
 \end{itemize}
-% TODO: schéma résumant l'utilisation
-Ce programme dépend de quatre \textit{crates}. Le premier est 
+Ce programme dépend de quatre \textit{crates} externes. Le premier est 
 tag\_manager (la librairie des fonctions manipulant les \acrshort{xattr}, voir sous-section \ref{tag_manager}), 
 réalisé au cours de ce projet. Les trois autres sont disponibles sur \href{https://crates.io}{crates.io}, 
 il s'agit de walkdir \cite{ref43}, petgraph \cite{ref44} et notify \cite{ref45}.
@@ -231,12 +233,13 @@ il s'agit de walkdir \cite{ref43}, petgraph \cite{ref44} et notify \cite{ref45}.
 \subparagraph{walkdir}
 est une librairie pour parcourir efficacement et de manière récursive une arborescence de fichiers.
 Elle offre différentes structures, dont \mintinline{rust}{WalkDir} et \mintinline{rust}{DirEntry}. 
-\mintinline{rust}{WalkDir} attend un chemin de répertoire et retourne un itérateur récursif sur 
+\mintinline{rust}{WalkDir} attend un chemin de répertoire et retourne un itérateur listant 
 chaque sous-répertoire et fichier contenu dans le répertoire de départ. Chaque entrée de cet 
 itérateur est représenté par la structure \mintinline{rust}{DirEntry}, qui détient des méthodes 
 pour obtenir des informations sur l'entrée (le chemin complet, les méta-données, si c'est un 
 répertoire ou un fichier, son nom, etc.). Le listing \ref{walkdir_demo} illustre un exemple de 
-parcours d'un répertoire. walkdir est utilisé pour réaliser le premier scan de l'arborescence 
+parcours d'un répertoire et de l'affichage des informations pour chaque entrée rencontrée. 
+walkdir est utilisé pour réaliser le premier balayage de l'arborescence 
 fournie et constituer le graphe (voir listing \ref{tag_engine_graph_make_graph}).
 \bigbreak
 \begin{code}
@@ -261,7 +264,7 @@ représenter un graphe et des modules de manipulation et parcours de graphes. Le
 données sont au nombre de trois :
 \begin{enumerate}
     \item \mintinline{rust}{Graph<N, E, Ty = Directed, Ix = DefaultIx>} : représente un graphe et 
-        ses données sous forme de deux listes d'adjacence (deux \mintinline{rust}{Vec}, un pour les 
+        ses données sous forme de deux listes d'adjacences (deux \mintinline{rust}{Vec}, un pour les 
         noeuds et l'autre pour les arcs ou arêtes). Les noeuds sont de type générique \mintinline{rust}{N}, 
         les arcs ou arêtes de type générique \mintinline{rust}{E}, le graphe est par défaut orienté (type 
         \mintinline{rust}{Directed}) et le type pour l'index (l'identifiant numérique d'un noeud et 
@@ -282,7 +285,7 @@ choisie pour représenter l'arborescence des fichiers et tags à surveiller. Un 
 être soit un fichier, soit un répertoire, soit un tag. Le lien entre un répertoire et un sous-répertoire 
 ou un fichier est symbolisé par un arc partant du répertoire en question. Le lien entre un tag et 
 un répertoire ou un fichier est également un arc partant du tag en question. Un arc n'a pas de 
-donnée à sauvegarder, il n'a donc pas de type effectif. Pour accélérer l'accès à un tag dans le 
+données à sauvegarder, il n'a donc pas de type effectif. Pour accélérer l'accès à un tag dans le 
 graphe à partir de son nom, une \textit{hashmap} associant le nom du tag à son identifiant dans le graphe 
 est maintenue.
 
@@ -297,12 +300,13 @@ par un type vide, nommé \mintinline{rust}{Nil}. petgraph offre de nombreuses m�
 \mintinline{rust}{StableGraph} : accès, ajout et suppression de noeuds et d'arcs, un itérateur sur 
 les voisins d'un noeud (avec indication du sens), recherche d'arcs entre deux noeuds, etc. La 
 fonction \mintinline{rust}{make_graph()} listée au listing \ref{tag_engine_graph_make_graph} est 
-la fonction première du module, elle crée le graphe et la \textit{hashmap} avec walkdir à partir du
+la fonction première de notre module, elle crée le graphe et la \textit{hashmap} avec walkdir à partir du
 chemin du répertoire racine. Elle retourne le graphe contenant les fichiers, répertoires et tags 
-trouvés, la \textit{hashmap} et l'identifiant du noeud racine, point de départ pour les mises à 
+trouvés, la \textit{hashmap} remplie et l'identifiant du noeud racine, point de départ pour les mises à 
 jour suivantes du graphe (sur les fichiers et répertoires). La fonction \mintinline{rust}{make_subgraph()}, 
 appelée dans la boucle s'assure d'ajouter correctement les noeuds en fonction du chemin, pour éviter 
-de créer deux fois le même noeud par exemple.
+de créer deux fois le même noeud ou pour qu'un noeud enfant ne soit créé avant son parent 
+(il n'y a pas de garantie de parcourir l'arborescence des fichiers dans un ordre parent-enfants).
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
@@ -314,23 +318,22 @@ de créer deux fois le même noeud par exemple.
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
-        tabsize=2,firstline=85,lastline=110]{rust}{../tag_engine/src/graph.rs}
+        tabsize=2,firstline=83,lastline=108]{rust}{../tag_engine/src/graph.rs}
     \caption{Fonction \mintinline{rust}{make_graph()} dans \mintinline{rust}{src/graph.rs}}
     \label{tag_engine_graph_make_graph}
 \end{code}
 \bigbreak
-Pour chaque fichier et répertoire la fonction \mintinline{rust}{update_tags()}, listée au listing 
-\ref{tag_engine_graph_update_tags} compare les tags dans les \acrshort{xattr} aux tags présents 
-dans le graphe et met à jour les relations au besoin.
+Pour chaque fichier et répertoire, la fonction \mintinline{rust}{update_tags()}, listée au listing 
+\ref{tag_engine_graph_update_tags}, compare les tags dans les \acrshort{xattr} aux tags présents 
+dans le graphe et met à jour les relations si besoin.
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
-        tabsize=2,firstline=220,lastline=232]{rust}{../tag_engine/src/graph.rs}
+        tabsize=2,firstline=217,lastline=229]{rust}{../tag_engine/src/graph.rs}
     \caption{Fonction \mintinline{rust}{update_tags()} dans \mintinline{rust}{src/graph.rs}}
     \label{tag_engine_graph_update_tags}
 \end{code}
 \bigbreak
-% TODO: relire, éventuellement ajouter qqch
 
 \subparagraph{notify}\label{tag_engine_notify}
 est une librairie multiplateforme de notifications d'événements sur le système de fichier. 
@@ -367,34 +370,24 @@ les suivants :
 \end{itemize}
 Le détail de ce mécanisme est disponible au listing \ref{tag_engine_notify_main}, des lignes 14 à 33.
 
-\subparagraph{Serveur sockets}\label{tag_engine_socket}
-Le fichier \mintinline{rust}{src/server.rs} contient toute la logique des traitements de requêtes 
-provenant de Tag Manager. Comme vu sur le listing \ref{tag_engine_notify_main} aux lignes 10 à 12, 
-le serveur est lancé dans un thread séparé. De ce fait, Tag Engine peut écouter à la fois sur les 
-événements du \acrshort{fs} et sur les requêtes provenant de Tag Manager. Trois types de requêtes 
-sont implémentés, le détail est disponible dans la table \ref{tag_manager_sockets_protocol} de la 
-sous-section \ref{tag_manager_description}. Le code reçu est converti en une \mintinline{rust}{enum}, 
-\mintinline{rust}{RequestKind}, visible dans le listing \ref{tag_engine_socket_enum}, pour faciliter 
-la manipulation par \textit{pattern matching}.
-\bigbreak
-\begin{code}
-    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-enum RequestKind {
-    Entries(String),
-    Tags,
-    RenameTag(String)
-}
-    \end{minted}
-    \caption{Énumération \mintinline{rust}{RequestKind} dans le fichier \mintinline{rust}{server.rs}}
-    \label{tag_engine_socket_enum}
-\end{code}
-\bigbreak
-Chaque requête est tout d'abord analysée avec la 
-fonction \mintinline{rust}{parse_request()} qui détermine si la requête est valide et de quel type 
-il s'agit. Les verrous sont ensuite pris pour accéder au graphe et à la \textit{hashmap} pour 
-construire la réponse. Les fonctions lisant et écrivant les requêtes et réponses manipulent un 
-\mintinline{rust}{UnixStream}. 
-
+\subparagraph{Mutex et références multiples}
+Étant donné que le thread \mintinline{rust}{main}, consommant les événements émis par notify, et le 
+thread socket serveur, écoutant sur les requêtes entrantes, ont besoin tous deux de lire et modifier 
+le graphe et la \textit{hashmap} associée, la règle de base d'un seul \textit{owner} par valeur 
+n'est pas respectée. Par ailleurs, il ne faut pas que les threads accèdent en même temps à ces 
+deux variables, au risque de se retrouver avec des données incohérentes. Les solutions à ces deux 
+problèmes sont les références multiples atomiques, ou \textit{Atomic Reference Counting} (\mintinline{rust}{Arc}) 
+et les verrous, ou \mintinline{rust}{Mutex}. Les premières autorisent plusieurs \textit{owner} 
+simultanés et concurrents à une valeur, au prix d'une légère dégradation de performances pour 
+des questions de sécurité mémoire. Les seconds sont des verrous classiques en programmation 
+concurrente, comme ceux existant en C par exemple. Dans le listing \ref{tag_engine_notify_main}, 
+nous pouvons voir aux lignes 5 et 6 le graphe et la \textit{hashmap} être enveloppés dans un 
+\mintinline{rust}{Mutex}, lui-même enveloppé dans un \mintinline{rust}{Arc} et aux lignes 7 et 8 
+la création d'une référence à ce graphe et \textit{hashmap} grâce à la fonction 
+\mintinline{rust}{Arc::clone()}. À partir de là, si le thread \mintinline{rust}{main} désire utiliser 
+le graphe ou la \textit{hashmap}, il lui faut prendre le verrou, comme aux lignes 23 et 24 de ce même listing.
+Le thread serveur socket doit faire de même de son côté, c'est la raison pour laquelle à la ligne 11 
+il reçoit les variables \mintinline{rust}{graph} et \mintinline{rust}{tags_index} définies aux lignes 5 et 6.
 \bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
@@ -437,6 +430,34 @@ loop {
 \end{code}
 \bigbreak
 
+\subparagraph{Serveur sockets}\label{tag_engine_socket}
+Le fichier \mintinline{rust}{src/server.rs} contient toute la logique des traitements de requêtes 
+provenant de Tag Manager. Comme vu sur le listing \ref{tag_engine_notify_main} aux lignes 10 à 12, 
+le serveur est lancé dans un thread séparé. De ce fait, Tag Engine peut écouter à la fois sur les 
+événements du \acrshort{fs} et sur les requêtes provenant de Tag Manager. Trois types de requêtes 
+sont implémentés, le détail est disponible dans la table \ref{tag_manager_sockets_protocol} de la 
+sous-section \ref{tag_manager_description}. Le code reçu est converti en une \mintinline{rust}{enum}, 
+\mintinline{rust}{RequestKind}, visible dans le listing \ref{tag_engine_socket_enum}, pour faciliter 
+la manipulation par \textit{pattern matching}.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+enum RequestKind {
+    Entries(String),
+    Tags,
+    RenameTag(String)
+}
+    \end{minted}
+    \caption{Énumération \mintinline{rust}{RequestKind} dans le fichier \mintinline{rust}{server.rs}}
+    \label{tag_engine_socket_enum}
+\end{code}
+\bigbreak
+Chaque requête est tout d'abord analysée avec la 
+fonction \mintinline{rust}{parse_request()} qui détermine si la requête est valide et de quel type 
+il s'agit. Les verrous sont ensuite pris pour accéder au graphe et à la \textit{hashmap} pour 
+construire la réponse. Les fonctions lisant et écrivant les requêtes et réponses manipulent un 
+\mintinline{rust}{UnixStream}. 
+
 Il y a un mécanisme intéressant à montrer dans la fonction 
 \mintinline{rust}{request_tags()} recopiée dans le listing \ref{tag_engine_socket_collect}. La 
 fonction en elle-même n'est pas très complexe, elle prend le verrou sur la \textit{hashmap} des 
@@ -463,11 +484,10 @@ fn request_tags(tags_index_thread : &Arc<Mutex<HashMap<String,
     \label{tag_engine_socket_collect}
 \end{code}
 \bigbreak
-% \subparagraph{Threads et \textit{channel}}\label{tag_engine_main}
 
 \subparagraph{Analyse d'une expression logique}\label{tag_engine_parse}
 Le fichier \mintinline{rust}{src/parse.rs} contient principalement une fonction transformant 
-une expression logique infixe en postfixe (appelée également "notation polonaise inverse"). 
+une expression logique infixe en postfixe (appelée également "notation polonaise inverse" \cite{ref41}). 
 Dans le cadre de ce programme, elle est utilisée par la requête fournissant un ou plusieurs tags, 
 séparés par des "et" ou des "ou" logiques pour récupérer la liste des fichiers et répertoires 
 correspondants. Le type d'expression infixe est la manière "naturelle" en mathématiques ou en 
@@ -475,7 +495,7 @@ logique de déclarer la séquence d'opérateurs et opérandes d'un calcul ou d'u
 booléenne. Les exemples suivants sont plus explicites : l'expression logique infixe 
 \mintinline{text}{bob OR fred AND max} se traduirait en l'expression postfixe 
 \mintinline{text}{bob fred max AND OR}. L'algorithme utilisé pour implémenter cette fonction 
-a été réalisé par Premshree Pillai \cite{ref40}. Le listing \ref{tag_engine_infix_postfix} montre 
+est disponible ici \cite{ref40}. Le listing \ref{tag_engine_infix_postfix} montre 
 les deux \mintinline{rust}{enum} utilisée pour la conversion. Un \mintinline{rust}{Arg} est soit 
 un opérande avec un nom, soit un opérateur "AND" ou "OR". La méthode \mintinline{rust}{compare()}, 
 inspirée de Java, compare les deux opérateurs pour donner la priorité à "AND" sur "OR". Cette 
@@ -510,7 +530,8 @@ result <-- pop from the stack
     \label{tag_engine_postfix_algo}
 \end{code}
 \bigbreak
-Il n'est ainsi pas nécessaire d'établir une grammaire pour un analyseur de code source ou d'expressions 
+Il n'est ainsi pas nécessaire d'établir une grammaire d'analyse d'expressions, comme pour un 
+analyseur de code source ou d'expressions 
 régulières. Pour l'évaluation simple d'une expression comportant deux opérateurs différents uniquement, 
 cette solution est largement satisfaisante et efficace. La fonction convertissant l'expression 
 infixe vers postfixe se nomme \mintinline{rust}{infix_to_postfix()} et se trouve dans le fichier 
@@ -519,9 +540,9 @@ expression postfixe se nomme \mintinline{rust}{expression_to_entries()} et se tr
 \mintinline{rust}{server.rs}. Les opérandes de l'expression sont des tags et les deux opérateurs sont 
 "AND" et "OR". "AND" a la priorité sur "OR", comme la multiplication sur l'addition. Pour chaque tag, 
 un ensemble au sens mathématique des fichiers et répertoires vers lesquels il pointe est réalisé et 
-est empiler sur la pile. Lorsqu'un opérateur survient, les deux derniers ensembles d'entrées sont 
+est placé sur la pile. Lorsqu'un opérateur survient, les deux derniers ensembles d'entrées sont 
 dépilés et l'opération ensembliste correspondante leur est appliquée (une intersection pour un "AND" 
-et une union pour un "OR"). Le nouvel ensemble ainsi obtenu est de nouveau empilé sur la pile. 
+et une union pour un "OR"). Le nouvel ensemble ainsi obtenu est de nouveau poussé sur la pile. 
 À la fin de l'algorithme, l'ensemble final est retourné.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -533,13 +554,15 @@ standard l'état du graphe et de la \textit{hashmap} et écrit deux fichiers, \m
 et \mintinline{text}{graph.png}, après chaque événement survenu. Le listing \ref{tag_engine_ex} montre les 
 \textit{outputs} de Tag Engine correspondants aux opérations sur l'arborescence manipulée par 
 Tag Manager (voir section \ref{tag_manager_utilisation} et le listing \ref{tag_manager_ex}). 
-On aperçoit aux lignes 13 à 18 l'ajout des tags "in\_a" et "myfiles" et aux lignes 34 et 35 les 
+On aperçoit aux lignes 11 à 16 l'ajout des tags "in\_a" et "myfiles" et aux lignes 30 et 31 les 
 requêtes de tags et d'entrées effectuées.
 Les deux fichiers représentent également l'état du graphe. Le fichier \mintinline{text}{graph.dot} 
 respecte la syntaxe d'un outil appelé Graphviz \cite{ref50}, dédié à la modélisation et visualisation 
 de graphes. Il comprend plusieurs moteurs de génération de graphes à partir de données texte ou 
-brutes, dont \mintinline{bash}{dot} utilisé ici. À partir du fichier graph.dot, disponible au 
+brutes, dont \mintinline{bash}{dot} utilisé ici. À partir du fichier \mintinline{text}{graph.dot}, disponible au 
 listing \ref{tag_engine_petgraph_dot}, la figure \ref{tag_engine_petgraph_dot_image} est obtenue. 
+petgraph donne la possibilité de générer un fichier respectant la sémantique attendue par \mintinline{bash}{dot} 
+pour dessiner un graphe. Nous pouvons voir que le résultat obtenu concorde avec l'arborescence obtenue.
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
