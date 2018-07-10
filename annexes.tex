@@ -85,6 +85,32 @@
 
 % TODO: wrapper le code et vérifier les lignes des listings dans rapport
 
+\section{Compiler et exécuter le code}
+Le répertoire racine du projet contient deux répertoires, \mintinline{text}{tag_engine} et \mintinline{text}{tag_manager} dans 
+lesquels se trouvent le code source de chaque programme. Pour compiler et exécuter les programmes, 
+il faut tout d'abord avoir installé Rust et Cargo comme décrit dans le listing \ref{rust_installation} 
+pour Linux.
+\bigbreak
+\begin{code}
+    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{bash}
+$ curl https://sh.rustup.rs -sSf | sh
+$ source $HOME/.cargo/env
+    \end{minted}
+    \caption{Installation de Rust sur Linux ou macOS}
+    \label{rust_installation}
+\end{code}
+\bigbreak
+En se plaçant dans le répertoire racine avec un shell, il faut en premier lieu exécuter la 
+commande \mintinline{bash}{cargo build}. Elle crée deux exécutables \mintinline{text}{tag_engine} et 
+\mintinline{text}{tag_manager} dans le répertoire \mintinline{text}{target/debug}. L'utilisateur peut 
+soit utiliser ces deux exécutables, soit passer par Cargo avec la syntaxe suivante :
+\begin{itemize}
+	\item \mintinline{bash}{cargo run -p tag_engine /path/to/files} pour Tag Engine.
+	\item \mintinline{bash}{cargo run -p tag_manager} pour Tag Manager.
+\end{itemize}
+Le code source des deux programmes est disponible sur \url{https://github.com/stevenliatti/tagfs}. 
+
+
 \section{Code source de Tag Manager}
 
 \subsection{\mintinline{rust}{src/lib.rs}}

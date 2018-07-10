@@ -19,13 +19,17 @@ listes chaînées, car non triviales en Rust de par le fait de ses contraintes.
 \subsubsection{Installation}
 L'installation de Rust sur Linux et macOS est très simple. Les prérequis sont un 
 compilateur C (certaines librairies Rust en nécessitent un) et l'outil de transfert de données 
-\mintinline{bash}{curl}. Il suffit ensuite d'ouvrir un terminal et d'entrer la commande suivante :
+\mintinline{bash}{curl}. Il suffit ensuite d'ouvrir un terminal et d'entrer les commandes du listing 
+\ref{rust_installation}. La deuxième commande est facultative est n'est nécessaire que si l'on veut 
+utiliser Rust sans se déconnecter du shell courant.
 \bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{bash}
 $ curl https://sh.rustup.rs -sSf | sh
+$ source $HOME/.cargo/env
     \end{minted}
     \caption{Installation de Rust sur Linux ou macOS}
+    \label{rust_installation}
 \end{code}
 \bigbreak
 Sur Windows, la procédure est un peu plus longue mais tout aussi simple, il faut s'assurer d'avoir 
