@@ -2,12 +2,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Motivations}
 Avec l'augmentation de la puissance de calcul et la capacité de stockage de masse grandissante à un 
-prix raisonnable, nos ordinateurs gèrent des quantités de fichiers très importantes, de l'ordre du 
+prix raisonnable, nos ordinateurs personnels gèrent des quantités de fichiers très importantes, de l'ordre du 
 millier ou du million de fichiers. Que ce soit des images, des documents ou de la musique, les 
 réserves de stockage de fichiers semblent sans fin. Dès lors se pose la question de l'organisation 
 de ces nombreux fichiers. Comment doit-on ordonner ses photos personnelles ? Par date, par lieu, 
-par thème ? Ce sont trois bonnes réponses, mais malheureusement pour l'utilisateur, les \acrshort{os} 
-d'aujourd'hui ne proposent qu'une seule manière native d'organiser ses fichiers : 
+par thème ? Ce sont trois bonnes réponses, mais malheureusement pour l'utilisateur, les systèmes d'exploitation 
+(\acrshort{os}) d'aujourd'hui ne proposent qu'une seule manière native d'organiser ses fichiers : 
 la classique hiérarchie de répertoires, sous-répertoires et fichiers, sous la forme d'une arborescence.
 \bigbreak
 Comment retrouver rapidement la photo de votre chat dormant sur votre balcon au début de sa vie 
@@ -19,12 +19,12 @@ d'apposer une ou plusieurs étiquettes, ou "tags", sur ses fichiers et de lui fo
 avec laquelle il pourra aisément retrouver ses fichiers. Il doit garder le contrôle sur ses fichiers 
 et pouvoir les manipuler comme il l'a toujours fait. Les tags doivent être stockés avec les fichiers, 
 pour qu'ils ne soient pas perdus en cas de grand changement dans le système. L'utilisation des 
-attributs étendus, ou \textit{extended attributes} est la manière la plus naturelle de répondre à 
+attributs étendus, ou \textit{extended attributes} (\acrshort{xattr}), est la manière la plus naturelle de répondre à 
 ce dernier besoin : les tags "voyagent" ainsi avec les fichiers. Nous verrons qu'il existe 
 des applications résolvant en partie ce problème. Finalement, cette interface doit être performante et fiable. 
 \bigbreak
 Ces deux qualificatifs, performant et fiable, résument le langage de programmation Rust. Rust est 
-un langage de programmation moderne fort d'une communauté grandissante et passionnée. Il est très 
+un langage de programmation moderne, fort d'une communauté grandissante et passionnée. Il est très 
 performant, proche ou meilleur que C selon les situations. Il est fiable grâce à ses règles strictes 
 sur l'utilisation de la mémoire et son compilateur très intelligent. C'est un langage totalement 
 adapté à notre situation. À travers ce travail, le lecteur pourra se faire une illustration des 
@@ -40,8 +40,8 @@ Avec plus de détails, les buts de ce projet sont les suivants :
 \begin{itemize}
     \item Étudier et s'approprier le langage Rust pour la réalisation d'une application système sous Linux.
     \item Répertorier les applications existantes permettant d'étiqueter les fichiers.
-    \item Étudier les \textit{extended attributes} lors des manipulation courantes sur les fichiers.
-    \item Explorer les méthodes de surveillance du \acrshort{fs}.
+    \item Étudier les \acrshort{xattr} lors des manipulation courantes sur les fichiers.
+    \item Explorer les méthodes de surveillance du système de fichiers (\acrshort{fs}).
     \item Analyser les moyens d'indexer une arborescence de fichiers.
     \item Concevoir et implémenter un système répondant aux motivations. Il devra être performant, 
         utilisable en temps réel et gérer de nombreux fichiers, répertoires et tags.

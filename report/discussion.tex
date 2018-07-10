@@ -13,7 +13,7 @@ quasi-totalité des erreurs liées à la mémoire sont détectées à la compila
 loin en étant très verbeux sur les erreurs survenues, en suggérant souvent le moyen de résoudre 
 le problème. Ce qui, avec le temps, sont devenues des bonnes pratiques à connaître lorsque 
 nous programmons en C, Rust force les programmeur à les implémenter avant même que le code soit 
-compilé. Les listings de code suivant illustrent deux exemples où Rust se comporte "mieux" que 
+compilé. Les listings de code suivants illustrent deux exemples où Rust se comporte "mieux" que 
 C. Les listings \ref{undefined_pointer_c} et \ref{undefined_pointer_rust} montrent une fonction, 
 respectivement écrite en C et en Rust, qui retourne un pointeur indéfini. En C, la détection de 
 l'erreur surviendrait à l'exécution du programme (bien que selon le compilateur C utilisé, un 
@@ -75,13 +75,13 @@ fn print_data() {
 \bigbreak
 Nous pouvons également citer que Rust est parfois plus rapide que C pour certaines tâches, ou 
 presque aussi rapide. Le site \textit{The Computer Language Benchmarks Game} \cite{ref51} dresse 
-une comparaison entre Rust et un à un C, C++, Go et Java sur les temps d'exécution, quantité de 
+une comparaison entre Rust et, un à un C, C++, Go et Java sur les temps d'exécution, quantité de 
 mémoire et charge processeur pour une variété d'applications. Rust comparé à C et C++ est parfois 
 plus rapide et souvent distancé de peu. Rust comparé à Go et Java est toujours le plus rapide. 
 On peut en conclure que sécurité peut rimer au propre comme au figuré avec rapidité.
 \bigbreak
 Un autre grand avantage de Rust sur C est sa gestion des erreurs et l'absence de \mintinline{c}{NULL}. 
-Tony Hoare, un chercheur en informatique, est l'inventeur de \mintinline{c}{NULL} et l'appel 
+Tony Hoare, un chercheur en informatique, est l'inventeur de \mintinline{c}{NULL} et l'appelle 
 aujourd'hui son erreur à un milliard de dollars \cite{ref52}. \mintinline{c}{NULL} autorise de 
 nombreuses erreurs inattendues, malgré le fait que l'idée n'est pas mauvaise (il est pratique de 
 déclarer une variable ne contenant pas de valeur). En Rust, \mintinline{c}{NULL} n'existe pas, à la 
@@ -220,6 +220,7 @@ et donnent davantage de détails sur les possibles solutions \cite{ref2} \cite{r
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \subsection{Résultats et améliorations futures}
 Les résultats des mesures de performances réalisés à la sous-section \ref{mesures_performances} 
 montrent que le parcours initial du graphe est relativement rapide, tout du moins se déroule 
@@ -241,10 +242,13 @@ voici une liste non exhaustive d'améliorations qui pourraient être apportées 
     \item Possibilité d'ajouter des nouveaux chemins de répertoires à surveiller après le lancement 
         initial de Tag Engine. Actuellement, le programme se lance avec un seul chemin de répertoire
         à surveiller. Il faut pour cela modifier la gestion des threads et des données dans Tag 
-        Engine.
+        Engine. Le problème peut être partiellement résolu en donnant à Tag Engine un répertoire 
+        suffisamment haut dans la hiérarchie pour surveiller un plus grand nombre de fichiers.
     \item Gestion des périphériques amovibles et de leurs \acrshort{fs}. \mintinline{bash}{inotify} ne 
         permet pas de surveiller le dossier \mintinline{text}{/media} de la même manière qu'un 
         autre répertoire. Il faut donc pouvoir détecter le branchement d'un périphérique de stockage 
         et ajouter une nouvelle surveillance sur le répertoire monté.
     \item Réaliser davantage de tests, plus globaux que des tests unitaires et de performances.
+    \item Créer un cache des dernières requêtes logiques adressées au serveur, pour accélérer la 
+        réponse. Le cache devrait être effacé en cas de modification de l'arbre ou de la \textit{hashmap}.
 \end{itemize}

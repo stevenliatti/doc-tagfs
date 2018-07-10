@@ -5,19 +5,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Description du programme et du code}\label{tag_manager_description}
-La première réalisation de ce projet est un outil en ligne de commande, écrit en Rust, permettant 
+La première réalisation de ce projet est un outil en ligne de commande (\acrshort{cli}), écrit en Rust, permettant 
 de facilement lister, ajouter et supprimer des tags à des fichiers et répertoires (avec une option 
 récursive pour ces derniers) et d'exécuter des requêtes vers le serveur (Tag Engine, sous-section 
 \ref{tag_engine_realisation}) pour lister 
 les tags existants, renommer un tag et demander la liste des fichiers correspondant à des tags 
 donnés. Cet outil dépend de deux \textit{crates} disponibles sur \href{https://crates.io}{crates.io} 
-: clap \cite{ref22} et xattr \cite{ref23}. Les tags sont stockés dans un \acrshort{xattr} nommé 
-\mintinline{text}{user.tags} et sont séparés entre eux par des virgules.
+: clap \cite{ref22} et xattr \cite{ref23}. Les tags sont stockés dans un \textit{extended attribute} 
+(\acrshort{xattr}) nommé \mintinline{text}{user.tags} et sont séparés entre eux par des virgules.
+
 \subparagraph{clap}
 (Command Line Argument Parser for Rust) est une 
-librairie pour \textit{parse} les arguments d'un programme en ligne de commande. Elle analyse 
+librairie pour \textit{parse} les arguments d'un programme \acrshort{cli}. Elle analyse 
 et valide les arguments fournis par l'utilisateur. Elle dispose de plusieurs syntaxes pour 
-définir les arguments des commandes et options attendues par notre programme \acrshort{cli}. 
+définir les arguments des commandes et options attendues par notre programme. 
 Sur le dépôt github de clap, dans le 
 dossier \textit{examples}, plusieurs exemples d'utilisation sont fournis. Pour illustrer son 
 utilisation, le listing \ref{tag_manager_clap} reprend l'exemple \mintinline{text}{01a_quick_example.rs} 
@@ -31,11 +32,12 @@ retourne la valeur d'un argument présent à l'exécution. Il est donc aisé d'u
 donnés en tant que variables du programme. clap donne également la possibilité de regrouper les 
 arguments. Un seul argument d'un groupe peut être présent à l'exécution, ce qui évite de nombreuses 
 conditions de détection et d'exclusion des arguments.
+
 \subparagraph{xattr}
-est une \acrshort{api} 
+est une interface de programmation (\acrshort{api}) 
 en Rust pour récupérer, lister, ajouter/modifier et supprimer des \acrshort{xattr} accrochés à des 
-fichiers avec Rust. C'est essentiellement un \textit{wrapper} des \acrshort{syscall} en C fournis par Linux 
-et d'autres \acrshort{os} pour manipuler les \acrshort{xattr}. À noter que les fonctions offertes ne 
+fichiers avec Rust. C'est essentiellement un \textit{wrapper} des appels système (\acrshort{syscall}) en C fournis par Linux 
+et d'autres systèmes d'exploitation (\acrshort{os}) pour manipuler les \acrshort{xattr}. À noter que les fonctions offertes ne 
 suivent pas les liens symboliques (il est fait de même pour Tag Manager lui-même). Quatre fonctions 
 sont disponibles : \mintinline{rust}{get()}, \mintinline{rust}{list()}, \mintinline{rust}{set()} 
 et \mintinline{rust}{remove()}. Toutes attendent le nom du fichier et selon les cas le nom du 
@@ -118,13 +120,13 @@ La communication socket est réalisée grâce la librairie standard \mintinline{
 équivalent aux sockets \mintinline{c}{AF_UNIX} en C (voir sous-section \ref{sockets_doc}). Le 
 fichier adresse des sockets est par défaut écrit dans \mintinline{text}{/tmp/tag_engine}. Le format 
 des requêtes respecte le petit protocole décrit dans la table \ref{tag_manager_sockets_protocol}. 
-Le début de la requête est formé du code à troix caractères.
+Le début de la requête est formé du code à trois caractères.
 La requête listant les fichiers selon une expression logique des tags accepte les opérateurs 
-\mintinline{text}{AND} et \mintinline{text}{OR}, avec la précédance logique du premier sur le 
+\mintinline{text}{AND} et \mintinline{text}{OR}, avec la précédence logique du premier sur le 
 second (voir sous-section \ref{tag_engine_realisation} pour plus de détails). Les opérateurs et 
 opérandes (les tags) doivent être séparés par un espace.
 \begin{center}
-    \begin{tabular}{|p{6cm}|c|p{6cm}|} \hline
+    \begin{tabular}{|p{7cm}|c|p{6cm}|} \hline
         \textbf{Requête} & \textbf{Code} & \textbf{Exemple} \\ \hline
         Fichiers et répertoires correspondants à une expression logique de tags & \mintinline{text}{0x0} & 
             \mintinline{text}{0x0 tag1 OR tag2 AND tag3} \\ \hline
@@ -142,7 +144,7 @@ La figure \ref{tag_manager_schema} résume le fonctionnement du programme :
 \end{enumerate}
 \begin{figure}
     \begin{center}
-        \includegraphics[width=0.7\textwidth]{images/tag_manager.png}
+        \includegraphics[width=0.6\textwidth]{images/tag_manager.png}
     \end{center}
     \caption{Schéma de fonctionnement de Tag Manager}
     \label{tag_manager_schema}
@@ -225,7 +227,7 @@ requêtes émises depuis Tag Manager. Il est divisé en plusieurs fichiers et mo
         (voir paragraphe \textbf{notify}).
     \item \mintinline{rust}{main.rs} : point d'entrée du programme, initialise les variables 
         partagées, le thread socket serveur et écoute indéfiniment sur les événements survenus 
-        sur l'arborescence surveillée.
+        sur l'arborescence surveillée (voir paragraphe \textbf{Mutex et références multiples}).
     \item \mintinline{rust}{parse.rs} : module de conversion d'une expression infixe vers postfixe 
         (voir paragraphe \textbf{Analyse d'une expression logique}).
     \item \mintinline{rust}{server.rs} : module construisant le serveur socket et répondant 
@@ -294,7 +296,7 @@ un répertoire ou un fichier est également un arc partant du tag en question. U
 données à sauvegarder, il n'a donc pas de type effectif. Pour accélérer l'accès à un tag dans le 
 graphe à partir de son nom, une \textit{hashmap} associant le nom du tag à son identifiant dans le graphe 
 est maintenue.
-
+\bigbreak
 La structure \mintinline{rust}{StableGraph} a été choisie en raison de sa rétention des identifiants lors 
 des suppressions de noeuds et d'arcs. En effet, lors des opérations de suppression de tags ou de 
 fichiers, pour maintenir cohérente la \textit{hashmap} des tags associés aux identifiants du graphe, il 
@@ -342,7 +344,7 @@ dans le graphe et met à jour les relations si besoin.
 \bigbreak
 
 \subparagraph{notify}\label{tag_engine_notify}
-est une librairie multiplateforme de notifications d'événements sur le système de fichier. 
+est une librairie multiplateforme de notifications d'événements sur le \acrshort{fs}. 
 Elle utilise différentes implémentations selon sur quel \acrshort{os} elle est utilisée. Sur Linux, 
 elle repose sur \mintinline{text}{inotify}. Elle attend un chemin de fichier ou répertoire. Elle 
 dispose également d'une option récursive pour la surveillance d'un répertoire. Elle offre deux 
@@ -366,8 +368,7 @@ dispose également d'une option récursive pour la surveillance d'un répertoire
 renommage. Les deux \acrshort{api} nécessitent la création d'un canal de communication entre deux 
 threads ou plus : notify aura le rôle d'un producteur en émettant les événements. Dans une boucle 
 infinie, les événements nécessaires à la mise à jour du graphe sont attrapés et traités. C'est la 
-partie thread consommateur du canal. Les événements nécessaires à la mise à jour du graphe sont 
-les suivants :
+partie thread consommateur du canal. Les événements mettant à jour du graphe sont les suivants :
 \begin{itemize}
     \item Création de fichier ou répertoire.
     \item Modification des attributs (dans notre cas, les tags).
@@ -436,6 +437,7 @@ loop {
 \end{code}
 \bigbreak
 
+\newpage
 \subparagraph{Serveur sockets}\label{tag_engine_socket}
 Le fichier \mintinline{rust}{src/server.rs} contient toute la logique des traitements de requêtes 
 provenant de Tag Manager. Comme vu sur le listing \ref{tag_engine_notify_main} aux lignes 10 à 12, 
@@ -565,6 +567,7 @@ le fonctionnement du programme :
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \subsubsection{Utilisation du programme et exemples}
 Le programme attend un chemin absolu valide pointant vers un répertoire. Il admet un argument 
 facultatif, \mintinline{text}{-d} ou \mintinline{text}{--debug}, qui imprime sur la sortie 

@@ -1,8 +1,8 @@
 Dans cette section, nous allons analyser les principales solutions existantes, qu'elles soient 
-sous la forme d'applications utilisateur ou intégrées directement dans un \acrshort{os}.
+sous la forme d'applications utilisateur ou intégrées directement dans un système d'exploitation (\acrshort{os}).
 Jean-Francois Dockes en dresse également une liste avec avantages et inconvénients sur son site 
 \cite{ref3}. Ce que nous recherchons est une application \textit{open source}, fonctionnant sur Linux, 
-stockant les tags dans les \acrshort{xattr}, ne modifiant pas les fichiers et performante.
+stockant les tags dans les \textit{extended attributes} (\acrshort{xattr}), ne modifiant pas les fichiers et performante.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -11,21 +11,21 @@ stockant les tags dans les \acrshort{xattr}, ne modifiant pas les fichiers et pe
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{TMSU}
 TMSU \cite{ref15} est un outil en ligne de commande (\acrshort{cli}) qui permet d'attribuer des tags à des 
-fichiers et d'exécuter des recherches par tags. On commence par initialiser TMSU dans le dossier choisi. 
+fichiers et d'exécuter des recherches par tags. On commence par initialiser TMSU dans le répertoire choisi. 
 Une commande liste les tags associés à un ou 
 plusieurs fichiers et une autre liste les fichiers qui possèdent le ou les tags donnés. TMSU offre 
-la possibilité à l'utilisateur de "monter" un \acrshort{fs} virtuel avec FUSE (Filesystem in 
+la possibilité à l'utilisateur de "monter" un système de fichiers (\acrshort{fs}) virtuel avec FUSE (Filesystem in 
 UserSpacE). L'outil est rapide et efficace, mais il comporte quelques défauts :
 \begin{itemize}
     \item Pas d'interface graphique.
     \item Dépendance à FUSE pour monter le \acrshort{fs} virtuel.
-    \item Stockage des tags dans une base de données SQLite : si la base est perdue, les tags également.
+    \item Stockage des tags dans une base de données SQLite : si la base est perdue, les tags le sont également.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Tagsistant}
-Tagsistant \cite{ref16} est autre outil \acrshort{cli} de gestion de tags. Il dépend de FUSE et d'une base 
+Tagsistant \cite{ref16} est autre outil en ligne de commande (\acrshort{cli}) de gestion de tags. Il dépend de FUSE et d'une base 
 de données (SQLite ou MySQL) pour fonctionner. Comme pour TMSU, il faut donner un répertoire à Tagsistant 
 pour son usage interne. À l'intérieur de ce dernier, se trouvent différents répertoires :
 \dirtree{%
@@ -47,7 +47,7 @@ des nouveaux :
 \begin{itemize}
     \item Pas d'interface graphique.
     \item Dépendance à FUSE pour monter le \acrshort{fs} virtuel.
-    \item Stockage des tags dans une base de données : si la base est perdue, les tags également.
+    \item Stockage des tags dans une base de données : si la base est perdue, les tags le sont également.
     \item Utilisation des différents répertoires peu intuitive.
     \item Tous les fichiers sont contenus dans un seul répertoire et leur nom est modifié pour les 
         besoins internes de l'application. Obligation de passer par l'application pour accéder aux 
@@ -74,10 +74,11 @@ pas à nos besoins.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{TagSpaces}
-TagSpaces \cite{ref13} est un programme avec une \acrshort{gui} permettant d'étiqueter ses fichiers avec des tags. 
-L'application est agréable à utiliser, on commence par connecter un emplacement qui fera office de dossier de 
+TagSpaces \cite{ref13} est un programme avec une interface graphique (\acrshort{gui}) permettant 
+d'étiqueter ses fichiers avec des tags. 
+L'application est agréable à utiliser, on commence par connecter un emplacement qui fera office de répertoire de 
 destination aux fichiers. On peut ajouter ou créer des fichiers depuis l'application. Les fichiers 
-existants ajoutés depuis l'application sont copiés dans le dossier (cela créé donc un doublon). 
+existants ajoutés depuis l'application sont copiés dans le répertoire (cela créé donc un doublon). 
 Sur le panneau de gauche se situe la zone de gestion des tags. TagSpaces ajoute automatiquement 
 certains tags dits "intelligents" aux fichiers nouvellement créés avec l'application (par exemple 
 un tag avec la date de création).
@@ -108,10 +109,10 @@ sont à déplorer :
 \subsubsection{Windows}
 À partir de Windows Vista, Microsoft a donné la possibilité aux utilisateurs d'ajouter des 
 méta-données aux fichiers; parmi ces méta-données se trouvent les tags. Il existe une fonctionnalité 
-appelée \textit{Search Folder} qui permet de créer un dossier virtuel contenant le résultat d'une 
+appelée \textit{Search Folder} qui permet de créer un répertoire virtuel contenant le résultat d'une 
 recherche sur les noms de fichiers ou d'autres critères \cite{ref19}. Depuis Windows 8, l'utilisateur 
 a la possibilité d'ajouter des méta-données à certains types de fichiers (ceux de la suite office 
-par exemple), dont des tags. Il peut par la suite exécuter des recherches ciblées via recherche de 
+par exemple), dont des tags. Il peut par la suite exécuter des recherches ciblées via 
 l'explorateur de fichiers Windows du type \mintinline{text}{meta:value} \cite{ref20}. C'est 
 dommage que Windows ne prenne pas en compte davantage de types de fichiers, comme les PDFs ou les 
 fichiers \mintinline{text}{.txt}.
@@ -127,7 +128,7 @@ Dans l'explorateur de fichiers, les tags se retrouvent sur le bas côté, pour y
 rapidement. 
 \begin{figure}
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{images/macos_tags.png}
+        \includegraphics[width=0.55\textwidth]{images/macos_tags.png}
     \end{center}
     \caption{Vue et gestion d'un tag dans le Finder macOS \cite{ref5}}
     \label{macos_tags}
@@ -137,11 +138,10 @@ recherche interne à macOS. Spotlight garde un index des tags, fournissant un ac
 fichiers correspondants \cite{ref9}.
 Tous ces tags peuvent se synchroniser sur les différents "iDevices" via iCloud. Finalement, 
 un menu de réglages permet la gestion des tags (affichage, suppression, etc.) \cite{ref5}, 
-\cite{ref6}. L'implémentation de ce système utilise les extended attributes (voir section 
-\ref{extended_attributes}) pour stocker les tags. Les différents tags se trouvent dans l'attribut 
-\mintinline{shell}{kMDItemUserTags}, listés les uns à la suite des autres. Via le Terminal, à 
-l'aide de la commande \mintinline{shell}{mdls}, nous pouvons afficher la liste des tags associés à 
-un fichier, nommé "Hello" pour l'exemple :
+\cite{ref6}. L'implémentation de ce système utilise les \acrshort{xattr} pour stocker les tags. 
+Les différents tags se trouvent dans l'attribut \mintinline{shell}{kMDItemUserTags}, listés les 
+uns à la suite des autres. Via le Terminal, à l'aide de la commande \mintinline{shell}{mdls}, 
+nous pouvons afficher la liste des tags associés à un fichier, nommé "Hello" pour l'exemple :
 \bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{shell}
@@ -155,11 +155,14 @@ kMDItemUserTags = (
     \caption{\mintinline{shell}{mdls} listant les tags d'un fichier sous macOS \cite{ref7}}
 \end{code}
 \bigbreak
-Ici, ce fichier "Hello" est étiqueté avec trois tags, "Green", "Red" et "Essential". Le fait que 
+Ici, le fichier \mintinline{text}{Hello} est étiqueté avec trois tags, "Green", "Red" et "Essential". Le fait que 
 l'indexation est réalisée avec Spotlight implique une réindexation des fichiers dans le cas d'un 
 changement de nom pour un tag donné sous macOS. Le framework système \mintinline{text}{FSEvents} 
 donne une solution partielle : c'est une \acrshort{api} (utilisée également par Spotlight) qui offre aux 
-applications la possibilité d'être notifiées si un changement a eu lieu sur un dossier (un événement 
+applications la possibilité d'être notifiées si un changement a eu lieu sur un répertoire (un événement 
 toutes les 30 secondes). \mintinline{text}{FSEvents} maintient des logs de ces changements dans 
 des fichiers, les applications peuvent ainsi retrouver l'historique des changements quand elles 
-le souhaitent \cite{ref10}.
+le souhaitent \cite{ref10}. Les seuls points négatifs de cette implémentation, c'est qu'elle 
+n'est pas \textit{open source}, qu'elle n'existe que sur macOS et qu'elle n'est pas écrite en Rust. 
+Mais c'est la solution vers laquelle ce projet essaie de se rapprocher car elle correspond aux 
+critères sur les \acrshort{xattr} et le fonctionnement interne.

@@ -1,10 +1,11 @@
-Le système global est composé de quatre entités distinctes, décrites dans les sous-sections suivantes.
+Cette section présente l'architecture logicielle choisie pour implémenter le système. 
+Il est composé de quatre entités distinctes, décrites dans les sous-sections suivantes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Gestion des tags}
 La gestion physiques des tags stockés dans les attributs étendus (\acrshort{xattr}) est une fonctionnalité indépendante du 
-reste du système. Comme vu dans la section \ref{extended_attributes}, des outils système existent pour 
+reste du système. Comme expliqué dans la section \ref{extended_attributes}, des outils système existent pour 
 manipuler les \acrshort{xattr} des fichiers. Cependant, pour offrir un plus haut niveau d'abstraction, 
 une cohérence sur le nommage des tags pour l'indexation et plus de confort pour l'utilisateur final, 
 un outil devient nécessaire pour la gestion des tags. Cet outil se présente, sous sa forme de base, 
@@ -24,14 +25,14 @@ rapproche plus de son utilisation pour les bases de données : c'est une structu
 permettant de retrouver rapidement les données, dans notre cas, récupérer rapidement la relation 
 entre tags et fichiers. Deux architectures ont été imaginées pour l'indexation des tags et des fichiers, 
 elles sont décrites dans les deux sous-sections suivantes. La table \ref{table_evenements_possibles} liste 
-les événements qui se produisent lors d'une utilisation normale du \acrshort{fs} en leur attribuant 
+les événements qui se produisent lors d'une utilisation normale du système de fichiers (\acrshort{fs}) en leur attribuant 
 un numéro. Ces numéros sont repris et utilisés pour alléger la lecture des tables \ref{table_architecture_1} 
 et \ref{table_architecture_2}.
 \begin{center}
     \begin{tabularx}{15cm}{|c|X|} \hline
-        \textbf{Numéro} & \textbf{Cas d'utilisation} \\ \hline
+        \textbf{Numéro} & \textbf{Événement} \\ \hline
         1 & Ajout d'un tag à un fichier ou à un répertoire \\ \hline
-        2 & Suppression d'un tag d'un fichier ou à un répertoire \\ \hline
+        2 & Suppression d'un tag d'un fichier ou d'un répertoire \\ \hline
         3 & Renommage d'un tag \\ \hline
         4 & Ajout d'un fichier dans l'arborescence surveillée \\ \hline
         5 & Ajout d'un répertoire dans l'arborescence surveillée \\ \hline
@@ -62,13 +63,13 @@ La première version de l'architecture de l'indexation, comportant deux structur
 \end{enumerate}
 \begin{figure}
     \begin{center}
-        \fbox{\includegraphics[width=0.7\textwidth]{images/hashmap_wiki.png}}
+        \includegraphics[width=0.7\textwidth]{images/hashmap_wiki.png}
     \end{center}
     \caption{Un annuaire représenté comme une table de hachage - \cite{ref27}}
     \label{hashmap_wiki}
 \end{figure}
 Une table de hachage est un tableau associatif. Les composantes de l'association sont la "clé", 
-reliée à une ou plusieurs valeurs. Pour insérer, accéder ou supprimer une entrée de la table, 
+reliée à une ou plusieurs "valeurs". Pour insérer, accéder ou supprimer une entrée de la table, 
 il faut calculer le "hash" de la clé, \textit{id est} son empreinte unique. Sur la figure \ref{hashmap_wiki}, 
 nous apercevons les clés en bleu, le résultat du hash en rouge et les valeurs associées en vert. 
 Le risque que deux clés ou plus produisent une même empreinte s'appelle une "collision", c'est 
@@ -100,7 +101,7 @@ Elle peut être obtenue grâce à la commande \mintinline{bash}{tree} sous Linux
 La même représentation sous forme d'un arbre est illustrée sur la figure \ref{tree} :
 \begin{figure}
     \begin{center}
-        \fbox{\includegraphics[width=0.8\textwidth]{images/tree.png}}
+        \includegraphics[width=0.8\textwidth]{images/tree.png}
     \end{center}
     \caption{Représentation sous forme d'arbre d'une hiérarchie de fichiers et répertoires}
     \label{tree}
@@ -171,7 +172,7 @@ Cette version a été en partie abandonnée et adaptée pour deux raisons majeur
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Indexation avec un graphe et une table de hachage}\label{graphe_architecture}
-Pendant l'implémentation de cette partie du programme (voir section \ref{problemes}), 
+Pendant l'implémentation de cette partie du programme, 
 une nouvelle architecture a été imaginée. Elle reprend les bases de la précédente, mais simplifie 
 la structure de données. Plutôt que de maintenir deux structures différentes, cette solution 
 propose une structure de données principale, secondée par une structure secondaire, optionnelle, 
@@ -221,7 +222,7 @@ maintient une unique structure de données cohérente et diminue le nombre d'op�
 nécessaires lors de la mise à jour du \acrshort{fs}. Le parcours de ce graphe se fait en 
 fonction du chemin de fichier donné, en gardant l'identifiant unique du noeud correspondant au 
 répertoire racine, le parcours se fait de la racine vers le noeud final du chemin de fichier.
-\bigbreak
+\newpage
 La table de hachage utilisée dans cette version peut être vue comme un "cache" d'accès aux noeuds 
 tags. En effet, nous pourrions nous passer de cette table de hachage et lorsqu'un accès à un tag 
 est demandé, rechercher dans tout le graphe le tag en question. Cependant, cette dernière opération 
@@ -244,7 +245,7 @@ Nous pouvons constater que les opérations sur la table de hachage sont peu nomb
 facultatives, ce qui se traduit par un gain sur le nombre d'opérations totales.
 \begin{center}
     \begin{tabularx}{16cm}{|c|X|p{5.5cm}|} \hline
-        \textbf{Numéro} & \textbf{Opération graphe} & \textbf{Opération \textit{hashmap}} \\ \hline
+        \textbf{Numéro} & \textbf{Opération sur le graphe} & \textbf{Opération sur la \textit{hashmap}} \\ \hline
         1 & Parcourir le graphe à la recherche du fichier, 
             si besoin créer le noeud tag, et relier le noeud fichier au noeud tag -> $O(p * c)$ 
             & Si non existant, ajouter le nom du tag comme clé et son identifiant dans le graphe 
@@ -282,7 +283,7 @@ facultatives, ce qui se traduit par un gain sur le nombre d'opérations totales.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Surveillance du \acrshort{fs}}
 La surveillance du \acrshort{fs} et des tags associés est le deuxième pilier du système. 
-L'indexation initiale est nécessaire, mais il est également nécessaire de surveiller en permanence 
+L'indexation initiale est obligatoire, mais il est également nécessaire de surveiller en permanence 
 l'arborescence des fichiers pour garder cet index à jour. Pour y parvenir, nous allons utiliser 
 \mintinline{c}{inotify} (voir section \ref{inotify_techno}), en surveillant tout particulièrement les événements 
 suivants :
@@ -297,7 +298,7 @@ suivants :
 \end{itemize}
 Un thread s'occupe d'écouter les événements du \acrshort{fs} et les inscrit dans un buffer 
 tandis qu'un autre va mettre à jour le graphe pour répercuter les changements survenus en lisant 
-dans ce même buffer (simple pattern producteur-consommateur).
+dans ce même buffer (simple \textit{pattern} producteur-consommateur).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -313,4 +314,5 @@ a la possibilité de :
     \item Renommer un tag. 
 \end{itemize}
 Pour échanger les requêtes et les réponses, client et serveur communiquent par sockets, avec un 
-format de protocole très simple pour distinguer le type d'une requête.
+format de protocole très simple (décrit dans la table \ref{tag_manager_sockets_protocol}) pour 
+distinguer le type d'une requête.

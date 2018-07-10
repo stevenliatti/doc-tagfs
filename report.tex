@@ -57,6 +57,7 @@
 
 \begin{document}
 
+% TODO: refaire titre
 \title{TagFS \protect\\ Système d'étiquetage des fichiers avec Rust}
 \author{Steven Liatti}
 \affil{\small Projet de bachelor - Prof. Florent Glück}
@@ -71,9 +72,10 @@
 % fichiers modifiés, créés, ou supprimés afin d'indexer les tags avec un minimum de latence (temps réel). Si le temps le
 % permet, le système développé sera intégré à un environnement desktop choisi (Gnome, KDE, etc.).
 
+% TODO: ajuster couleurs, rouge hepia, bleu hes-so
 \begin{figure}
 	\begin{center}
-		\includegraphics[width=1\textwidth]{images/title.png}
+		\includegraphics[width=1\textwidth]{images/title.png} 
 	\end{center}
 \end{figure}
 
@@ -120,11 +122,11 @@
 
 \subsection*{Conventions typographiques} %-----------------------------------------------------------------------------------------------
 \addcontentsline{toc}{subsection}{Conventions typographiques}
-Lors de la rédaction de ce document, les conventions typographique ci-dessous ont
+Lors de la rédaction de ce document, les conventions typographiques ci-dessous ont
 été adoptées.
 \begin{itemize}[label=\textbullet]
-	\item Tous les mots empruntés à la langue anglaise ou latine ont été écrits en \textit{italique}
-	\item Toute référence à un nom de fichier (ou dossier), un chemin d'accès, une 
+	\item Tous les mots empruntés à la langue anglaise ou latine ont été écrits en \textit{italique}.
+	\item Toute référence à un nom de fichier (ou répertoire), un chemin d'accès, une 
     utilisation de paramètre, variable, commande utilisable par l'utilisateur, ou extrait de code 
     source est écrite avec une police d'écriture à \mintinline{text}{chasse fixe}.
 	\item Tout extrait de fichier ou de code est écrit selon le format suivant:
@@ -145,12 +147,12 @@ Le présent document commence par l'introduction, rappelant les motivations du p
 atteindre. Il aborde ensuite les applications existantes fournissant un service similaire au but du 
 projet, mais avec quelques limitations pour la plupart. Il poursuit par une section sur l'architecture 
 logicielle du système final, avec ses différents composants et besoins. Après, une analyse technologique du 
-langage Rust et des outils utilisés pour la réalisation technique sera faite. La section suivante illustre 
-la réalisation technique en elle-même, avec les deux programmes réalisés. Le système est testé dans 
+langage Rust et des outils utilisés pour la réalisation technique est réalisée. La section suivante illustre 
+la réalisation technique en elle-même, avec les deux programmes conçus. Le système est testé dans 
 la section d'après, expliquant le protocole et le résultat des tests. Finalement, le document se 
 termine par une section de discussion des résultats, de l'état du projet, des améliorations futures 
-et des différences entre Rust et C et une dernière section de conclusion. La dernière section 
-est réservée aux références.
+et des différences entre Rust et C et une dernière section de conclusion. Les références se trouvent à 
+la toute fin du document.
 
 \subsection*{Remerciements} %-----------------------------------------------------------------------------------------------
 \addcontentsline{toc}{subsection}{Remerciements}
@@ -172,7 +174,7 @@ Je tiens finalement à remercier mes collègues de classe pour leur camaraderie 
 \newacronym{api}{API}{\textit{Application Programming Interface}, Interface de programmation : 
     services offerts par un programme producteur à d'autres programmes consommateurs}
 \newacronym{syscall}{SYSCALL}{\textit{System call}, Appel système : lorsqu'un programme a besoin d'un 
-    accès privilégié à certaines parties du système d'exploitation (système de fichier, mémoire, 
+    accès privilégié à certaines parties du système d'exploitation (système de fichiers, mémoire, 
     périphériques), il demande au noyau d'exécuter l'opération voulue pour lui}
 \newacronym{fs}{FS}{\textit{File System}, Système de fichiers : organisation logique des fichiers 
     physiques sur le disque}

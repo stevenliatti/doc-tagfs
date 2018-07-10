@@ -2,11 +2,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Mesures de performances}\label{mesures_performances}
 Des mesures de temps d'exécution ont été réalisées avec une version de Tag Engine légèrement modifiée :
-la fonction main a été tronquée à partir du lancement du thread socket serveur et de la boucle infinie 
+la fonction \mintinline{rust}{main()} a été tronquée à partir du lancement du thread socket serveur et de la boucle infinie 
 écoutant sur les événements survenus sur l'arborescence surveillée. Ainsi, le programme parcoure 
 une seule fois l'arborescence et construit le graphe et la table de hachage associée. Cette modification 
-a été faite dans le but de mesurer plusieurs exécutions du programme pour un répertoire donné pour 
-réaliser une moyenne du temps. Elle est illustrée au listing \ref{tests_main_modif}. 
+a été faite dans le but de mesurer plusieurs exécutions du programme (avec le type \mintinline{rust}{Duration} de Rust) 
+pour un répertoire donné pour réaliser une moyenne du temps. Elle est illustrée au listing \ref{tests_main_modif}. 
 \bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
@@ -89,13 +89,13 @@ moins un répertoire contient d'entrées, moins le temps d'exécution sera long.
 aux spécificités des fichiers contenus, comme leur taille sur le disque.
 \begin{figure}
     \begin{center}
-        \fbox{\includegraphics[width=1\textwidth]{images/histo.png}}
+        \includegraphics[width=1\textwidth]{images/histo.png}
     \end{center}
     \caption{Temps d'exécution en fonction du répertoire et par type de mode de compilation}
     \label{histo}
 \end{figure}
 Il est intéressant de remarquer que le rapport de temps d'exécution entre la version non-optimisée 
-et optimisée peut être important. La figure \ref{histo2} donne illustre ces rapports de temps. Nous 
+et optimisée peut être important. La figure \ref{histo2} illustre ces rapports de temps. Nous 
 voyons que la différence varie entre 5.93 pour \mintinline{text}{android-studio} et 1.33 pour 
 \mintinline{text}{Images}, de manière générale ce sont à nouveau les répertoires 
 avec le plus d'entrées qui ont les rapports les plus importants. Le répertoire \mintinline{text}{Images} 
@@ -104,12 +104,8 @@ réduit d'opérations durant l'exécution du programme. La leçon à tirer de ce
 que le compilateur Rust est capable de grandes optimisations sur le code.
 \begin{figure}
     \begin{center}
-        \fbox{\includegraphics[width=1\textwidth]{images/histo2.png}}
+        \includegraphics[width=1\textwidth]{images/histo2.png}
     \end{center}
     \caption{Rapport entre le temps d'exécution en mode \textit{debug} et \textit{release}}
     \label{histo2}
 \end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Tests unitaires avec Rust}
-% TODO: tests unitaires supplémentaires

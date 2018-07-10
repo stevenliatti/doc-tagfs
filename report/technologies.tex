@@ -5,13 +5,14 @@ Cette section présente le langage de programmation Rust et certains de ses méc
 travers quelques exemples, qui sont soit absolument nécessaires pour commencer à programmer avec 
 Rust, soit utilisés dans le code de ce projet. Rust est un langage multi paradigmes, fortement typé, 
 compilé et performant. Il peut être utilisé en autres pour de la programmation orientée système, 
-pour créer des programmes \acrshort{cli} ou pour créer des applications web. Fort d'une communauté active, de 
+pour créer des programmes en ligne de commande (\acrshort{cli}) ou pour créer des applications web. 
+Fort d'une communauté active, de 
 nombreux packages et modules sont disponibles sur \href{https://crates.io}{Crates.io} \cite{ref33} 
 et de nombreuses discussions sont présentes sur le \href{https://www.reddit.com/r/rust/}{reddit} 
 \cite{ref34} dédié. Pour plus de détails, l'excellent livre \cite{ref0} réalisé par les mainteneurs 
 de Rust saura donner de plus amples et précises informations au lecteur avide de connaissances sur 
 Rust. Un autre livre \cite{ref2}, plus spécialisé, guide le débutant à Rust dans la conception de 
-listes chaînées, car non triviales en Rust de par le fait de ses contraintes
+listes chaînées, car non triviales en Rust de par le fait de ses contraintes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,9 +76,9 @@ et il dispose également d'une \href{https://doc.rust-lang.org/cargo/}{documenta
 \subsubsection{Généralités}
 
 \paragraph{Commentaires}
-Tout texte écrit après deux slashs consécutifs ("//") est considéré comme un commentaire en Rust.
+Tout texte écrit après deux slashs consécutifs "//" est considéré comme un commentaire en Rust.
 La syntaxe multiligne qui existe en C par exemple n'est pas prise en compte. En mettant trois slashs 
-consécutifs ("///"), le commentateur indique au compilateur que ce commentaire fait partie de la 
+consécutifs "///", le commentateur indique au compilateur que ce commentaire fait partie de la 
 documentation (qui peut être générée avec Cargo, voir sous-section \ref{cargo_crates}).
 
 \paragraph{Variables}
@@ -99,16 +100,12 @@ peut être de type différent. Le listing \ref{rust_variables} montre quelques c
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
 // Déclaration d'une variable "x", immutable et de type inféré i32
 let x = 3;
-
 // Déclaration d'une variable "y", mutable et de type inféré bool
 let mut y = true;
-
 // Déclaration d'une variable "z", mutable et de type déclaré char
 let mut z : char = 'A';
-
 // La constante PI de type flottant 64 bits
 const PI : f64 = 3.1415;
-
 // Shadowing. La première déclaration crée une variable nommée "answer"
 // de type i32 et de valeur 42, alors que la deuxième écrase la 
 // précédente variable en lui prenant son nom et est de type String.
@@ -127,17 +124,17 @@ Il existe deux familles de types en Rust :
     \item Les scalaires : nombres entiers, nombres à virgule, booleans et caractères.
     \item Les composés (deux types primitifs) : les tuples et les tableaux.
 \end{itemize}
-Les entiers peuvent être signés ou non signés et sur 8, 16, 32, 64 ou dépendant de l'architecture
+Les entiers peuvent être signés ou non signés et sur 8, 16, 32, 64 bits ou dépendant de l'architecture
 du processeur (\mintinline{rust}{i8, u8, i16, u16, i32, u32, i64, u64, isize, usize}). Les nombres 
 à virgule ont deux possibilités, soit sur 32 bits, soit sur 64 bits (\mintinline{rust}{f32} ou 
-\mintinline{rust}{f64}). Le type bool, classique, peut prendre deux valeurs, \mintinline{rust}{true} 
-ou \mintinline{rust}{false}. Enfin, dernier type primitif scalaire, \mintinline{rust}{chat} stocke 
+\mintinline{rust}{f64}). Le type \mintinline{rust}{bool}, classique, peut prendre deux valeurs, \mintinline{rust}{true} 
+ou \mintinline{rust}{false}. Enfin, dernier type primitif scalaire, \mintinline{rust}{char}, stocke 
 un caractère Unicode entre simples guillemets. Le premier type primitif composé est le tuple. C'est 
 un regroupement de plusieurs valeurs qui peuvent être de différents types. Lors des déclarations, 
 les noms de variables, les types et les valeurs d'un tuple sont contenues entre parenthèses et 
 séparées par des virgules. Enfin, le type tableau, ou \textit{array} : classique type regroupant 
 plusieurs valeurs du même type cette fois. Un \textit{array} a une taille fixe, déterminée à la 
-compilation. La déclaration des valeurs d'un tableau se fait entre crochets "[]". Pour accéder à une 
+compilation. La déclaration des valeurs d'un tableau se fait entre crochets "[ ]". Pour accéder à une 
 valeur du tableau, il faut utiliser la syntaxe \mintinline{rust}{array[i]} où \mintinline{rust}{i} 
 est un indice valide du tableau (entre zéro compris et la taille du tableau non compris). Quelques 
 exemples sont donnés dans le listing \ref{rust_types_ex}.
@@ -147,12 +144,10 @@ exemples sont donnés dans le listing \ref{rust_types_ex}.
 let myint : i32 = 1234;
 let mychar : char = 'a';
 let myfloat : f64 = 2.0;
-
 // Déclaration d'un tuple
 let tuple : (char, u32, f64) = ('c', 42, 2.8);
 // Destructuration du tuple en trois variables distinctes
 let (letter, age, score) = tuple;
-
 // Déclaration d'un tableau
 let myarray = ['a', 'b', 'c', 'd', 'e', 'f'];
 let x = myarray[4]; // x vaut 'e'
@@ -195,13 +190,13 @@ Pour plus de détails, se référer au chapitre 3.3 du \textit{book} \cite{ref0}
 
 \paragraph{Structures de contrôle}
 Comme tout langage de programmation, Rust possède des structures de contrôle pour gérer les 
-consditions et les répétitions (boucles). Il y a le classique \mintinline{rust}{if condition 
+conditions et les répétitions (boucles). Il y a le classique \mintinline{rust}{if condition 
 { ... } else if autre_condition { ... } else { ... }} avec une différence notable par rapport à C : 
 il est possible d'affecter une variable avec un \mintinline{rust}{if}, comme dans le listing 
 \ref{rust_if}. Il n'y a pas de \mintinline{c}{switch ... case} à proprement parler en Rust, 
 nous verrons le \mintinline{rust}{match ... case} à la sous-section \ref{rust_enum_pattern_matching}.
 En ce qui concerne les boucles, elles sont au nombre de trois : \mintinline{rust}{loop} (boucle 
-infinie), \mintinline{rust}{while} (boucle avec condition initiale) et \mintinline{rust}{for} 
+infinie), \mintinline{rust}{while} (boucle avec condition initiale) et \mintinline{rust}{for}, 
 boucle pour traverser les collections par leurs itérateurs principalement (voir sous-section 
 \ref{rust_collections}).
 \bigbreak
@@ -231,14 +226,12 @@ else { 66 };
 loop {
     println!("Forever");
 }
-
 // Boucle avec condition
 let mut x = 0;
 while x < 10 {
     println!("{}", x);
     x = x + 1;
 }
-
 // Parcours d'un tableau
 let myarray = [1, 2, 3, 4, 5];
 for elem in myarray.iter() {
@@ -252,8 +245,7 @@ for elem in myarray.iter() {
 Pour plus de détails, se référer au chapitre 3.5 du \textit{book} \cite{ref0}.
 
 \paragraph{Organisation des fichiers et modules}
-Un programme écrit en Rust a la possibilité d'être découpé en plusieurs fichiers (autres que 
-\mintinline{rust}{main.rs}) et modules. 
+Un programme écrit en Rust peut être découpé en plusieurs fichiers et modules. 
 Un module peut contenir des déclarations de fonctions, de structures et leurs implémentations (voir 
 section \ref{rust_struct_data}), etc. Le mot-clé pour déclarer un module est \mintinline{rust}{mod}. 
 Le code à l'intérieur du module est par défaut privé, pour le rendre accessible en dehors du module, 
@@ -343,7 +335,7 @@ fn main() {
     let player_one = Player::new(String::from("Groumf"),
         String::from("Wizard"));
     let mut player_two = Player::new(String::from("Trabi"),
-        String::from("Thief"));
+        String::from("Bard"));
     player_one.attack(&mut player_two);
     player_one.say_hi();
 }
@@ -456,7 +448,6 @@ enum Option<T> {
     Some(T),
     None,
 }
-
 fn process(value : Option<u32>) {
     match value {
         Some(data) => println!("{}", data),
@@ -481,7 +472,7 @@ en Java. Un vecteur est générique (voir sous-section \ref{trait_generic}), il 
 de données, mais un seul type à la fois. 
 De nombreuses méthodes existent pour manipuler un vecteur, que ce soit pour lui ajouter ou enlever 
 des éléments ou pour le convertir vers d'autre formes. Une macro, \mintinline{rust}{vec!} est 
-disponible pour rapidement créer un vecteur (éléments séparés par des virgules entre "[]").
+disponible pour rapidement créer un vecteur (éléments séparés par des virgules entre "[ ]").
 Le listing \ref{rust_collections_vec} donne quelques exemples :
 \bigbreak
 \begin{code}
@@ -534,11 +525,11 @@ La caractéristique unique de Rust est sans aucun doute l'\textit{ownership}, ou
 L'\textit{ownership} est défini par ces trois règles :
 \begin{itemize}
     \item Chaque variable est dite le "possesseur" (\textit{owner}) d'une valeur.
-    \item Il ne peut y avoir q'un seul \textit{owner} pour une valeur.
+    \item Il ne peut y avoir qu'un seul \textit{owner} pour une valeur.
     \item Lorsque l'\textit{owner} est détruit ou change de portée, la valeur est détruite.
 \end{itemize}
 Avant de continuer sur cette notion, un bref rappel sur l'utilisation de la mémoire est nécessaire. 
-L'\acrshort{os} met à disposition d'un programme deux zones mémoire différentes pour stocker ses 
+Le système d'exploitation (\acrshort{os}) met à disposition d'un programme deux zones mémoire différentes pour stocker ses 
 variables : la pile (\textit{stack}) et le tas (\textit{heap}). Le mécanisme d'accès à la pile est 
 simple et rapide et stocke des variables dont la taille est fixe et connue à la compilation. Les 
 variables de type primitifs (voir paragraphe \ref{rust_types}) sont stockées dans la pile. Lorsqu'une 
@@ -582,14 +573,14 @@ Pour qu'un type évolué puisse être copié de cette façon, il doit implément
     let mut my_vec = vec![3, 2, 1]; 
     let other_vec = my_vec;
     my_vec.push(42); // Erreur, la valeur a été déplacée (move)
-} // la portée de my_vec se termine ici, my_vec est alors supprimé
+}
     \end{minted}
     \caption{Transfert de l'\textit{ownership} en Rust}
     \label{rust_ownership_transfer}
 \end{code}
 \bigbreak
 À la ligne 8 du listing \ref{rust_ownership_transfer}, la variable \mintinline{rust}{my_vec} est 
-invalidée, mais les données vers lesquelles elle pointe. Il n'y a que le pointeur vers ces données 
+invalidée, mais pas les données vers lesquelles elle pointe. Il n'y a que le pointeur vers ces données 
 qui transféré vers \mintinline{rust}{other_vec}. C'est ici que la deuxième règle de l'\textit{ownership} 
 s'applique, il ne peut y avoir plus d'un \textit{owner} d'une même valeur au même moment. 
 Pour réaliser une vraie copie des données d'un vecteur à un autre, ou de manière générale pour un 
@@ -622,7 +613,7 @@ Pour palier à ce problème de transfert de possession lors d'appels aux fonctio
         et non conseillée.
     \item La fonction peut "emprunter" la variable de différentes manières (voir ci-dessous).
 \end{enumerate}
-Heureusement, les fonctions peuvent se "prêter" les variables par \textit{Borrowing} ("emprunt").
+Heureusement, les fonctions peuvent se "prêter" les variables par \textit{borrowing} ("emprunt").
 Deux types de références aux variables sont disponibles :
 \begin{enumerate}
     \item Les références immutables (syntaxe \mintinline{rust}{&ma_variable}).
@@ -676,7 +667,7 @@ d'exceptions mélange ces deux types d'erreurs). Pour ces dernières, Rust offre
 la sortie standard en indiquant à quelle ligne le programme a planté. Pour les erreurs récupérables, 
 une manière plus élégante existe : à la manière de l'énumération \mintinline{rust}{Option} vue à 
 la section \ref{rust_enum_pattern_matching}, l'énumération \mintinline{rust}{Result} a été conçue 
-pour gérer les erreurs au \textit{runtime}.
+pour gérer les erreurs au \textit{runtime} (voir listing \ref{rust_result}).
 \bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
@@ -700,7 +691,7 @@ De nombreuses fonctions de la librairie standard et de la communauté retournent
 \mintinline{rust}{Result}, notamment lors de l'ouverture d'un fichier. Comme ce genre d'opérations 
 sont courantes, Rust met à disposition deux fonctions équivalentes à réaliser un \mintinline{rust}{match} 
 sur un \mintinline{rust}{Result}, \mintinline{rust}{unwrap()} et \mintinline{rust}{expect()}. La 
-seule différence entre les deux est qu'avec la deuxième fonctions, un message personnalisé est 
+seule différence entre les deux est qu'avec la deuxième fonction, un message personnalisé est 
 attendu en argument. Le listing \ref{rust_result_file} montre les différentes façons de traiter un 
 \mintinline{rust}{Result} lors de l'ouverture d'un fichier :
 \bigbreak
@@ -872,26 +863,27 @@ Pour plus de détails, se référer au chapitre 19.1 du \textit{book} \cite{ref0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Extended attributes}\label{extended_attributes}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Fonctionnement des \acrshort{xattr}}
-Les extended attributes (\acrshort{xattr}), ou "attributs étendus" en français, sont un moyen d'attacher des 
-méta-données aux fichiers et dossiers sous forme de paires \mintinline{text}{espace:nom:valeur}. 
+Les \textit{extended attributes} (\acrshort{xattr}), ou "attributs étendus" en français, sont un moyen d'attacher des 
+méta-données aux fichiers et dossiers sous forme de paires \mintinline{text}{espace.nom:valeur}. 
 L'espace de nom, ou \textit{namespace} en anglais, définit les différentes classes d'attributs. 
-Dans le cadre de ce projet, l'accent est mis sur le système de fichiers ext4 \cite{ref36}
+Dans le cadre de ce projet, l'accent est mis sur le système de fichiers (\acrshort{fs}) ext4 \cite{ref36}
 sous Linux, il existe actuellement quatre espaces de noms 
 ou classes : \mintinline{text}{user}, \mintinline{text}{trusted}, \mintinline{text}{security} et 
 \mintinline{text}{system}. L'espace qui nous intéresse est \mintinline{text}{user}. C'est là que 
 l'utilisateur ou l'application, pour autant qu'il ait les droits usuels UNIX sur les fichiers, peut 
-manipuler les extended attributes. Les trois autres espaces de noms sont utilisés entre autres pour 
+manipuler les \acrshort{xattr}. Les trois autres espaces de noms sont utilisés entre autres pour 
 les listes d'accès ACL (\mintinline{text}{system}), les modules de sécurité du kernel 
 (\mintinline{text}{security}) ou par \mintinline{text}{root} (\mintinline{text}{trusted})
 \cite{ref11} \cite{ref12}.
 Le nom est une chaine de caractères et la valeur peut être une chaine de caractères ou des données binaires. 
-Les extended attributes sont stockés dans les fichiers. De nombreux \acrshort{fs} gèrent leur 
+Les \acrshort{xattr} sont stockés dans les fichiers. De nombreux \acrshort{fs} gèrent leur 
 usage : ext2-3-4, XFS, Btrfs, UFS1-2, NTFS, HFS+, ZFS. Ces \acrshort{fs} sont utilisés par 
 les quatre \acrshort{os} les plus répandus : Windows, macOS, Linux et FreeBSD. Windows utilise 
-les extended attributes notamment dans sa gestion des permissions Unix dans le shell Linux intégré 
+les \acrshort{xattr} notamment dans sa gestion des permissions Unix dans le shell Linux intégré 
 à Windows 10 \cite{ref21}. macOS, comme vu à la section \ref{existant_macOS}, les utilise entre 
 autres dans son système de gestion des tags. La commande \mintinline{text}{xattr} permet de les 
 manipuler. Sous Linux, il en existe trois : \mintinline{text}{attr}, \mintinline{text}{getfattr} et 
@@ -899,18 +891,18 @@ manipuler. Sous Linux, il en existe trois : \mintinline{text}{attr}, \mintinline
 (1024, 2048 ou 4096 bytes) \cite{ref12}.
 Apple et freedesktop.org préconisent la notation DNS inversée pour 
 nommer les attributs \cite{ref8}, \cite{ref24} car n'importe quel processus peut modifier les 
-attributs dans l'espace utilisateur. En préfixant du nom du programme le nom de l'attribut, par 
+attributs dans l'espace utilisateur. En préfixant du nom du programme au nom de l'attribut, par 
 exemple \mintinline{text}{user.myprogram.myattribute}, on diminue le risque qu'une autre 
 application utilise le même nom d'attribut. Malheureusement, la plupart des outils \acrshort{cli} Linux 
 pour manipuler les fichiers comme \mintinline{text}{cp}, \mintinline{text}{tar}, etc. ne prennent 
-pas en compte les attributs avec leur syntaxe par défaut \cite{ref4}.
+pas en compte les attributs avec leur syntaxe par défaut, il faut spécifier des arguments supplémentaires \cite{ref4}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Comportement lors des opérations d'accès courantes}
 Pour vérifier la portabilité des \acrshort{xattr}, quelques tests ont été réalisés entre un 
-SSD faisant office de disque système à Linux Mint avec 2 clés USB (de 8 et 64 Go) et un emplacement 
-réseau monté en NFS. Le listing suivant montre la sortie de la commande \mintinline{bash}{df}, qui 
+SSD faisant office de disque système à Linux Mint 18.2 Sonya avec deux clés USB (de 8 et 64 Go) et un emplacement 
+réseau monté en NFS. Le listing \ref{xattr_df} montre la sortie de la commande \mintinline{bash}{df}, qui 
 renvoie l'utilisation des différents emplacements de stockage, dans l'ordre : le disque système, en 
 ext4, la clé de 8 Go formatée une fois en FAT32, puis une autre fois en NTFS, la clé de 64 Go formatée 
 en ext4 et finalement une machine virtuelle sous Debian 9 montée en NFS.
@@ -925,6 +917,7 @@ Sys. de fichiers        Type   Taille Utilisé Dispo Uti% Monté sur
 192.168.1.21:/home/user nfs4     916G    198G  673G  23% /mnt/debian
     \end{minted}
     \caption{Output de \mintinline{bash}{df -Th} : le disque système, les clés USB et le NFS}
+    \label{xattr_df}
 \end{code}
 \bigbreak
 La démarche est la suivante : un \acrshort{xattr} dans l'espace \mintinline{text}{user} avec 
@@ -932,30 +925,35 @@ comme nom \mintinline{text}{author} et comme valeur \mintinline{text}{steven} es
 \mintinline{text}{file.txt} avec \mintinline{bash}{attr}. Ce fichier est copié avec 
 \mintinline{bash}{cp} en prenant garde à préserver l'attribut (option 
 \mintinline{bash}{--preserve=xattr}). Une fois copié, on tente de lire le même attribut, toujours 
-avec \mintinline{bash}{attr}. Les résultats sont les suivants :
+avec \mintinline{bash}{attr}. Les résultats sont visibles dans les listings \ref{xattr_copy_8_fat32}, 
+\ref{xattr_copy_8_ntfs}, \ref{xattr_copy_64_ext4} et \ref{xattr_copy_nfs} :
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
         tabsize=2,firstline=45,lastline=49]{text}{text/test_attr.txt}
     \caption{Copie sur clé USB 8 Go, FAT32}
+    \label{xattr_copy_8_fat32}
 \end{code}
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
         tabsize=2,firstline=54,lastline=61]{text}{text/test_attr.txt}
     \caption{Copie sur clé USB 8 Go, NTFS}
+    \label{xattr_copy_8_ntfs}
 \end{code}
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
         tabsize=2,firstline=66,lastline=73]{text}{text/test_attr.txt}
     \caption{Copie sur clé USB 64 Go, ext4}
+    \label{xattr_copy_64_ext4}
 \end{code}
 \bigbreak
 \begin{code}
     \inputminted[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,
         tabsize=2,firstline=78,lastline=79]{text}{text/test_attr.txt}
     \caption{Copie sur l'emplacement réseau distant, NFS}
+    \label{xattr_copy_nfs}
 \end{code}
 \bigbreak
 On constate que l'opération est infructueuse sur la clé en FAT32 et sur l'emplacement réseau monté 
@@ -970,8 +968,8 @@ l'explorateur de fichiers Nemo de Linux Mint. Ces deux opérations conservent pa
 \subsection{\mintinline{c}{inotify}}\label{inotify_techno}
 Sous Linux, un outil (inclu au noyau) dédié à la surveillance du \acrshort{fs} existe, \mintinline{c}{inotify} 
 \cite{ref29}. Comme son nom l'indique, \mintinline{c}{inotify} donne la possibilité à une application d'être 
-notifiée sur des événements au niveau du système de fichiers. Une \acrshort{api} en C existe et 
-offre les \acrshort{syscall} suivants :
+notifiée sur des événements au niveau du système de fichiers. Une interface de programmation (\acrshort{api}) 
+en C existe et offre les appels systèmes (\acrshort{syscall}) suivants :
 \begin{enumerate}
     \item \mintinline{c}{int inotify_init(void)} : initialise une instance \mintinline{c}{inotify} et retourne un 
         descripteur de fichier.
@@ -984,11 +982,11 @@ offre les \acrshort{syscall} suivants :
         supprime la surveillance du descripteur de fichier \mintinline{c}{wd} de l'instance \mintinline{c}{inotify} 
         retournée par \mintinline{c}{fd}.
 \end{enumerate}
-\mintinline{c}{inotify} s'utilise comme suit : il faut initialiser l'instance (1), ajouter les fichiers et répertoires 
-pour la surveillance avec le masque des événements voulus (2) et, généralement, dans une boucle, 
+\mintinline{c}{inotify} s'utilise comme suit : il faut initialiser l'instance, ajouter les fichiers et répertoires 
+pour la surveillance avec le masque des événements voulus et, généralement, dans une boucle, 
 appeler le \acrshort{syscall} \mintinline{c}{read()} avec comme argument le descripteur de fichier 
 renvoyé par \mintinline{c}{inotify_init()}. Chaque appel abouti à \mintinline{c}{read()} retourne 
-la structure suivante :
+la structure disponible au listing \ref{inotify_struct_event} :
 \bigbreak
 \begin{code}
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{c}
@@ -1002,6 +1000,7 @@ struct inotify_event {
 };
     \end{minted}
     \caption{Structure \mintinline{c}{inotify_event} - \cite{ref29}}
+    \label{inotify_struct_event}
 \end{code}
 \bigbreak
 Le champ \mintinline{c}{mask} peut prendre les valeurs suivantes (multiples valeurs autorisées, 
@@ -1065,7 +1064,7 @@ Les \textit{sockets} (littéralement "prise" en français) sont un moyen de comm
 différents processus, qu'ils soient sur la même machine ou en réseau. Il existe plusieurs types 
 de \textit{sockets}, les deux plus connues sont les sockets "locales" (type \mintinline{c}{AF_UNIX} ou 
 \mintinline{c}{AF_LOCAL}), uniquement possibles sur la même machine car reliées par un fichier spécial 
-de sur le \acrshort{fs} de la machine et les sockets IP (type \mintinline{c}{AF_INET} ou 
+sur le \acrshort{fs} de la machine et les sockets IP (type \mintinline{c}{AF_INET} ou 
 \mintinline{c}{AF_INET6}) qui sont reliées par des paires d'adresses IP et ports.
 Lors d'une communication socket entre deux processus, un des processus endosse le rôle de serveur 
 l'autre de client. Le serveur doit, dans l'ordre, exécuter les \acrshort{syscall} suivants : 
@@ -1089,7 +1088,7 @@ Le client, de son côté, doit exécuter les \acrshort{syscall} suivants :
 La figure \ref{sockets_procedure} résume la procédure d'initialisation et d'utilisation des sockets.
 \begin{figure}
     \begin{center}
-        \includegraphics[width=0.5\textwidth]{images/sockets.png}
+        \includegraphics[width=0.4\textwidth]{images/sockets.png}
     \end{center}
     \caption{Procédure d'initialisation et d'utilisation des sockets}
     \label{sockets_procedure}

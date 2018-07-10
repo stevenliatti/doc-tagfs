@@ -11,7 +11,7 @@ $(REPORT).pdf: $(REPORT).tex report/*.tex bib.bib images/* text/* ../tag_manager
 	bibtex $(REPORT)
 	$(CC) $(REPORT).tex
 	$(CC) $(REPORT).tex
-	make mostlyclean
+	# make mostlyclean
 
 $(ANNEXES).pdf: $(ANNEXES).tex ../tag_manager/src/* ../tag_engine/src/*
 	$(CC) $(ANNEXES).tex
