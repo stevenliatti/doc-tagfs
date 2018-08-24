@@ -25,11 +25,11 @@ $(PRES).pdf: $(PRES).tex images/*
 
 mostlyclean:
 	rm -rf _minted-* *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg
-	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist *.lot
+	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist *.lot *.vrb
 
 clean:
 	rm -f *.pdf
 	rm -rf _minted-* *.log *.aux *.out *.lof *.lol *.toc *.bbl *.blg
-	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist *.lot
+	rm -rf *.nav *.snm *.glg *.glo *.gls *.glsdefs *.ist *.lot *.vrb
 
 rebuild: clean all
