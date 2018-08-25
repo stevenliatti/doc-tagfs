@@ -95,34 +95,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Solutions existantes}
-\subsection{TMSU}
+\subsection{TMSU et Tagsistant}
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
         \item CLI.
         \item Gestion des tags.
         \item Liste des fichiers associés à des tags.
-    \end{itemize}
-    \pause
-    \begin{center}
-        \begin{tabularx}{8cm}{|X|X|} \hline
-            \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
-            Simple (CLI) & Dépendance à FUSE \\ \hline
-            Rapide et efficace & Dépendance à une BDD externe \\ \hline
-            Open source &  \\ \hline
-        \end{tabularx}
-    \end{center}
-\end{frame}
-
-\subsection{Tagsistant}
-\begin{frame}
-    \frametitle{\subsecname}
-    \begin{itemize}
-        \item CLI.
-        \item Répertoire = tag.
-        \item Liste des fichiers associés à des tags.
         \item Usage de commandes usuelles (\mintinline{bash}{cp}, \mintinline{bash}{ls}, 
-            \mintinline{bash}{mkdir}) pour manipuler les tags.
+            \mintinline{bash}{mkdir}) pour manipuler les tags (Tagsistant).
     \end{itemize}
     \pause
     \begin{center}
@@ -130,7 +111,7 @@
             \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
             Simple (CLI) & Dépendance à FUSE \\ \hline
             Rapide et efficace & Dépendance à une BDD externe \\ \hline
-            Open source & Modification et accès uniquement par l'application \\ \hline
+            Open source & Modification et accès uniquement par l'application (Tagsistant) \\ \hline
         \end{tabularx}
     \end{center}
 \end{frame}
@@ -150,9 +131,9 @@
             \begin{center}
                 \begin{tabularx}{4.5cm}{|X|X|} \hline
                     \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
-                    Simple (CLI) & Dépendance à FUSE \\ \hline
                     Rapide et efficace & Dépendance à une BDD externe \\ \hline
                     Open source & Modification et accès uniquement par l'application \\ \hline
+                    GUI & \\ \hline
                 \end{tabularx}
             \end{center}
         \end{column}
@@ -256,7 +237,7 @@
     \begin{itemize}
         \item Langage moderne, performant, fiable, compilé, et fortement typé.
         \item Disponible sur Linux, Windows et macOS.
-        \item Cargo : système de compilation et d’exécution et gestionnaire de paquets intégré à Rust.
+        \item Cargo : système de compilation et d'exécution et gestionnaire de paquets intégré à Rust.
         \item Structures, collections, énumérations et pattern matching. 
     \end{itemize}
 
@@ -304,14 +285,19 @@ match value {
 \begin{frame}
     \frametitle{\subsecname}
     \framesubtitle{Ownership et Borrowing (1)}
-    Ownership
+    \textbf{Ownership}
     \begin{itemize}
-        \item 
+        \item Chaque variable est dite le "possesseur" (\textit{owner}) d'une valeur.
+        \item Il ne peut y avoir qu'un seul \textit{owner} pour une valeur.
+        \item Lorsque l'\textit{owner} est détruit ou change de portée, la valeur est détruite.
     \end{itemize}
-    Borrowing
-    \begin{itemize}
-        \item 
-    \end{itemize}
+    \bigbreak
+    \textbf{Borrowing}
+    \begin{enumerate}
+        \item À tout moment, il ne peut y avoir soit une seule référence mutable, soit plusieurs 
+            références immutables, mais pas les deux en même temps.
+        \item Les références doivent toujours être valides.
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -349,10 +335,10 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
-        \item API de notifications d’événements sur le système de fichiers.
+        \item API de notifications d'événements sur le système de fichiers.
         \item Trois appels système : initialisation, ajout de surveillance sur un chemin de fichiers 
             donné et suppression de cette surveillance.
-        \item Lecture d’un événement avec read().
+        \item Lecture d'un événement avec read().
     \end{itemize}
 \end{frame}
 
@@ -361,7 +347,7 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
     \frametitle{\subsecname}
     \begin{center}
         \begin{figure}
-            \includegraphics[width=0.4\textwidth]{images/sockets.png}
+            \includegraphics[width=1\textwidth]{images/sockets2.png}
         \end{figure}
     \end{center}
 \end{frame}
@@ -376,8 +362,7 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
         \begin{column}{.5\textwidth}
             \begin{center}
                 \begin{figure}
-                    % TODO: redessiner image
-                    \includegraphics[width=1\textwidth]{images/tag_manager.png}
+                    \includegraphics[width=1\textwidth]{images/tag_manager2.png}
                 \end{figure}
             \end{center}
         \end{column}
@@ -401,17 +386,16 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
         \begin{column}{.5\textwidth}
             \begin{center}
                 \begin{figure}
-                    % TODO: redessiner image
-                    \includegraphics[width=1\textwidth]{images/tag_engine.png}
+                    \includegraphics[width=1\textwidth]{images/tag_engine2.png}
                 \end{figure}
             \end{center}
         \end{column}
         \pause
         \begin{column}{.5\textwidth}
             \begin{itemize}
-                \item Surveille l’arborescence des fichiers.
+                \item Surveille l'arborescence des fichiers.
                 \item Écoute sur une socket les requêtes provenant de Tag Manager.
-                \item Maintient la relation entre tags, fichiers et répertoires à l’aide d’un graphe orienté et d’une hashmap.
+                \item Maintient la relation entre tags, fichiers et répertoires à l'aide d'un graphe orienté et d'une hashmap.
                 \item Les changements sur le FS sont répercutés sur le graphe.
                 \item Multithread.
             \end{itemize}
@@ -441,11 +425,48 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \subsection{Mesures de performances}
 \begin{frame}
     \frametitle{\subsecname}
+    \begin{columns}[T]
+        \begin{column}{.35\textwidth}
+        \fontsize{6pt}{8}\selectfont
+            \begin{tabularx}{4cm}{|p{1cm}|p{1cm}|X|} \hline
+                \textbf{Répertoire} & \textbf{Sous-répertoires} & \textbf{Fichiers} \\ \hline
+                Android & 15'172 & 112'046 \\ \hline
+                android-studio & 3'331 & 13'287 \\ \hline
+                bin & 553 & 9'306 \\ \hline
+                Documents & 15'442 & 64'486 \\ \hline
+                Dropbox & 2'377 & 8'659 \\ \hline
+                Images & 5 & 863 \\ \hline
+                Musique & 135 & 1'352 \\ \hline
+            \end{tabularx}
+        \end{column}
+        \pause
+        \begin{column}{.65\textwidth}
+            \begin{center}
+                \begin{figure}
+                    \includegraphics[width=1\textwidth]{images/histo.png}
+                \end{figure}
+            \end{center}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \subsection{Rust vs C}
 \begin{frame}
     \frametitle{\subsecname}
+    \begin{center}
+        \begin{tabularx}{11cm}{|X|X|} \hline
+            \textbf{Avantages par rapport à C} & \textbf{Inconvénients par rapport à C} \\ \hline
+            Garanties sécurité mémoire & Courbe d'apprentissage plus longue \\ \hline
+            Détection des erreurs à la compilation & Contraintes du langage parfois handicapantes \\ \hline
+            Compilateur verbeux & Moins répandu \\ \hline
+            Performances égales ou très proches & Manque de soutien global \\ \hline
+            Gestion des erreurs &  \\ \hline
+            Absence de NULL &  \\ \hline
+            Cargo et Crates.io &  \\ \hline
+            Librairie standard &  \\ \hline
+            Généricité &  \\ \hline
+        \end{tabularx}
+    \end{center}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -453,13 +474,26 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \section{Conclusion}
 \begin{frame}
     \frametitle{\secname}
+    % TODO: conclusion
+    \begin{itemize}
+        \item 
+    \end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Références}
+% \section*{Remerciements}
 \begin{frame}
-    \frametitle{\secname}
+    \frametitle{Remerciements}
+    % TODO: références
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \section*{Références}
+\begin{frame}
+    \frametitle{Références}
+    % TODO: références
 \end{frame}
 
 
