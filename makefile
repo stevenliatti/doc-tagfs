@@ -21,6 +21,9 @@ $(ANNEXES).pdf: $(ANNEXES).tex ../tag_manager/src/* ../tag_engine/src/*
 $(PRES).pdf: $(PRES).tex images/*
 	$(CC) $(PRES).tex
 	$(CC) $(PRES).tex
+	bibtex $(PRES)
+	$(CC) $(PRES).tex
+	$(CC) $(PRES).tex
 	make mostlyclean
 
 mostlyclean:

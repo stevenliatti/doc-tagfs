@@ -76,15 +76,17 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
-        \item Étudier et s'approprier le langage Rust.
+        \item Étudier et s'approprier le langage Rust \cite{ref0}.
         \pause
-        \item Répertorier les applications existantes permettant d'étiqueter les fichiers.
+        \item Répertorier les applications existantes permettant d'étiqueter les fichiers \cite{ref5} 
+            \cite{ref6} \cite{ref7} \cite{ref8} \cite{ref9} \cite{ref10} \cite{ref15} \cite{ref16} \cite{ref14}.
         \pause
-        \item Étudier les XATTR lors des manipulation courantes sur les fichiers.
+        \item Étudier les XATTR lors des manipulation courantes sur les fichiers \cite{ref3} \cite{ref4} \cite{ref11}.
         \pause
-        \item Explorer les méthodes de surveillance du système de fichiers.
+        \item Explorer les méthodes de surveillance du système de fichiers \cite{ref12} \cite{ref29} 
+            \cite{ref30} \cite{ref31} \cite{ref32}.
         \pause
-        \item Analyser les moyens d'indexer une arborescence de fichiers.
+        \item Analyser les moyens d'indexer une arborescence de fichiers \cite{ref25} \cite{ref26} \cite{ref28}.
         \pause
         \item Concevoir et implémenter un système performant.
         \pause
@@ -145,11 +147,12 @@
     \frametitle{\subsecname}
     \begin{columns}[T]
         \begin{column}{.4\textwidth}
-            \begin{center}
-                \begin{figure}
+            \begin{figure}
+                \begin{center}
                     \includegraphics[width=1\textwidth]{images/macos_tags.png}
-                \end{figure}
-            \end{center}
+                    \caption{Vue et gestion d'un tag dans le Finder macOS \cite{ref5}}
+                \end{center}
+            \end{figure}
         \end{column}
         \pause
         \begin{column}{.6\textwidth}
@@ -184,19 +187,20 @@
     \frametitle{\subsecname}
     \begin{columns}[T]
         \begin{column}{.5\textwidth}
-            \begin{center}
-                \begin{figure}
+            \begin{figure}
+                \begin{center}
                     \includegraphics[width=1\textwidth]{images/graph.png}
-                \end{figure}
-            \end{center}
+                \end{center}
+            \end{figure}
         \end{column}
         \pause
         \begin{column}{.5\textwidth}
-            \begin{center}
-                \begin{figure}
+            \begin{figure}
+                \begin{center}
                     \includegraphics[width=1\textwidth]{images/hashmap_wiki.png}
-                \end{figure}
-            \end{center}
+                    \caption{Un annuaire représenté comme une table de hachage - \cite{ref27}}
+                \end{center}
+            \end{figure}
         \end{column}
     \end{columns}
 \end{frame}
@@ -274,11 +278,12 @@ match value {
         \item Unsafe Rust.
         \item Concurrence et Threads.
     \end{itemize}
-    \begin{center}
-        \begin{figure}
+    \begin{figure}
+        \begin{center}
             \includegraphics[width=0.8\textwidth]{images/mpsc.png}
-        \end{figure}
-    \end{center}
+            \caption{Canal de communication entre threads - \cite{ref37}}
+        \end{center}
+    \end{figure}
 \end{frame}
 
 \subsubsection{Ownership et Borrowing}
@@ -345,11 +350,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \subsection{Sockets}
 \begin{frame}
     \frametitle{\subsecname}
-    \begin{center}
-        \begin{figure}
+    \begin{figure}
+        \begin{center}
             \includegraphics[width=1\textwidth]{images/sockets2.png}
-        \end{figure}
-    \end{center}
+        \end{center}
+    \end{figure}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -360,11 +365,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
     \frametitle{\subsecname}
     \begin{columns}[T]
         \begin{column}{.5\textwidth}
-            \begin{center}
-                \begin{figure}
+            \begin{figure}
+                \begin{center}
                     \includegraphics[width=1\textwidth]{images/tag_manager2.png}
-                \end{figure}
-            \end{center}
+                \end{center}
+            \end{figure}
         \end{column}
         \pause
         \begin{column}{.5\textwidth}
@@ -384,11 +389,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
     \frametitle{\subsecname}
     \begin{columns}[T]
         \begin{column}{.5\textwidth}
-            \begin{center}
-                \begin{figure}
+            \begin{figure}
+                \begin{center}
                     \includegraphics[width=1\textwidth]{images/tag_engine2.png}
-                \end{figure}
-            \end{center}
+                \end{center}
+            \end{figure}
         \end{column}
         \pause
         \begin{column}{.5\textwidth}
@@ -406,11 +411,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \subsection{TagFS}
 \begin{frame}
     \frametitle{\subsecname}
-    \begin{center}
-        \begin{figure}
+    \begin{figure}
+        \begin{center}
             \includegraphics[width=1\textwidth]{images/tagfs4.png}
-        \end{figure}
-    \end{center}
+        \end{center}
+    \end{figure}
 \end{frame}
 
 \subsection{Démo}
@@ -441,11 +446,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
         \end{column}
         \pause
         \begin{column}{.65\textwidth}
-            \begin{center}
-                \begin{figure}
+            \begin{figure}
+                \begin{center}
                     \includegraphics[width=1\textwidth]{images/histo.png}
-                \end{figure}
-            \end{center}
+                \end{center}
+            \end{figure}
         \end{column}
     \end{columns}
 \end{frame}
@@ -474,26 +479,31 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \section{Conclusion}
 \begin{frame}
     \frametitle{\secname}
-    % TODO: conclusion
     \begin{itemize}
-        \item 
+        \item Étude du langage Rust.
+        \item Conception d'un moteur de gestion de tags.
+        \item Diverses technologies et approches.
     \end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \section*{Remerciements}
 \begin{frame}
     \frametitle{Remerciements}
-    % TODO: références
+    \begin{itemize}
+        \item Florent Glück
+        \item Orestis Malaspinas
+        \item Joël Cavat
+    \end{itemize}
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \section*{Références}
-\begin{frame}
+% TODO: références
+
+\begin{frame}[allowframebreaks]
     \frametitle{Références}
-    % TODO: références
+    \fontsize{4pt}{4}\selectfont
+	\bibliographystyle{unsrt}
+	\bibliography{bib}
 \end{frame}
 
 
