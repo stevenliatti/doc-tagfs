@@ -18,6 +18,8 @@
     linkcolor=black,
     urlcolor=blue
 }
+\usepackage{graphicx}
+\usepackage{multimedia}
 
 \usetheme{Frankfurt}
 \usecolortheme{beaver}
@@ -72,7 +74,7 @@
     \Large\textbf{Système de tags de fichiers et répertoires avec possibilité de recherche par tags.}
 \end{frame}
 
-\subsection{Objectifs}
+\subsection{Cahier des charges}
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
@@ -80,11 +82,11 @@
         \pause
         \item Répertorier les applications existantes permettant d'étiqueter les fichiers.
         \pause
-        \item Étudier les XATTR lors des manipulation courantes sur les fichiers.
-        \pause
-        \item Explorer les méthodes de surveillance du système de fichiers.
+        \item Étudier les attributs étendus (XATTR) lors des manipulation courantes sur les fichiers.
         \pause
         \item Analyser les moyens d'indexer une arborescence de fichiers.
+        \pause
+        \item Explorer les méthodes de surveillance du système de fichiers.
         \pause
         \item Concevoir et implémenter un système performant.
         \pause
@@ -95,47 +97,36 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Solutions existantes}
-\subsection{TMSU et Tagsistant}
-\begin{frame}
-    \frametitle{\subsecname}
-    \begin{itemize}
-        \item CLI.
-        \item Gestion des tags.
-        \item Liste des fichiers associés à des tags.
-        \item Usage de commandes usuelles (\mintinline{bash}{cp}, \mintinline{bash}{ls}, 
-            \mintinline{bash}{mkdir}) pour manipuler les tags (Tagsistant).
-    \end{itemize}
-    \pause
-    \begin{center}
-        \begin{tabularx}{8cm}{|X|X|} \hline
-            \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
-            Simple (CLI) & Dépendance à FUSE \\ \hline
-            Rapide et efficace & Dépendance à une BDD externe \\ \hline
-            Open source & Modification et accès uniquement par l'application (Tagsistant) \\ \hline
-        \end{tabularx}
-    \end{center}
-\end{frame}
-
-\subsection{TagSpaces}
+\subsection{TMSU, Tagsistant et TagSpaces}
 \begin{frame}
     \frametitle{\subsecname}
     \begin{columns}[T]
-        \begin{column}{.6\textwidth}
-            \begin{figure}
-                \includegraphics[width=1\textwidth]{images/tagspaces.png}
-            \end{figure}
-        \end{column}
-        \pause
         \begin{column}{.4\textwidth}
         \fontsize{7pt}{9}\selectfont
             \begin{center}
-                \begin{tabularx}{4.5cm}{|X|X|} \hline
+                \begin{itemize}
+                    \item Gestion des tags.
+                    \item Liste des fichiers liés à des tags.
+                    \item Usage de commandes usuelles pour manipuler les tags (Tagsistant).
+                \end{itemize}
+                \pause[3]
+                \bigbreak
+                \begin{tabularx}{5cm}{|p{1.8cm}|X|} \hline
                     \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
-                    Rapide et efficace & Dépendance à une BDD externe \\ \hline
-                    Open source & Modification et accès uniquement par l'application \\ \hline
-                    GUI & \\ \hline
+                    Simples (CLI) & Dépendance à FUSE \\ \hline
+                    Rapides et efficaces & Dépendance à une BDD externe \\ \hline
+                    Open source & Modification et accès uniquement par l'app (Tagsistant et TagSpaces) \\ \hline
+                    & Non écrits en Rust \\ \hline
                 \end{tabularx}
             \end{center}
+        \end{column}
+        \pause[2]
+        \begin{column}{.6\textwidth}
+            \begin{flushright}
+                \begin{figure}
+                    \includegraphics[width=0.95\textwidth]{images/tagspaces.png}
+                \end{figure}
+            \end{flushright}
         \end{column}
     \end{columns}
 \end{frame}
@@ -143,26 +134,26 @@
 \subsection{macOS}
 \begin{frame}
     \frametitle{\subsecname}
+    \fontsize{8pt}{9}\selectfont
     \begin{columns}[T]
-        \begin{column}{.4\textwidth}
-            \begin{figure}
-                \begin{center}
-                    \includegraphics[width=1\textwidth]{images/macos_tags.png}
-                    \caption{Vue et gestion d'un tag dans le Finder macOS \cite{ref5}}
-                \end{center}
-            \end{figure}
+        \begin{column}{.55\textwidth}
+            \begin{center}
+                \begin{figure}
+                    \includegraphics[width=0.7\textwidth]{images/macos_tags.png}
+                    \caption{Gestion d'un tag dans le Finder \cite{ref5}}
+                \end{figure}
+            \end{center}
         \end{column}
         \pause
-        \begin{column}{.6\textwidth}
-        % \fontsize{7pt}{9}\selectfont
-            \begin{center}
-                \begin{tabularx}{6cm}{|X|X|} \hline
+        \begin{column}{.45\textwidth}
+            \begin{flushleft}
+                \begin{tabularx}{5cm}{|X|X|} \hline
                     \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
-                    Système de tags intégré à l'explorateur de fichiers & Pas open source \\ \hline
+                    Système de tags intégré à l'explorateur de fichiers & Code propriétaire \\ \hline
                     Stocke les tags dans les attributs des fichiers & Seulement pour macOS \\ \hline
                     Performant & Non écrit en Rust \\ \hline
                 \end{tabularx}
-            \end{center}
+            \end{flushleft}
         \end{column}
     \end{columns}
 \end{frame}
@@ -263,7 +254,7 @@ match direction {
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
 enum Result<T, E> { Ok(T), Err(E), }
 match value {
-  Ok(data) => println!("u32 value : {}", data),
+  Ok(data) => println!("Value : {}", data),
   Err(error) => println!("Error : {}", error)
 }
     \end{minted}
@@ -419,7 +410,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \subsection{Démo}
 \begin{frame}
     \frametitle{\subsecname}
-    % TODO: vidéo
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{images/video.png}
+        \bigbreak
+        \movie[externalviewer]{Vidéo}{video.mp4}
+    \end{center}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
