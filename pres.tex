@@ -11,18 +11,18 @@
 \newenvironment{code}{\captionsetup{type=listing}}{}
 
 \usepackage{hyperref}
-\hypersetup{
-    colorlinks,
-    citecolor=black,
-    filecolor=black,
-    linkcolor=black,
-    urlcolor=blue
-}
+% \hypersetup{
+%     colorlinks,
+%     citecolor=black,
+%     filecolor=black,
+%     linkcolor=black,
+%     urlcolor=blue
+% }
 \usepackage{graphicx}
 \usepackage{multimedia}
 
 \usetheme{Frankfurt}
-\usecolortheme{beaver}
+\usecolortheme{default}
 
 \addtobeamertemplate{navigation symbols}{}{%
     \usebeamerfont{footline}%
@@ -60,7 +60,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\subsection{Problématique}
+\subsection{Problématiques}
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
@@ -71,7 +71,7 @@
         \item Plusieurs emplacements logiques pour un seul fichier.
         \pause
     \end{itemize}
-    \Large\textbf{Système de tags de fichiers et répertoires avec possibilité de recherche par tags.}
+    \Large\textbf{Système de "tagging" de fichiers et répertoires avec possibilité de recherche par tags.}
 \end{frame}
 
 \subsection{Cahier des charges}
@@ -84,13 +84,9 @@
         \pause
         \item Étudier les attributs étendus (XATTR) lors des manipulation courantes sur les fichiers.
         \pause
-        \item Analyser les moyens d'indexer une arborescence de fichiers.
+        \item Analyser les moyens d'indexer et de surveiller une arborescence de fichiers.
         \pause
-        \item Explorer les méthodes de surveillance du système de fichiers.
-        \pause
-        \item Concevoir et implémenter un système performant.
-        \pause
-        \item Mesurer les performances de ce système.
+        \item Concevoir et implémenter le système (open source et sur Linux) et mesurer ses performances.
     \end{itemize}
 \end{frame}
 
@@ -102,21 +98,20 @@
     \frametitle{\subsecname}
     \begin{columns}[T]
         \begin{column}{.4\textwidth}
-        \fontsize{7pt}{9}\selectfont
+        \fontsize{8pt}{9}\selectfont
             \begin{center}
                 \begin{itemize}
                     \item Gestion des tags.
-                    \item Liste des fichiers liés à des tags.
-                    \item Usage de commandes usuelles pour manipuler les tags (Tagsistant).
+                    \item Liste de fichiers liés aux tags.
+                    \item CLI ou GUI.
                 \end{itemize}
                 \pause[3]
                 \bigbreak
                 \begin{tabularx}{5cm}{|p{1.8cm}|X|} \hline
                     \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
-                    Simples (CLI) & Dépendance à FUSE \\ \hline
-                    Rapides et efficaces & Dépendance à une BDD externe \\ \hline
-                    Open source & Modification et accès uniquement par l'app (Tagsistant et TagSpaces) \\ \hline
-                    & Non écrits en Rust \\ \hline
+                    Simples & Dépendance à une BDD externe \\ \hline
+                    Rapides et efficaces & Modification et accès uniquement par l'app (Tagsistant et TagSpaces) \\ \hline
+                    Open source & Non écrits en Rust \\ \hline
                 \end{tabularx}
             \end{center}
         \end{column}
@@ -166,8 +161,8 @@
     \frametitle{\subsecname}
     \begin{itemize}
         \item Stockage des tags dans les attributs étendus (XATTR).
-        \item Outil dédié plutôt que reprendre les commandes existantes.
-        \item Confort d'utilisation.
+        \pause
+        \item Outil dédié plutôt que reprendre les commandes existantes \\ => Confort d'utilisation.
     \end{itemize}
 \end{frame}
 
@@ -197,15 +192,17 @@
 \subsection{Surveillance du système de fichiers}
 \begin{frame}
     \frametitle{\subsecname}
+    Mise à jour du graphe lors des événements suivants :
+    \bigbreak
+    \pause
     \begin{itemize}
-        \item Mise à jour du graphe lors des événements suivants :
-        \begin{itemize}
-            \item Changement sur les tags.
-            \item Création de fichiers/répertoires.
-            \item Suppression de fichiers/répertoires.
-            \item Déplacement/renommage de fichiers/répertoires.
-        \end{itemize}
-        \item Pattern producer-consumer.
+        \item Changement sur les tags.
+        \pause
+        \item Création de fichiers/répertoires.
+        \pause
+        \item Suppression de fichiers/répertoires.
+        \pause
+        \item Déplacement/renommage de fichiers/répertoires.
     \end{itemize}
 \end{frame}
 
@@ -213,8 +210,11 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
+        \pause
         \item Lister les fichiers et répertoires associés à des tags (expressions logiques).
+        \pause
         \item Lister les tags existants.
+        \pause
         \item Renommer un tag.
     \end{itemize}
 \end{frame}
@@ -229,42 +229,58 @@
     \framesubtitle{Généralités (1)}
     \begin{itemize}
         \item Langage moderne, performant, fiable, compilé, et fortement typé.
+        \pause
         \item Disponible sur Linux, Windows et macOS.
-        \item Cargo : système de compilation et d'exécution et gestionnaire de paquets intégré à Rust.
-        \item Structures, collections, énumérations et pattern matching. 
-    \end{itemize}
-
-    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-enum Direction { North, South, East, West }
-match direction {
-  Direction::North => println!("Go North"),
-  Direction::South => println!("Go South"),
-  _ => println!("Go East or West") //clause par défaut
-}
-    \end{minted}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{\subsecname}
-    \framesubtitle{Généralités (2)}
-    \begin{itemize}
-        \item Tests.
+        \pause
+        \item Cargo : outil de compilation et d'exécution et gestionnaire de paquets intégré à Rust.
+        \pause
+        \item Structures, collections, généricité, énumérations et \textit{pattern matching}.
+        \pause
         \item Gestion des erreurs.
     \end{itemize}
+    \pause
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
 enum Result<T, E> { Ok(T), Err(E), }
 match value {
   Ok(data) => println!("Value : {}", data),
-  Err(error) => println!("Error : {}", error)
+  Err(error) => panic!("Error : {}", error)
 }
     \end{minted}
+
+%     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+% enum Direction { North, South, East, West }
+% match direction {
+%   Direction::North => println!("Go North"),
+%   Direction::South => println!("Go South"),
+%   _ => println!("Go East or West") //clause par défaut
+% }
+%     \end{minted}
 \end{frame}
+
+% \begin{frame}[fragile]
+%     \frametitle{\subsecname}
+%     \framesubtitle{Généralités (2)}
+%     \begin{itemize}
+%         \item Tests.
+%         \item Gestion des erreurs.
+%     \end{itemize}
+%     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
+% enum Result<T, E> { Ok(T), Err(E), }
+% match value {
+%   Ok(data) => println!("Value : {}", data),
+%   Err(error) => println!("Error : {}", error)
+% }
+%     \end{minted}
+% \end{frame}
 
 \begin{frame}
     \frametitle{\subsecname}
-    \framesubtitle{Généralités (3)}
+    \framesubtitle{Généralités (2)}
     \begin{itemize}
+        \item Tests.
+        \pause
         \item Unsafe Rust.
+        \pause
         \item Concurrence et Threads.
     \end{itemize}
     \begin{figure}
@@ -276,27 +292,19 @@ match value {
 \end{frame}
 
 \subsubsection{Ownership et Borrowing}
-\begin{frame}
+\begin{frame}[fragile]
     \frametitle{\subsecname}
-    \framesubtitle{Ownership et Borrowing (1)}
-    \textbf{Ownership}
+    \framesubtitle{Ownership}
     \begin{itemize}
+        \pause
         \item Chaque variable est dite le "possesseur" (\textit{owner}) d'une valeur.
+        \pause
         \item Il ne peut y avoir qu'un seul \textit{owner} pour une valeur.
+        \pause
         \item Lorsque l'\textit{owner} est détruit ou change de portée, la valeur est détruite.
     \end{itemize}
     \bigbreak
-    \textbf{Borrowing}
-    \begin{enumerate}
-        \item À tout moment, il ne peut y avoir soit une seule référence mutable, soit plusieurs 
-            références immutables, mais pas les deux en même temps.
-        \item Les références doivent toujours être valides.
-    \end{enumerate}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{\subsecname}
-    \framesubtitle{Ownership et Borrowing (2)}
+    \pause
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
 let a = 10;
 let b = a;
@@ -304,6 +312,21 @@ let mut my_vec = vec![3, 2, 1];
 let other_vec = my_vec;
 my_vec.push(42); // Erreur, la valeur a été déplacée
     \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{\subsecname}
+    \framesubtitle{Borrowing}
+    \begin{enumerate}
+        \pause
+        \item À tout moment, il ne peut exister qu'une seule référence mutable ou plusieurs 
+            références immutables, mais pas les deux en même temps.
+        \pause
+        \item Les références doivent toujours être valides.
+    \end{enumerate}
+
+    \pause
+
     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
 fn main() {
     let mut my_vec = vec![3, 2, 1];
@@ -320,7 +343,9 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
     \frametitle{\subsecname}
     \begin{itemize}
         \item Métadonnées sous forme de paire \mintinline{text}{espace.nom:valeur}.
+        \pause
         \item Nom = chaine de caractères, valeur = chaine de caractères ou données binaires.
+        \pause
         \item Existent sous ext2-3-4, XFS, Btrfs, UFS1-2, NTFS, HFS+, ZFS.
     \end{itemize}
 \end{frame}
@@ -330,8 +355,10 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
     \frametitle{\subsecname}
     \begin{itemize}
         \item API de notifications d'événements sur le système de fichiers.
+        \pause
         \item Trois appels système : initialisation, ajout de surveillance sur un chemin de fichiers 
             donné et suppression de cette surveillance.
+        \pause
         \item Lecture d'un événement avec read().
     \end{itemize}
 \end{frame}
@@ -458,8 +485,7 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
             Détection des erreurs à la compilation & Contraintes du langage parfois handicapantes \\ \hline
             Compilateur verbeux & Moins répandu \\ \hline
             Performances égales ou très proches & Manque de soutien global \\ \hline
-            Gestion des erreurs &  \\ \hline
-            Absence de NULL &  \\ \hline
+            Gestion des erreurs (NULL) &  \\ \hline
             Cargo et Crates.io &  \\ \hline
             Librairie standard &  \\ \hline
             Généricité &  \\ \hline
@@ -473,8 +499,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \begin{frame}
     \frametitle{\secname}
     \begin{itemize}
+        \pause
         \item Étude du langage Rust.
+        \pause
         \item Conception d'un moteur de gestion de tags.
+        \pause
         \item Diverses technologies et approches.
     \end{itemize}
 \end{frame}
