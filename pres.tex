@@ -78,8 +78,6 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
-        \item Étudier et s'approprier le langage Rust.
-        \pause
         \item Répertorier les applications existantes permettant d'étiqueter les fichiers.
         \pause
         \item Étudier les attributs étendus (XATTR) lors des manipulation courantes sur les fichiers.
@@ -87,6 +85,8 @@
         \item Analyser les moyens d'indexer et de surveiller une arborescence de fichiers.
         \pause
         \item Concevoir et implémenter le système (open source et sur Linux) et mesurer ses performances.
+        \pause
+        \item Étudier et s'approprier le langage Rust.
     \end{itemize}
 \end{frame}
 
@@ -97,7 +97,7 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{columns}[T]
-        \begin{column}{.4\textwidth}
+        \begin{column}{.35\textwidth}
         \fontsize{8pt}{9}\selectfont
             \begin{center}
                 \begin{itemize}
@@ -107,19 +107,19 @@
                 \end{itemize}
                 \pause[3]
                 \bigbreak
-                \begin{tabularx}{5cm}{|p{1.8cm}|X|} \hline
+                \begin{tabularx}{4.5cm}{|p{1.8cm}|X|} \hline
                     \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
                     Simples & Dépendance à une BDD externe \\ \hline
-                    Rapides et efficaces & Modification et accès uniquement par l'app (Tagsistant et TagSpaces) \\ \hline
-                    Open source & Non écrits en Rust \\ \hline
+                    Rapides et efficaces & Modification et accès uniquement par l'app \\ \hline
+                    Open source & \\ \hline
                 \end{tabularx}
             \end{center}
         \end{column}
         \pause[2]
-        \begin{column}{.6\textwidth}
+        \begin{column}{.65\textwidth}
             \begin{flushright}
                 \begin{figure}
-                    \includegraphics[width=0.95\textwidth]{images/tagspaces.png}
+                    \includegraphics[width=0.98\textwidth]{images/tagspaces.png}
                 \end{figure}
             \end{flushright}
         \end{column}
@@ -141,14 +141,14 @@
         \end{column}
         \pause
         \begin{column}{.45\textwidth}
-            \begin{flushleft}
-                \begin{tabularx}{5cm}{|X|X|} \hline
+            \begin{center}
+                \begin{tabularx}{5.3cm}{|X|X|} \hline
                     \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
                     Système de tags intégré à l'explorateur de fichiers & Code propriétaire \\ \hline
-                    Stocke les tags dans les attributs des fichiers & Seulement pour macOS \\ \hline
-                    Performant & Non écrit en Rust \\ \hline
+                    Stocke les tags dans les XATTR & Seulement pour macOS \\ \hline
+                    Performant & \\ \hline
                 \end{tabularx}
-            \end{flushleft}
+            \end{center}
         \end{column}
     \end{columns}
 \end{frame}
@@ -170,7 +170,7 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{columns}[T]
-        \begin{column}{.5\textwidth}
+        \begin{column}{.6\textwidth}
             \begin{figure}
                 \begin{center}
                     \includegraphics[width=1\textwidth]{images/graph.png}
@@ -178,7 +178,7 @@
             \end{figure}
         \end{column}
         \pause
-        \begin{column}{.5\textwidth}
+        \begin{column}{.4\textwidth}
             \begin{figure}
                 \begin{center}
                     \includegraphics[width=1\textwidth]{images/hashmap_wiki.png}
@@ -211,7 +211,8 @@
     \frametitle{\subsecname}
     \begin{itemize}
         \pause
-        \item Lister les fichiers et répertoires associés à des tags (expressions logiques).
+        \item Lister les fichiers et répertoires associés à des tags => requêtes sous forme 
+            d'expressions logiques.
         \pause
         \item Lister les tags existants.
         \pause
@@ -224,77 +225,29 @@
 \section{Technologies}
 \subsection{Rust}
 \subsubsection{Généralités}
-\begin{frame}[fragile]
+\begin{frame}
     \frametitle{\subsecname}
-    \framesubtitle{Généralités (1)}
+    \framesubtitle{\subsubsecname}
     \begin{itemize}
-        \item Langage moderne, performant, fiable, compilé, et fortement typé.
+        \item Langage système moderne, performant, fiable (plus sécurisé qu'Ada), compilé, et fortement typé.
         \pause
         \item Disponible sur Linux, Windows et macOS.
         \pause
         \item Cargo : outil de compilation et d'exécution et gestionnaire de paquets intégré à Rust.
         \pause
-        \item Structures, collections, généricité, énumérations et \textit{pattern matching}.
+        \item Structures, collections, généricité, immutabilité, énumérations et \textit{pattern matching}.
         \pause
         \item Gestion des erreurs.
+        \pause
+        \item Tests.
     \end{itemize}
-    \pause
-    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-enum Result<T, E> { Ok(T), Err(E), }
-match value {
-  Ok(data) => println!("Value : {}", data),
-  Err(error) => panic!("Error : {}", error)
-}
-    \end{minted}
-
-%     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-% enum Direction { North, South, East, West }
-% match direction {
-%   Direction::North => println!("Go North"),
-%   Direction::South => println!("Go South"),
-%   _ => println!("Go East or West") //clause par défaut
-% }
-%     \end{minted}
 \end{frame}
 
-% \begin{frame}[fragile]
-%     \frametitle{\subsecname}
-%     \framesubtitle{Généralités (2)}
-%     \begin{itemize}
-%         \item Tests.
-%         \item Gestion des erreurs.
-%     \end{itemize}
-%     \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-% enum Result<T, E> { Ok(T), Err(E), }
-% match value {
-%   Ok(data) => println!("Value : {}", data),
-%   Err(error) => println!("Error : {}", error)
-% }
-%     \end{minted}
-% \end{frame}
-
+\subsubsection{Ownership, Borrowing}
 \begin{frame}
     \frametitle{\subsecname}
-    \framesubtitle{Généralités (2)}
-    \begin{itemize}
-        \item Tests.
-        \pause
-        \item Unsafe Rust.
-        \pause
-        \item Concurrence et Threads.
-    \end{itemize}
-    \begin{figure}
-        \begin{center}
-            \includegraphics[width=0.8\textwidth]{images/mpsc.png}
-            \caption{Canal de communication entre threads - \cite{ref37}}
-        \end{center}
-    \end{figure}
-\end{frame}
-
-\subsubsection{Ownership et Borrowing}
-\begin{frame}[fragile]
-    \frametitle{\subsecname}
-    \framesubtitle{Ownership}
+    \framesubtitle{\subsubsecname}
+    \textbf{Ownership}
     \begin{itemize}
         \pause
         \item Chaque variable est dite le "possesseur" (\textit{owner}) d'une valeur.
@@ -305,48 +258,27 @@ match value {
     \end{itemize}
     \bigbreak
     \pause
-    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-let a = 10;
-let b = a;
-let mut my_vec = vec![3, 2, 1]; 
-let other_vec = my_vec;
-my_vec.push(42); // Erreur, la valeur a été déplacée
-    \end{minted}
-\end{frame}
-
-\begin{frame}[fragile]
-    \frametitle{\subsecname}
-    \framesubtitle{Borrowing}
-    \begin{enumerate}
+    \textbf{Borrowing}
+    \begin{itemize}
         \pause
         \item À tout moment, il ne peut exister qu'une seule référence mutable ou plusieurs 
             références immutables, mais pas les deux en même temps.
         \pause
         \item Les références doivent toujours être valides.
-    \end{enumerate}
-
-    \pause
-
-    \begin{minted}[bgcolor=mygray,breaklines,breaksymbol=,linenos,frame=single,stepnumber=1,tabsize=2]{rust}
-fn main() {
-    let mut my_vec = vec![3, 2, 1];
-    ref_immutable(&my_vec);
-    ref_mutable(&mut my_vec);
-}
-fn ref_immutable(v : &Vec<i32>) { println!("{:?}", v); }
-fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
-    \end{minted}
+    \end{itemize}
 \end{frame}
 
 \subsection{Attributs étendus (XATTR)}
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
-        \item Métadonnées sous forme de paire \mintinline{text}{espace.nom:valeur}.
+        \item Métadonnée sous forme de paire \mintinline{text}{nom:valeur}.
         \pause
         \item Nom = chaine de caractères, valeur = chaine de caractères ou données binaires.
         \pause
         \item Existent sous ext2-3-4, XFS, Btrfs, UFS1-2, NTFS, HFS+, ZFS.
+        \pause
+        \item Outils CLI pour facilement les manipuler.
     \end{itemize}
 \end{frame}
 
@@ -390,11 +322,11 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
         \pause
         \begin{column}{.5\textwidth}
             \begin{itemize}
+                \item Programme "client".
                 \item CLI.
                 \item Gestion des tags.
-                \item Requêtes sur les tags et fichiers.
                 \item Manipule les XATTR des fichiers.
-                \item Programme "client".
+                \item Envoi de requêtes à Tag Engine.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -404,7 +336,7 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
 \begin{frame}
     \frametitle{\subsecname}
     \begin{columns}[T]
-        \begin{column}{.5\textwidth}
+        \begin{column}{.6\textwidth}
             \begin{figure}
                 \begin{center}
                     \includegraphics[width=1\textwidth]{images/tag_engine2.png}
@@ -412,13 +344,15 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
             \end{figure}
         \end{column}
         \pause
-        \begin{column}{.5\textwidth}
+        \begin{column}{.4\textwidth}
+        \fontsize{8pt}{9}\selectfont
             \begin{itemize}
+                \item Programme "serveur".
                 \item Surveille l'arborescence des fichiers.
-                \item Écoute sur une socket les requêtes provenant de Tag Manager.
-                \item Maintient la relation entre tags, fichiers et répertoires à l'aide d'un graphe orienté et d'une hashmap.
                 \item Les changements sur le FS sont répercutés sur le graphe.
-                \item Multithread.
+                \item Maintient la relation entre tags, fichiers et répertoires (graphe et hashmap).
+                \item Écoute sur une socket les requêtes provenant de Tag Manager.
+                \item Retourne la liste des fichiers correspondants à une requête logique (opérateurs OR et AND).
             \end{itemize}
         \end{column}
     \end{columns}
@@ -468,50 +402,57 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
         \begin{column}{.65\textwidth}
             \begin{figure}
                 \begin{center}
-                    \includegraphics[width=1\textwidth]{images/histo.png}
+                    \includegraphics[width=1\textwidth]{images/histo3.png}
                 \end{center}
             \end{figure}
         \end{column}
     \end{columns}
 \end{frame}
 
-\subsection{Rust vs C}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Améliorations}
 \begin{frame}
     \frametitle{\subsecname}
-    \begin{center}
-        \begin{tabularx}{11cm}{|X|X|} \hline
-            \textbf{Avantages par rapport à C} & \textbf{Inconvénients par rapport à C} \\ \hline
-            Garanties sécurité mémoire & Courbe d'apprentissage plus longue \\ \hline
-            Détection des erreurs à la compilation & Contraintes du langage parfois handicapantes \\ \hline
-            Compilateur verbeux & Moins répandu \\ \hline
-            Performances égales ou très proches & Manque de soutien global \\ \hline
-            Gestion des erreurs (NULL) &  \\ \hline
-            Cargo et Crates.io &  \\ \hline
-            Librairie standard &  \\ \hline
-            Généricité &  \\ \hline
-        \end{tabularx}
-    \end{center}
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
-\begin{frame}
-    \frametitle{\secname}
     \begin{itemize}
         \pause
-        \item Étude du langage Rust.
+        \item GUI : environnement de bureau ou application web.
+        \pause
+        \item Daemon pour Tag Engine.
+        \pause
+        \item Ajout de nouveaux répertoires de surveillance (partiel).
+        \pause
+        \item Gestion des périphériques amovibles (limitation inotify).
+        \pause
+        \item Cache des dernières requêtes logiques adressées au serveur.
+        \pause
+        \item Ajouter des opérateurs logiques (NOT).
+    \end{itemize}
+\end{frame}
+
+\section{Conclusion}
+\subsection{Bilan personnel}
+\begin{frame}
+    \frametitle{\subsecname}
+    \begin{itemize}
         \pause
         \item Conception d'un moteur de gestion de tags.
         \pause
+        \item Étude du langage Rust.
+        \pause
         \item Diverses technologies et approches.
+        \pause
+        \item Cahier des charges rempli.
+        \pause
+        \item Progression personnelle : technologies, bonnes pratiques, démarche.
     \end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Remerciements}
 \begin{frame}
-    \frametitle{Remerciements}
+    \frametitle{\subsecname}
     \begin{itemize}
         \item Florent Glück
         \item Orestis Malaspinas
@@ -519,9 +460,9 @@ fn ref_mutable(v : &mut Vec<i32>) { v.push(42); }
     \end{itemize}
 \end{frame}
 
+\subsection{Références}
 \begin{frame}[allowframebreaks]
-    \frametitle{Références}
-    \fontsize{6pt}{6}\selectfont
+    \frametitle{\subsecname}
 	\bibliographystyle{unsrt}
 	\bibliography{bib}
 \end{frame}
