@@ -80,7 +80,7 @@
     \begin{itemize}
         \item Répertorier les applications existantes permettant d'étiqueter les fichiers.
         \pause
-        \item Étudier les attributs étendus (XATTR) lors des manipulation courantes sur les fichiers.
+        \item Étudier une façon de stocker les tags avec les fichiers : les attributs étendus des fichiers (XATTR).
         \pause
         \item Analyser les moyens d'indexer et de surveiller une arborescence de fichiers.
         \pause
@@ -160,9 +160,10 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
-        \item Stockage des tags dans les attributs étendus (XATTR).
         \pause
-        \item Outil dédié plutôt que reprendre les commandes existantes \\ => Confort d'utilisation.
+        \item Stockage des tags avec les fichiers (indépendance à une base de données).
+        \pause
+        \item Outil dédié de gestion de tags (confort d'utilisation).
     \end{itemize}
 \end{frame}
 
@@ -170,6 +171,7 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{columns}[T]
+        \pause
         \begin{column}{.6\textwidth}
             \begin{figure}
                 \begin{center}
@@ -212,7 +214,7 @@
     \begin{itemize}
         \pause
         \item Lister les fichiers et répertoires associés à des tags => requêtes sous forme 
-            d'expressions logiques.
+            d'expressions logiques (opérateurs logiques).
         \pause
         \item Lister les tags existants.
         \pause
@@ -224,10 +226,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Technologies}
 \subsection{Rust}
-\subsubsection{Généralités}
 \begin{frame}
     \frametitle{\subsecname}
-    \framesubtitle{\subsubsecname}
     \begin{itemize}
         \item Langage système moderne, performant, fiable (plus sécurisé qu'Ada), compilé, et fortement typé.
         \pause
@@ -237,34 +237,9 @@
         \pause
         \item Structures, collections, généricité, immutabilité, énumérations et \textit{pattern matching}.
         \pause
-        \item Gestion des erreurs.
+        \item Gestion des erreurs et tests unitaires.
         \pause
-        \item Tests.
-    \end{itemize}
-\end{frame}
-
-\subsubsection{Ownership, Borrowing}
-\begin{frame}
-    \frametitle{\subsecname}
-    \framesubtitle{\subsubsecname}
-    \textbf{Ownership}
-    \begin{itemize}
-        \pause
-        \item Chaque variable est dite le "possesseur" (\textit{owner}) d'une valeur.
-        \pause
-        \item Il ne peut y avoir qu'un seul \textit{owner} pour une valeur.
-        \pause
-        \item Lorsque l'\textit{owner} est détruit ou change de portée, la valeur est détruite.
-    \end{itemize}
-    \bigbreak
-    \pause
-    \textbf{Borrowing}
-    \begin{itemize}
-        \pause
-        \item À tout moment, il ne peut exister qu'une seule référence mutable ou plusieurs 
-            références immutables, mais pas les deux en même temps.
-        \pause
-        \item Les références doivent toujours être valides.
+        \item \textbf{\textit{Ownership}, \textit{Borrowing} (références)}.
     \end{itemize}
 \end{frame}
 
@@ -272,7 +247,8 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
-        \item Métadonnée sous forme de paire \mintinline{text}{nom:valeur}.
+        \pause
+        \item Métadonnées sous forme de paires \mintinline{text}{nom:valeur}.
         \pause
         \item Nom = chaine de caractères, valeur = chaine de caractères ou données binaires.
         \pause
@@ -286,6 +262,7 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{itemize}
+        \pause
         \item API de notifications d'événements sur le système de fichiers.
         \pause
         \item Trois appels système : initialisation, ajout de surveillance sur un chemin de fichiers 
@@ -312,6 +289,7 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{columns}[T]
+        \pause
         \begin{column}{.5\textwidth}
             \begin{figure}
                 \begin{center}
@@ -336,6 +314,7 @@
 \begin{frame}
     \frametitle{\subsecname}
     \begin{columns}[T]
+        \pause
         \begin{column}{.6\textwidth}
             \begin{figure}
                 \begin{center}
