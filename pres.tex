@@ -20,6 +20,7 @@
 % }
 \usepackage{graphicx}
 \usepackage{multimedia}
+% \usepackage[table]{xcolor}
 
 \usetheme{Frankfurt}
 \usecolortheme{default}
@@ -98,7 +99,7 @@
     \frametitle{\subsecname}
     \begin{columns}[T]
         \begin{column}{.35\textwidth}
-        \fontsize{8pt}{9}\selectfont
+        \fontsize{7pt}{8}\selectfont
             \begin{center}
                 \begin{itemize}
                     \item Gestion des tags.
@@ -120,6 +121,7 @@
             \begin{flushright}
                 \begin{figure}
                     \includegraphics[width=0.98\textwidth]{images/tagspaces.png}
+                    \caption{Utilisation de TagSpaces}
                 \end{figure}
             \end{flushright}
         \end{column}
@@ -129,20 +131,21 @@
 \subsection{macOS}
 \begin{frame}
     \frametitle{\subsecname}
-    \fontsize{8pt}{9}\selectfont
+    \fontsize{6pt}{8}\selectfont
     \begin{columns}[T]
-        \begin{column}{.55\textwidth}
+        \begin{column}{.65\textwidth}
             \begin{center}
                 \begin{figure}
-                    \includegraphics[width=0.7\textwidth]{images/macos_tags.png}
-                    \caption{Gestion d'un tag dans le Finder \cite{ref5}}
+                    \includegraphics[width=0.6\textwidth]{images/macos_tags.png}
+                    \caption{Gestion d'un tag dans le Finder - Apple}
                 \end{figure}
             \end{center}
         \end{column}
         \pause
-        \begin{column}{.45\textwidth}
+        \fontsize{8pt}{9}\selectfont
+        \begin{column}{.35\textwidth}
             \begin{center}
-                \begin{tabularx}{5.3cm}{|X|X|} \hline
+                \begin{tabularx}{3.5cm}{|X|X|} \hline
                     \textbf{Points positifs} & \textbf{Points négatifs} \\ \hline
                     Système de tags intégré à l'explorateur de fichiers & Code propriétaire \\ \hline
                     Stocke les tags dans les XATTR & Seulement pour macOS \\ \hline
@@ -176,6 +179,7 @@
             \begin{figure}
                 \begin{center}
                     \includegraphics[width=1\textwidth]{images/graph.png}
+                    \caption{Graphe de tags, fichiers et répertoires}
                 \end{center}
             \end{figure}
         \end{column}
@@ -183,8 +187,8 @@
         \begin{column}{.4\textwidth}
             \begin{figure}
                 \begin{center}
-                    \includegraphics[width=1\textwidth]{images/hashmap_wiki.png}
-                    \caption{Un annuaire représenté comme une table de hachage - \cite{ref27}}
+                    \includegraphics[width=0.5\textwidth]{images/hashmap.png}
+                    \caption{HashMap associant le nom du tag à son noeud}
                 \end{center}
             \end{figure}
         \end{column}
@@ -272,15 +276,15 @@
     \end{itemize}
 \end{frame}
 
-\subsection{Sockets}
-\begin{frame}
-    \frametitle{\subsecname}
-    \begin{figure}
-        \begin{center}
-            \includegraphics[width=1\textwidth]{images/sockets2.png}
-        \end{center}
-    \end{figure}
-\end{frame}
+% \subsection{Sockets}
+% \begin{frame}
+%     \frametitle{\subsecname}
+%     \begin{figure}
+%         \begin{center}
+%             \includegraphics[width=1\textwidth]{images/sockets2.png}
+%         \end{center}
+%     \end{figure}
+% \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -288,53 +292,23 @@
 \subsection{Tag Manager}
 \begin{frame}
     \frametitle{\subsecname}
-    \begin{columns}[T]
-        \pause
-        \begin{column}{.5\textwidth}
-            \begin{figure}
-                \begin{center}
-                    \includegraphics[width=1\textwidth]{images/tag_manager2.png}
-                \end{center}
-            \end{figure}
-        \end{column}
-        \pause
-        \begin{column}{.5\textwidth}
-            \begin{itemize}
-                \item Programme "client".
-                \item CLI.
-                \item Gestion des tags.
-                \item Manipule les XATTR des fichiers.
-                \item Envoi de requêtes à Tag Engine.
-            \end{itemize}
-        \end{column}
-    \end{columns}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=0.6\textwidth]{images/tag_manager2.png}
+            \caption{Fonctionnement de Tag Manager}
+        \end{center}
+    \end{figure}
 \end{frame}
 
 \subsection{Tag Engine}
 \begin{frame}
     \frametitle{\subsecname}
-    \begin{columns}[T]
-        \pause
-        \begin{column}{.6\textwidth}
-            \begin{figure}
-                \begin{center}
-                    \includegraphics[width=1\textwidth]{images/tag_engine2.png}
-                \end{center}
-            \end{figure}
-        \end{column}
-        \pause
-        \begin{column}{.4\textwidth}
-        \fontsize{8pt}{9}\selectfont
-            \begin{itemize}
-                \item Programme "serveur".
-                \item Surveille l'arborescence des fichiers.
-                \item Les changements sur le FS sont répercutés sur le graphe.
-                \item Maintient la relation entre tags, fichiers et répertoires (graphe et hashmap).
-                \item Écoute sur une socket les requêtes provenant de Tag Manager.
-                \item Retourne la liste des fichiers correspondants à une requête logique (opérateurs OR et AND).
-            \end{itemize}
-        \end{column}
-    \end{columns}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=0.7\textwidth]{images/tag_engine2.png}
+            \caption{Fonctionnement de Tag Engine}
+        \end{center}
+    \end{figure}
 \end{frame}
 
 \subsection{TagFS}
@@ -343,6 +317,7 @@
     \begin{figure}
         \begin{center}
             \includegraphics[width=1\textwidth]{images/tagfs4.png}
+            \caption{Système global TagFS}
         \end{center}
     \end{figure}
 \end{frame}
@@ -365,23 +340,17 @@
     \frametitle{\subsecname}
     \begin{columns}[T]
         \begin{column}{.35\textwidth}
-        \fontsize{6pt}{8}\selectfont
-            \begin{tabularx}{4cm}{|p{1cm}|p{1cm}|X|} \hline
-                \textbf{Répertoire} & \textbf{Sous-répertoires} & \textbf{Fichiers} \\ \hline
-                Android & 15'172 & 112'046 \\ \hline
-                android-studio & 3'331 & 13'287 \\ \hline
-                bin & 553 & 9'306 \\ \hline
-                Documents & 15'442 & 64'486 \\ \hline
-                Dropbox & 2'377 & 8'659 \\ \hline
-                Images & 5 & 863 \\ \hline
-                Musique & 135 & 1'352 \\ \hline
-            \end{tabularx}
+            \begin{figure}
+                \begin{center}
+                    \includegraphics[width=1\textwidth]{images/tableau_rep.png}
+                \end{center}
+            \end{figure}
         \end{column}
-        \pause
         \begin{column}{.65\textwidth}
             \begin{figure}
                 \begin{center}
-                    \includegraphics[width=1\textwidth]{images/histo3.png}
+                    \includegraphics[width=1\textwidth]{images/histo4.png}
+                    \caption{Temps d'exécution de Tag Engine en fonction des répertoires}
                 \end{center}
             \end{figure}
         \end{column}
@@ -421,9 +390,7 @@
         \pause
         \item Diverses technologies et approches.
         \pause
-        \item Cahier des charges rempli.
-        \pause
-        \item Progression personnelle : technologies, bonnes pratiques, démarche.
+        \item \textbf{Progression personnelle : technologies, bonnes pratiques, démarche.}
     \end{itemize}
 \end{frame}
 
@@ -437,13 +404,12 @@
         \item Orestis Malaspinas
         \item Joël Cavat
     \end{itemize}
-\end{frame}
-
-\subsection{Références}
-\begin{frame}[allowframebreaks]
-    \frametitle{\subsecname}
-	\bibliographystyle{unsrt}
-	\bibliography{bib}
+    \bigbreak
+    \pause
+    \fontsize{14pt}{15}\selectfont
+    \begin{center}
+        \textbf{Merci pour votre attention ! Questions ?}
+    \end{center}
 \end{frame}
 
 

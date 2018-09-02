@@ -1,62 +1,43 @@
 #!/bin/bash
 
-rm graph.png graph.dot
-rm -rf my
-unzip -o my.zip
-# set -x
+rm -rf tagfs graph.png graph.dot
+mkdir -p tagfs/code tagfs/images tagfs/docs/work
+touch tagfs/code/hello.c tagfs/code/hello.h tagfs/code/power.rs 
+touch tagfs/images/img1.png tagfs/images/img2.png tagfs/images/img3.png tagfs/images/img4.png
+touch tagfs/docs/weekend.ods tagfs/docs/work/office.txt
 
 read
 clear
 
-# echo "$ pwd"
-# read
-# pwd
-# read
-# clear
-echo "$ tree my"
+echo "$ tree tagfs"
 read
-tree my
+tree tagfs
 read
 clear
-echo "$ ./tag_manager -f my -r"
+echo "$ ./tag_manager -f tagfs -r"
 read
-./tag_manager -f my -r
-read
-clear
-echo "$ ./tag_manager -f my/images/2017/img1.png my/images/2018/img3.png my/docs/weekend.ods -s perso"
-read
-./tag_manager -f my/images/2017/img1.png my/images/2018/img3.png my/docs/weekend.ods -s perso
+./tag_manager -f tagfs -r
 read
 clear
-echo "$ ./tag_manager -f my/docs/work -r -s pro"
+echo "$ ./tag_manager -f tagfs/images/img1.png tagfs/images/img2.png tagfs/docs/weekend.ods -s family"
 read
-./tag_manager -f my/docs/work -r -s pro
-read
-# clear
-# echo "$ ./tag_manager -f my/images -r -s pictures"
-# read
-# ./tag_manager -f my/images -r -s pictures
-# read
-clear
-echo "$ ./tag_manager -f my/images/2017/img1.png my/images/2018/* -s family"
-read
-./tag_manager -f my/images/2017/img1.png my/images/2018/* -s family
+./tag_manager -f tagfs/images/img1.png tagfs/images/img2.png tagfs/docs/weekend.ods -s family
 read
 clear
-echo "$ ./tag_manager -f my/code/power.rs my/docs/work/office.txt -s secrt"
+echo "$ ./tag_manager -f tagfs/images -r -s persi"
 read
-./tag_manager -f my/code/power.rs my/docs/work/office.txt -s secrt
-read
-clear
-echo "$ ./tag_manager -R secrt secret"
-read
-./tag_manager -R secrt secret
+./tag_manager -f tagfs/images -r -s persi
 read
 clear
-# echo "$ ./tag_manager -f my -r"
-# read
-# ./tag_manager -f my -r
-# read
+echo "$ ./tag_manager -R persi perso"
+read
+./tag_manager -R persi perso
+read
+clear
+echo "$ mv tagfs/docs/work tagfs"
+read
+mv tagfs/docs/work tagfs
+read
 clear
 echo "$ ./tag_manager -l"
 read
@@ -68,19 +49,9 @@ read
 ./tag_manager -q perso
 read
 clear
-echo "$ ./tag_manager -q secret"
+echo "$ ./tag_manager -q family OR perso"
 read
-./tag_manager -q secret
-read
-clear
-echo "$ ./tag_manager -q secret OR pro"
-read
-./tag_manager -q secret OR pro
-read
-clear
-echo "$ ./tag_manager -q secret AND pro"
-read
-./tag_manager -q secret AND pro
+./tag_manager -q family OR perso
 read
 clear
 echo "$ ./tag_manager -q family AND perso"
@@ -88,17 +59,10 @@ read
 ./tag_manager -q family AND perso
 read
 clear
-echo "$ echo \"buy milk\" > my/todo.txt"
+echo "$ echo \"buy milk\" > tagfs/todo.txt"
 read
-echo "buy milk" > my/todo.txt
-read
-clear
-echo "$ ./tag_manager -f my/todo.txt -s tasks"
-read
-./tag_manager -f my/todo.txt -s tasks
+echo "buy milk" > tagfs/todo.txt
 read
 clear
-echo "$ rm -rf my/code"
-rm -rf my/code
-
-# set +x
+echo "$ rm -rf tagfs/code"
+rm -rf tagfs/code
